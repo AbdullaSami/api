@@ -22,34 +22,31 @@ class UserSeeder extends Seeder
 
     public function run(): void
     {
-        User::factory()->create([
-            // 'id_code'        => 400000,
-            'username'       => fake()->userName(),
-            'first_name'     => 'main',
-            'last_name'      => 'Account',
-            'email'          => 'start.main@hfs.com'
-        ])
-            ->each(function ($user) {
-                // Create a member for each user  
-                $member = $user->member()->create([
-                    'rank_id'        => 1
-                ]);
+$accounts = [
+    ['first_name' => 'main', 'last_name' => 'Account', 'email' => '1@hfs.com'],
+    ['first_name' => 'main', 'last_name' => 'Account', 'email' => '2@hfs.com'],
+    ['first_name' => 'main', 'last_name' => 'Account', 'email' => '3@hfs.com'],
+];
 
-                // Create a wallet for the created member  
-                $member->wallet()->create([
-                    'balance' => 0
-                ]);
+foreach ($accounts as $data) {
+
+    $user = User::factory()->create([
+        'username' => fake()->userName(),
+        ...$data
+    ]);
+
+    $member = $user->member()->create([
+        'rank_id' => 1
+    ]);
+
+    $member->wallet()->create(['balance' => 0]);
+
+    $member->subscription()->create([
+        'package_id'      => Package::inRandomOrder()->first()->id,
+        'expiration_date' => now()->addMonth()
+    ]);
+}
 
 
-                $member->subscription()->create([
-                    'package_id'        => Package::inRandomOrder()->first()->id,
-                    'expiration_date'   => now()->addMonth()
-                ]);
-            });
-
-        CommissionFactor::create([
-            'direct_rate' => 20,
-            'binary_rate' => 20
-        ]);
     }
 }
