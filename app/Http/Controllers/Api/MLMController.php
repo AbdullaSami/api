@@ -29,10 +29,10 @@ class MLMController extends Controller
         $packageCv = $referral->subscription->package->cv;
 
         if (empty($referral->sponsor->id)) {
-            return $this->failedResponse('Sorry, this referral not belongs to any sponsor.');
+            return response()->json('Sorry, this referral not belongs to any sponsor.');
         }
         if (!$referral->subscription)
-            return $this->failedResponse('Sorry, this referral is not subscribed to any packages.');
+            return response()->json('Sorry, this referral is not subscribed to any packages.');
 
         if (
             $referral->id == 1 ||
@@ -40,13 +40,13 @@ class MLMController extends Controller
             $referral->id == $sponsor->left_leg_id ||
             $referral->id == $sponsor->right_leg_id
         )
-            return $this->failedResponse(config('consts.REFERRAL_BLOCK_MESSAGE', 'This process cannot be completed.'));
+            return response()->json(config('consts.REFERRAL_BLOCK_MESSAGE', 'This process cannot be completed.'));
 
         if ($referral->id == $this->findFarLeft($sponsor)->id || $referral->id == $this->findFarRight($sponsor)->id)
-            return $this->failedResponse('referral is already present on the far right or on the far left, it cannot be added twice');
+            return response()->json('referral is already present on the far right or on the far left, it cannot be added twice');
 
         if ($referral->sponsor->id !== $sponsor->id)
-            return $this->failedResponse('Sorry, this referral belongs to another sponsor.');
+            return response()->json('Sorry, this referral belongs to another sponsor.');
 
         // Determine placement: left, right, or traverse tree
         if ($request->placement == 'left') {
