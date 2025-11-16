@@ -29,10 +29,10 @@ class MLMController extends Controller
         $packageCv = $referral->subscription->package->cv;
 
         if (empty($referral->id)) {
-            return response()->json('Sorry, this referral not belongs to any sponsor.');
+            return response()->json('Sorry, this referral not belongs to any sponsor.', 402);
         }
         if (!$referral->subscription)
-            return response()->json('Sorry, this referral is not subscribed to any packages.');
+            return response()->json('Sorry, this referral is not subscribed to any packages.', 402);
 
         if (
             $referral->id == 1 ||
