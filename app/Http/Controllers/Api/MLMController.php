@@ -28,7 +28,7 @@ class MLMController extends Controller
         $referral = Member::findOrFail($request->referral_id);
         $packageCv = $referral->subscription->package->cv;
 
-        if (empty($referral->sponsor->id)) {
+        if (empty($referral->id)) {
             return response()->json('Sorry, this referral not belongs to any sponsor.');
         }
         if (!$referral->subscription)
