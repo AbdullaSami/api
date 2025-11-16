@@ -31,22 +31,26 @@ class MLMController extends Controller
         if (empty($referral->id)) {
             return response()->json('Sorry, this referral not belongs to any sponsor.', 402);
         }
-        if (!$referral->subscription)
-            return response()->json('Sorry, this referral is not subscribed to any packages.', 402);
+        if (!$referral->subscription){
 
+            return response()->json('Sorry, this referral is not subscribed to any packages.', 402);   
+        }
         if (
             $referral->id == 1 ||
             $referral->id == $sponsor->id ||
             $referral->id == $sponsor->left_leg_id ||
             $referral->id == $sponsor->right_leg_id
-        )
+        ){
             return response()->json(config('consts.REFERRAL_BLOCK_MESSAGE', 'This process cannot be completed.'));
+        }
 
-        if ($referral->id == $this->findFarLeft($sponsor)->id || $referral->id == $this->findFarRight($sponsor)->id)
+        if ($referral->id == $this->findFarLeft($sponsor)->id || $referral->id == $this->findFarRight($sponsor)->id){
             return response()->json('referral is already present on the far right or on the far left, it cannot be added twice');
+        }
 
-        if ($referral->sponsor->id !== $sponsor->id)
+        if ($referral->sponsor->id !== $sponsor->id){
             return response()->json('Sorry, this referral belongs to another sponsor.');
+        }
 
         // Determine placement: left, right, or traverse tree
         if ($request->placement == 'left') {
@@ -371,7 +375,7 @@ class MLMController extends Controller
 
         // Check if the member is not found  
         if (!$member) {
-            return $this->failedResponse('Member not found');
+            return response()->josn('Member not found', 404);
         }
 
         // Fetch only the necessary fields  
@@ -388,6 +392,7 @@ class MLMController extends Controller
             $tank->member_username  = optional($tank->member->user)->username; // Get the member's user's name if exists  
             $tank->member_firstname = optional($tank->member->user)->first_name; // Get the member's user's name if exists  
             $tank->member_lastname = optional($tank->member->user)->last_name; // Get the member's user's name if exists  
+            $tank->member_lastname = optional($tank->member->subscription)->package; // Get the member's user's name if exists  
 
             // Check if member and subscription are not null  
             if ($tank->member && $tank->member->subscription) {
