@@ -517,7 +517,7 @@ class MLMController extends Controller
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         }
-        return $this->failedResponse('no downlines members to this user');
+        return response()->json('no downlines members to this user');
     }
 
 
