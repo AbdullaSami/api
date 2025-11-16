@@ -22,7 +22,7 @@ route::prefix('v1')->group(function () {
 
     route::post('login', [AuthController::class, 'login']);
     route::post('register', [AuthController::class, 'register']);
-    route::get('sponsor-data', [AuthController::class, 'sponsorData']);
+    route::get('sponsor-data/{id}', [AuthController::class, 'sponsorData']);
 
     // single sign-On 
     Route::post('login-token', [AuthController::class, 'generateToken']);

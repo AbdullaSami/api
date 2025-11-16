@@ -147,9 +147,9 @@ class AuthController extends Controller
     }
 
 
-    public function sponsorData(Request $request)
+    public function sponsorData($id)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make(['sponsor_id' => $id], [
             'sponsor_id' => ['required', 'exists:users,id_code'],
         ], [
             'sponsor_id.exists' => 'incorrect sponsor id'
@@ -157,8 +157,7 @@ class AuthController extends Controller
         if ($validator->fails())
             return $this->failedResponse($validator->errors(), 422);
 
-
-        $sponser = User::where('id_code', $request->sponsor_id)->whereHas('member')->pluck('id')->first();
+        $sponser = User::where('id_code', $id)->whereHas('member')->pluck('id')->first();
         if (empty($sponser)) {
             return $this->failedResponse('Sponsor information is incorrect, or this user does not have a membership', 422);
         }
