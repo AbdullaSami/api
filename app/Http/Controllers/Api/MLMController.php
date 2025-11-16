@@ -392,7 +392,7 @@ class MLMController extends Controller
             $tank->member_username  = optional($tank->member->user)->username; // Get the member's user's name if exists  
             $tank->member_firstname = optional($tank->member->user)->first_name; // Get the member's user's name if exists  
             $tank->member_lastname = optional($tank->member->user)->last_name; // Get the member's user's name if exists  
-            $tank->member_lastname = optional($tank->member->subscription)->package; // Get the member's user's name if exists  
+            $tank->member_package = optional($tank->member->subscription)->package; // Get the member's user's name if exists  
 
             // Check if member and subscription are not null  
             if ($tank->member && $tank->member->subscription) {
