@@ -42,8 +42,8 @@ public function getTotals()
     $member = $user->member;
 
     // 1 - Earnings (You must decide the correct model/table)
-    $totalEarnings = $member->wallet->transactions()
-        ->where('sponsor_id', $user->id)
+    $totalEarnings = $member->wallet
+        ->transactions()
         ->sum('amount');
 
     // 2 - Received internal transfer
