@@ -31,59 +31,113 @@ class WalletController extends Controller
         ]);
     }
 
-/**
- * calculate total earnings from commissions
- *
- */
+    /**
+     * calculate total earnings from commissions
+     * abdulla sami 2024-17-NOV
+     */
 
-public function getTotals()
-{
-    $user = Auth::user();
-    $member = $user->member;
+    public function getTotals()
+    {
+        $user = Auth::user();
+        $member = $user->member;
 
-    // 1 - Earnings (You must decide the correct model/table)
-    $totalEarnings = $member->wallet
-        ->transactions()
-        ->sum('amount');
+        // 1 - Earnings (You must decide the correct model/table)
+        $totalEarnings = $member->wallet
+            ->transactions()
+            ->sum('amount');
 
-    // 2 - Received internal transfer
-    $totalReceive = $member->wallet->transactions()
-        ->where('transaction_type', 'receive_internal_transfer')
-        ->where('status', 'accepted')
-        ->sum('amount');
+        // 2 - Received internal transfer
+        $totalReceive = $member->wallet->transactions()
+            ->where('transaction_type', 'receive_internal_transfer')
+            ->where('status', 'accepted')
+            ->sum('amount');
 
-    // 3 - Sent transfer
-    $totalTransfer = $member->wallet->transactions()
-        ->where('transaction_type', 'send_internal_transfer')
-        ->where('status', 'accepted')
-        ->sum('amount');
+        // 3 - Sent transfer
+        $totalTransfer = $member->wallet->transactions()
+            ->where('transaction_type', 'send_internal_transfer')
+            ->where('status', 'accepted')
+            ->sum('amount');
 
-    // 4 - Deposit
-    $totalBounce = $member->wallet->transactions()
-        ->where('transaction_type', 'deposit')
-        ->where('status', 'accepted')
-        ->sum('amount');
+        // 4 - Deposit
+        $totalBounce = $member->wallet->transactions()
+            ->where('transaction_type', 'deposit')
+            ->where('status', 'accepted')
+            ->sum('amount');
 
-    return response()->json([
-        'status' => true,
-        'total_earnings' => $totalEarnings,
-        'total_receive' => $totalReceive,
-        'total_transfer' => $totalTransfer,
-        'total_bounce' => $totalBounce
-    ]);
-}
+        return response()->json([
+            'status' => true,
+            'total_earnings' => $totalEarnings,
+            'total_receive' => $totalReceive,
+            'total_transfer' => $totalTransfer,
+            'total_bounce' => $totalBounce
+        ]);
+    }
+
+    /**
+     * Get reports data
+     * abdulla sami 2024-17-NOV
+     */
+
+    public function getReportsData()
+    {
+        $user = Auth::user();
+        $member = $user->member;
+        $wallet = $member->wallet;
+
+        $currentYear = now()->year;
+
+        // -----------------------------
+        // 1️⃣ Weekly Earnings
+        // -----------------------------
+        $weeklyEarnings = $wallet->transactions()
+            ->whereYear('created_at', $currentYear)
+            ->where('transaction_type', 'earning') // change if needed
+            ->where('status', 'accepted')
+            ->selectRaw('WEEK(created_at) as week, SUM(amount) as total')
+            ->groupBy('week')
+            ->orderBy('week')
+            ->get();
+
+        // -----------------------------
+        // 2️⃣ Raw Monthly bounce from DB
+        // -----------------------------
+        $rawBounce = $wallet->transactions()
+            ->whereYear('created_at', $currentYear)
+            ->where('transaction_type', 'deposit')
+            ->where('status', 'accepted')
+            ->selectRaw('MONTH(created_at) as month, SUM(amount) as total')
+            ->groupBy('month')
+            ->pluck('total', 'month'); // returns: [3 => 200, 7 => 500]
+
+        // -----------------------------
+        // 3️⃣ Generate Full 12-Month Report with Names
+        // -----------------------------
+        $months = collect(range(1, 12))->map(function ($monthNumber) use ($rawBounce) {
+            return [
+                'month' => \Carbon\Carbon::create()->month($monthNumber)->format('F'),
+                'total' => $rawBounce[$monthNumber] ?? 0,
+            ];
+        });
+
+        return response()->json([
+            'status'          => true,
+            'weekly_earnings' => $weeklyEarnings,
+            'monthly_bounce'  => $months,
+        ]);
+    }
+
 
 
     public function myAllTransactions()
     {
-        try{
+        try {
             $user = Auth::user();
             $transactions = $user->member->wallet->tarnsactions()->paginate(10);
             $data =  TransactionsResource::collection($transactions)->response()->getData(true);
             return response()->json([
-                'data'=>$data
-                ]);
-        } catch (\Exception $e){
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => $e->getMessage()
