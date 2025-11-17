@@ -27,7 +27,7 @@ class WalletController extends Controller
         $balance = $member->wallet->balance;
         return response()->json([
             'status' => true,
-            'message' => 'you current wallet balance is ' . $balance . ' HFS-C'
+            'balance' => $balance
         ]);
     }
 
