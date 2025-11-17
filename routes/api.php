@@ -86,7 +86,7 @@ route::prefix('v1')->group(function () {
         route::get('all-pending-tarnsactions', [WalletController::class, 'myPendingTransactions']);
         route::get('all-withdrawal-tarnsactions', [WalletController::class, 'myWithdrawalTransactions']);
         route::get('all-deposit-tarnsactions', [WalletController::class, 'myDepositTransactions']);
-        route::post('withdrawa', [WalletController::class, 'withdrawal']);
+        route::post('withdrawal', [WalletController::class, 'withdrawal']);
         route::post('charging-credit', [WalletController::class, 'chargingCredit']);
         route::post('internal-transfer', [WalletController::class, 'internalTransfer']);
 
