@@ -40,20 +40,31 @@ public function getTotals()
 {
     $user = Auth::user();
     $member = $user->member;
-    $totalEarnings = $member->where('sponsor_id', $user->id)->sum('amount');
-    $totalReceive = $member->wallet->transactions->
-    where('transaction_type','receive_internal_transfer')
-    ->orWhere('status','accepted')
-    ->sum('amount');
-    $totalTransfer = $member->wallet->transactions->
-    where('transaction_type','send_internal_transfer')
-    ->orWhere('status','accepted')
-    ->sum('amount');
-    $totalBounce = $member->wallet->transactions->
-    where('transaction_type','deposit')
-    ->orWhere('status','accepted')
-    ->sum('amount');
-        return response()->json([
+
+    // 1 - Earnings (You must decide the correct model/table)
+    $totalEarnings = $member->wallet->transactions()
+        ->where('sponsor_id', $user->id)
+        ->sum('amount');
+
+    // 2 - Received internal transfer
+    $totalReceive = $member->wallet->transactions()
+        ->where('transaction_type', 'receive_internal_transfer')
+        ->where('status', 'accepted')
+        ->sum('amount');
+
+    // 3 - Sent transfer
+    $totalTransfer = $member->wallet->transactions()
+        ->where('transaction_type', 'send_internal_transfer')
+        ->where('status', 'accepted')
+        ->sum('amount');
+
+    // 4 - Deposit
+    $totalBounce = $member->wallet->transactions()
+        ->where('transaction_type', 'deposit')
+        ->where('status', 'accepted')
+        ->sum('amount');
+
+    return response()->json([
         'status' => true,
         'total_earnings' => $totalEarnings,
         'total_receive' => $totalReceive,
@@ -61,6 +72,7 @@ public function getTotals()
         'total_bounce' => $totalBounce
     ]);
 }
+
 
     public function myAllTransactions()
     {
