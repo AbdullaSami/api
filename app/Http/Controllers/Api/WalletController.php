@@ -86,9 +86,7 @@ class WalletController extends Controller
 
         $currentYear = now()->year;
 
-        // -----------------------------
-        // 1️⃣ Weekly Earnings
-        // -----------------------------
+        // Weekly Earnings
         $weeklyEarnings = $wallet->transactions()
             ->whereYear('created_at', $currentYear)
             ->where('transaction_type', 'earning') // change if needed
@@ -98,9 +96,16 @@ class WalletController extends Controller
             ->orderBy('week')
             ->get();
 
-        // -----------------------------
-        // 2️⃣ Raw Monthly bounce from DB
-        // -----------------------------
+        // Generate full 52-week report
+        $fullWeeklyEarnings = collect(range(1, 52))->map(function ($week) use ($currentYear, $weeklyEarnings) {
+            $weekData = $weeklyEarnings->firstWhere('week', $week);
+            return [
+                'week' => $week,
+                'total' => $weekData ? $weekData->total : 0,
+            ];
+        });
+
+        // Raw Monthly bounce from DB
         $rawBounce = $wallet->transactions()
             ->whereYear('created_at', $currentYear)
             ->where('transaction_type', 'deposit')
@@ -109,9 +114,7 @@ class WalletController extends Controller
             ->groupBy('month')
             ->pluck('total', 'month'); // returns: [3 => 200, 7 => 500]
 
-        // -----------------------------
-        // 3️⃣ Generate Full 12-Month Report with Names
-        // -----------------------------
+        // Generate Full 12-Month Report with Names
         $months = collect(range(1, 12))->map(function ($monthNumber) use ($rawBounce) {
             return [
                 'month' => \Carbon\Carbon::create()->month($monthNumber)->format('F'),
@@ -121,7 +124,7 @@ class WalletController extends Controller
 
         return response()->json([
             'status'          => true,
-            'weekly_earnings' => $weeklyEarnings,
+            'weekly_earnings' => $fullWeeklyEarnings,
             'monthly_bounce'  => $months,
         ]);
     }
