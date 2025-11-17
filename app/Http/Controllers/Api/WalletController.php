@@ -31,7 +31,36 @@ class WalletController extends Controller
         ]);
     }
 
+/**
+ * calculate total earnings from commissions
+ *
+ */
 
+public function getTotals()
+{
+    $user = Auth::user();
+    $member = $user->member;
+    $totalEarnings = $member->where('sponsor_id', $user->id)->sum('amount');
+    $totalReceive = $member->wallet->transactions->
+    where('transaction_type','receive_internal_transfer')
+    ->orWhere('status','accepted')
+    ->sum('amount');
+    $totalTransfer = $member->wallet->transactions->
+    where('transaction_type','send_internal_transfer')
+    ->orWhere('status','accepted')
+    ->sum('amount');
+    $totalBounce = $member->wallet->transactions->
+    where('transaction_type','deposit')
+    ->orWhere('status','accepted')
+    ->sum('amount');
+        return response()->json([
+        'status' => true,
+        'total_earnings' => $totalEarnings,
+        'total_receive' => $totalReceive,
+        'total_transfer' => $totalTransfer,
+        'total_bounce' => $totalBounce
+    ]);
+}
 
     public function myAllTransactions()
     {

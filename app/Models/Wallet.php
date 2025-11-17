@@ -20,7 +20,7 @@ class Wallet extends Model
         return $this->belongsTo(Member::class);
     }
 
-    public function tarnsactions(): HasMany
+    public function transactions(): HasMany
     {
         return $this->hasMany(WalletTransaction::class, 'wallet_id', 'id');
     }

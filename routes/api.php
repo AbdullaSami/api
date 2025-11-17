@@ -90,6 +90,9 @@ route::prefix('v1')->group(function () {
         route::post('charging-credit', [WalletController::class, 'chargingCredit']);
         route::post('internal-transfer', [WalletController::class, 'internalTransfer']);
 
+        //abdulla sami 2025-17-NOV
+        route::get('wallet-totals', [WalletController::class, 'getTotals']);
+
 
         // rank
         Route::get('rank', [RankController::class, 'myRank']);
