@@ -35,14 +35,14 @@ class WalletController extends Controller
 
     public function myAllTransactions()
     {
-        $user = Auth::user();
-        $transactions = $user->member->wallet->tarnsactions()->paginate(10);
-        $data =  TransactionsResource::collection($transactions)->response()->getData(true);
-        if ($transactions) {
-            return $this->successResponse('All transactions retrieved successfully', 'transactions', $data);
+        try{
+            $user = Auth::user();
+            $transactions = $user->member->wallet->tarnsactions()->paginate(10);
+            $data =  TransactionsResource::collection($transactions)->response()->getData(true);
+            return response()->json([
+                'data'=>$data
+                ]);
         }
-
-        return $this->failedResponse();
     }
 
     public function myAcceptedTransactions()

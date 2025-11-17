@@ -24,7 +24,7 @@ route::prefix('v1')->group(function () {
     route::post('register', [AuthController::class, 'register']);
     route::get('sponsor-data/{id}', [AuthController::class, 'sponsorData']);
 
-    // single sign-On 
+    // single sign-On
     Route::post('login-token', [AuthController::class, 'generateToken']);
 
     //ranks
@@ -45,7 +45,7 @@ route::prefix('v1')->group(function () {
         route::post('user/active', [AuthController::class, 'activeUser']);
         route::post('user/inactive', [AuthController::class, 'inactiveUser']);
 
-        // single sign-On 
+        // single sign-On
         Route::get('get-login-user', [AuthController::class, 'getUser']);
 
 
@@ -95,25 +95,11 @@ route::prefix('v1')->group(function () {
         Route::get('rank', [RankController::class, 'myRank']);
         Route::get('/rank/evaluate', [RankController::class, 'evaluateRank']);
 
-
-
         Route::get('sync-user', [AuthController::class, 'syncUserToTradingSociety'])->name('syncUser');
-
-
 
         //validation node => for developer only
         Route::get('/members/validate', [NodeValidationController::class, 'validateNode']);
     });
-
-
-
-
-
-
-
-
-
-
     // admin routes
 
     route::prefix('admin')->group(function () {
