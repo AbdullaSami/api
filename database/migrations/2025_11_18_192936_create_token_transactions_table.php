@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('token_transactions', function (Blueprint $table) {
             $table->id();
-            $table->numeric('amount');
+            $table->decimal('amount');
             $table->foreign('token_wallet_id')->references('id')->on('token_wallets')->onDelete('cascade');
             $table->enum('transaction_type', ['send','receive']);
             $table->enum('status', ['sent', 'received', 'failed']);
