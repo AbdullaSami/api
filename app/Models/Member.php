@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Member extends Model
 {
@@ -29,7 +30,29 @@ class Member extends Model
     ];
 
 
-    // protected $hidden = ['left_leg', 'right_leg'];
+    /**
+     * Abdulla updates
+     */
+
+        public function tokenWallet()
+    {
+        return $this->hasOne(TokenWallet::class);
+    }
+    public function tokenTransactions(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            TokenTransaction::class,
+            TokenWallet::class,
+            'member_id', // Foreign key on TokenWallet table
+            'token_wallet_id', // Foreign key on TokenTransaction table
+            'id', // Local key on Member table
+            'id'  // Local key on TokenWallet table
+        );
+    }
+
+    /**
+     * End of Abdulla updates
+     */
 
 
     public function user()
@@ -354,7 +377,7 @@ class Member extends Model
 
 
 
-    
+
 
 
 

@@ -93,6 +93,8 @@ route::prefix('v1')->group(function () {
         //abdulla sami 2025-17-NOV
         route::get('wallet-totals', [WalletController::class, 'getTotals']);
         route::get('wallet-reports', [WalletController::class, 'getReportsData']);
+        //abdulla sami 2025-17-NOV
+        route::post('transfer-to-token-wallet', [WalletController::class, 'transferToTokenWallet']);
 
 
         // rank

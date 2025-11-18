@@ -14,6 +14,7 @@ use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PlaceReferralRequest;
+use App\Http\Controllers\Api\WalletController;
 
 class MLMController extends Controller
 {
@@ -21,8 +22,6 @@ class MLMController extends Controller
 
     public function placeReferral(PlaceReferralRequest $request)
     {
-
-
         $user = auth()->user();
         $sponsor = $user->member;
         $referral = Member::findOrFail($request->referral_id);
@@ -33,7 +32,7 @@ class MLMController extends Controller
         }
         if (!$referral->subscription){
 
-            return response()->json('Sorry, this referral is not subscribed to any packages.', 402);   
+            return response()->json('Sorry, this referral is not subscribed to any packages.', 402);
         }
         if (
             $referral->id == 1 ||
@@ -131,6 +130,15 @@ class MLMController extends Controller
                 $referral->is_first = 'no';
                 $referral->save();
                 $sponsor->save();
+
+                //create Token Wallets for both sponsor and referral
+                $walletController = new WalletController();
+                if ($sponsor->tokenWallet == null) {
+                $walletController->createTokenWallet($sponsor->id);
+                }
+                if ($referral->tokenWallet == null) {
+                $walletController->createTokenWallet($referral->id);
+                }
             }
 
             DB::commit();
@@ -173,7 +181,6 @@ class MLMController extends Controller
 
         return $members;
     }
-
 
     public function getDownlineMembers()
     {
@@ -223,8 +230,6 @@ class MLMController extends Controller
             ],
         ], 200);
     }
-
-
 
     public function getLeftDownlineMembers()
     {
@@ -282,7 +287,6 @@ class MLMController extends Controller
         ], 200);
     }
 
-
     /**
      * Returns the number of downlines on the left and right legs.
      */
@@ -295,7 +299,6 @@ class MLMController extends Controller
         $data['right_downlines_count'] = $member->countRightDownline();
         return $this->successResponse('done successfully', 'count', $data);
     }
-
 
     /**
      * Returns the network volume on the left and right legs.
@@ -313,9 +316,6 @@ class MLMController extends Controller
         ]);
     }
 
-
-
-
     /**
      * Calculates the direct commission for a member and returns it.
      */
@@ -330,84 +330,47 @@ class MLMController extends Controller
         ]);
     }
 
-    // public function mtTank()
-    // {
-    //     $user = auth()->user();
-
-    //     // Assuming the user has a single member  
-    //     $member = $user->member;
-
-    //     // Check if the member is not found  
-    //     if (!$member) {
-    //         return $this->failedResponse('Member not found');
-    //     }
-
-
-    //     // Fetch only the necessary fields  
-    //     $tanks = UserTank::where('sponsor_id', $member->id)
-    //         ->with([
-    //             'member.user:id,name',
-    //             'member.subscription.package:id,name'
-    //         ]) // Eager load the user from the member and the package from the subscription  
-    //         ->paginate(5);
-
-    //     // Append the member name and package to each tank  
-    //     $tanks->getCollection()->transform(function ($tank) {
-    //         $tank->member_name = optional($tank->member->user)->name; // Get the member's user's name if exists  
-    //         $tank->member_package = optional($tank->member->subscription->package)->name; // Safely accessing package name  
-
-    //         unset($tank->member); // Optionally remove the full member object if you don’t want it  
-    //         return $tank;
-    //     });
-
-    //     return $this->successResponse('Tanks retrieved successfully', 'tank', $tanks);
-    // }
-
-
-
-
     public function mtTank()
     {
         $user = auth()->user();
 
-        // Assuming the user has a single member  
+        // Assuming the user has a single member
         $member = $user->member;
 
-        // Check if the member is not found  
+        // Check if the member is not found
         if (!$member) {
             return response()->josn('Member not found', 404);
         }
 
-        // Fetch only the necessary fields  
+        // Fetch only the necessary fields
         $tanks = UserTank::where('sponsor_id', $member->id)
             ->with([
                 'member.user:id,username,first_name,last_name',
                 'member.subscription.package:id,name'
-            ]) // Eager load the user from the member and the package from the subscription  
+            ]) // Eager load the user from the member and the package from the subscription
             ->paginate(5);
 
-        // Append the member name and package to each tank  
+        // Append the member name and package to each tank
         $tanks->getCollection()->transform(function ($tank) {
-            // Use optional chaining to safely access the member's user and subscription's package  
-            $tank->member_username  = optional($tank->member->user)->username; // Get the member's user's name if exists  
-            $tank->member_firstname = optional($tank->member->user)->first_name; // Get the member's user's name if exists  
-            $tank->member_lastname = optional($tank->member->user)->last_name; // Get the member's user's name if exists  
-            $tank->member_package = optional($tank->member->subscription)->package; // Get the member's user's name if exists  
+            // Use optional chaining to safely access the member's user and subscription's package
+            $tank->member_username  = optional($tank->member->user)->username; // Get the member's user's name if exists
+            $tank->member_firstname = optional($tank->member->user)->first_name; // Get the member's user's name if exists
+            $tank->member_lastname = optional($tank->member->user)->last_name; // Get the member's user's name if exists
+            $tank->member_package = optional($tank->member->subscription)->package; // Get the member's user's name if exists
 
-            // Check if member and subscription are not null  
+            // Check if member and subscription are not null
             if ($tank->member && $tank->member->subscription) {
-                $tank->member_package = $tank->member->subscription->package ? $tank->member->subscription->package->name : null; // Safely accessing package name  
+                $tank->member_package = $tank->member->subscription->package ? $tank->member->subscription->package->name : null; // Safely accessing package name
             } else {
-                $tank->member_package = null; // Default to null if subscription is not present  
+                $tank->member_package = null; // Default to null if subscription is not present
             }
 
-            unset($tank->member); // Optionally remove the full member object if you don’t want it  
+            unset($tank->member); // Optionally remove the full member object if you don’t want it
             return $tank;
         });
 
         return $this->successResponse('Tanks retrieved successfully', 'tank', $tanks);
     }
-
 
     public function getDirectDownlineMembers()
     {
@@ -459,8 +422,6 @@ class MLMController extends Controller
         }
         return $this->failedResponse('no downlines members to this user');
     }
-
-
 
     public function getDirectDownlineMembersById($id)
     {
@@ -525,8 +486,6 @@ class MLMController extends Controller
         return response()->json('no downlines members to this user');
     }
 
-
-
     private function findFarLeft(Member $member)
     {
         $visited = []; // Keep track of visited nodes
@@ -557,8 +516,6 @@ class MLMController extends Controller
         return $member;
     }
 
-
-
     /**
      * Get the downline details for a member.
      *
@@ -582,221 +539,11 @@ class MLMController extends Controller
         ]);
     }
 
-
-    // public function getYearlySales()
-    // {
-    //     $user = auth()->user();
-
-    //     // Validate if the authenticated user exists
-    //     if (!$user) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'User not authenticated'
-    //         ], 401);
-    //     }
-
-    //     $member = $user->member;
-
-    //     // Validate if the user is linked to a member
-    //     if (!$member) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'User does not have an associated member'
-    //         ], 404);
-    //     }
-
-    //     // Load all downlines recursively
-    //     $downlines = $member->getAllDownlines();
-
-    //     // Check if downlines exist
-    //     if (empty($downlines)) {
-    //         return response()->json([
-    //             'monthly_sales' => [],
-    //             'weekly_sales' => [],
-    //             'message' => 'No downlines found for this member',
-    //         ]);
-    //     }
-
-    //     // Collect all wallets of the downlines
-    //     $wallets = Wallet::whereIn('member_id', $downlines->pluck('id'))->get();
-
-    //     // Initialize arrays for monthly and weekly sales
-    //     $monthlySales = [];
-    //     $weeklySales = [];
-
-    //     // Iterate through wallets and process transactions
-    //     foreach ($wallets as $wallet) {
-    //         $transactions = $wallet->tarnsactions()
-    //             ->where('transaction_type', 'buy_package')
-    //             ->where('status', 'accepted')
-    //             ->get();
-
-    //         // Skip if no transactions exist
-    //         if (empty($transactions)) {
-    //             continue;
-    //         }
-
-    //         foreach ($transactions as $transaction) {
-    //             // Ensure transaction data is valid
-    //             $amount = $transaction->amount ?? 0; // Default to 0 if null
-    //             $createdAt = $transaction->created_at ?? null;
-
-    //             // Skip transactions with invalid dates
-    //             if (!$createdAt) {
-    //                 continue;
-    //             }
-
-    //             $transactionDate = Carbon::parse($createdAt);
-
-    //             // Calculate monthly sales
-    //             $monthKey = $transactionDate->format('Y-m'); // e.g., "2024-01"
-    //             if (!isset($monthlySales[$monthKey])) {
-    //                 $monthlySales[$monthKey] = 0;
-    //             }
-    //             $monthlySales[$monthKey] += $amount;
-
-    //             // Calculate weekly sales
-    //             $weekKey = $transactionDate->format('Y-W'); // e.g., "2024-02"
-    //             if (!isset($weeklySales[$weekKey])) {
-    //                 $weeklySales[$weekKey] = 0;
-    //             }
-    //             $weeklySales[$weekKey] += $amount;
-    //         }
-    //     }
-
-    //     // Handle cases where no transactions were found
-    //     if (empty($monthlySales) && empty($weeklySales)) {
-    //         return response()->json([
-    //             'status'    => true,
-    //             'message' => 'No transactions found for this member’s network',
-    //             'monthly_sales' => [],
-    //             'weekly_sales' => [],
-    //         ]);
-    //     }
-
-    //     // Format and return the response
-    //     $response = [
-    //         'monthly_sales' => $monthlySales,
-    //         'weekly_sales' => $weeklySales,
-    //     ];
-
-    //     return response()->json([
-    //         'status'    => true,
-    //         'message'   => 'the report extracted successfully',
-    //         'data'      => $response
-    //     ]);
-    // }
-
-
-
-    // public function getYearlySales()
-    // {
-    //     $user = auth()->user();
-
-    //     // Validate if the authenticated user exists
-    //     if (!$user) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'User not authenticated'
-    //         ], 401);
-    //     }
-
-    //     $member = $user->member;
-
-    //     // Validate if the user is linked to a member
-    //     if (!$member) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'User does not have an associated member'
-    //         ], 404);
-    //     }
-
-    //     // Include the current member and all their downlines
-    //     $downlines = collect([$member])->merge($member->getAllDownlines());
-
-    //     // Ensure downlines exist
-    //     if ($downlines->isEmpty()) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'No downlines found for this member',
-    //             'monthly_sales' => [],
-    //             'weekly_sales' => [],
-    //         ]);
-    //     }
-
-    //     // Fetch all wallets belonging to the current member and their downlines
-    //     $wallets = Wallet::whereIn('member_id', $downlines->pluck('id'))->get();
-
-    //     // Initialize arrays for monthly and weekly sales
-    //     $monthlySales = array_fill_keys(range(1, 12), 0); // Initialize months with 0 sales
-    //     $weeklySales = [];
-
-    //     // Iterate through wallets and process transactions
-    //     foreach ($wallets as $wallet) {
-    //         $transactions = $wallet->tarnsactions()
-    //             ->where('transaction_type', 'buy_package')
-    //             ->where('status', 'accepted')
-    //             ->get();
-
-    //         // Skip if no transactions exist
-    //         if ($transactions->isEmpty()) {
-    //             continue;
-    //         }
-
-    //         foreach ($transactions as $transaction) {
-    //             // Ensure transaction data is valid
-    //             $amount = $transaction->amount ?? 0; // Default to 0 if null
-    //             $createdAt = $transaction->created_at ?? null;
-
-    //             // Skip transactions with invalid dates
-    //             if (!$createdAt) {
-    //                 continue;
-    //             }
-
-    //             $transactionDate = Carbon::parse($createdAt);
-
-    //             // Calculate monthly sales
-    //             $monthKey = $transactionDate->month; // e.g., "1" for January
-    //             $monthlySales[$monthKey] += $amount;
-
-    //             // Calculate weekly sales
-    //             $weekKey = $transactionDate->format('Y-W'); // e.g., "2024-02"
-    //             if (!isset($weeklySales[$weekKey])) {
-    //                 $weeklySales[$weekKey] = 0;
-    //             }
-    //             $weeklySales[$weekKey] += $amount;
-    //         }
-    //     }
-
-    //     // Format the monthly sales with month names
-    //     $formattedMonthlySales = [];
-    //     foreach ($monthlySales as $month => $total) {
-    //         $formattedMonthlySales[Carbon::create(null, $month)->format('F')] = $total; // "January" => 200
-    //     }
-
-    //     // Handle cases where no transactions were found
-    //     if (empty($formattedMonthlySales) && empty($weeklySales)) {
-    //         return response()->json([
-    //             'status' => true,
-    //             'message' => 'No transactions found for this member’s network',
-    //             'monthly_sales' => [],
-    //             'weekly_sales' => [],
-    //         ]);
-    //     }
-
-    //     // Format and return the response
-    //     return response()->json([
-    //         'monthly_sales' => $formattedMonthlySales,
-    //         'weekly_sales' => $weeklySales,
-    //     ]);
-    // }
-
-
     public function getYearlySales()
     {
         $user = auth()->user();
 
-        // Validate if the authenticated user exists  
+        // Validate if the authenticated user exists
         if (!$user) {
             return response()->json([
                 'status' => false,
@@ -806,7 +553,7 @@ class MLMController extends Controller
 
         $member = $user->member;
 
-        // Validate if the user is linked to a member  
+        // Validate if the user is linked to a member
         if (!$member) {
             return response()->json([
                 'status' => false,
@@ -815,17 +562,17 @@ class MLMController extends Controller
         }
 
         try {
-            // Get all downline IDs  
+            // Get all downline IDs
             $downlines = $member->getAllDownlines;
 
-            // Call the collectDownlineIds method to get all IDs  
+            // Call the collectDownlineIds method to get all IDs
             $downlineIds = $this->collectDownlineIds($downlines);
 
-            // Calculate monthly and weekly sales  
+            // Calculate monthly and weekly sales
             $monthlySales = $this->calculateMonthlySales($downlineIds);
             $weeklySales = $this->calculateWeeklySales($downlineIds);
 
-            // Return success response  
+            // Return success response
             return response()->json([
                 'status' => true,
                 'message' => 'Sales data retrieved successfully.',
@@ -835,7 +582,7 @@ class MLMController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            // Handle errors and return response  
+            // Handle errors and return response
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while retrieving sales data.',
@@ -865,7 +612,7 @@ class MLMController extends Controller
         for ($month = 1; $month <= 12; $month++) {
             $monthName = Carbon::createFromFormat('m', $month)->format('F');
 
-            // Calculate the total amount for the specified month and year  
+            // Calculate the total amount for the specified month and year
             $monthlySales[$monthName] = WalletTransaction::whereHas('wallet', function ($query) use ($downlineIds) {
                 $query->whereIn('member_id', $downlineIds);
             })
@@ -879,8 +626,8 @@ class MLMController extends Controller
         return $monthlySales;
     }
 
-    /**  
-     * Calculate weekly sales for a member's downline.  
+    /**
+     * Calculate weekly sales for a member's downline.
      */
     private function calculateWeeklySales(array $downlineIds)
     {
