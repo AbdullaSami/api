@@ -13,16 +13,34 @@ return new class extends Migration
     {
         Schema::create('token_transactions', function (Blueprint $table) {
             $table->id();
+
+            $table->unsignedBigInteger('token_wallet_id');
             $table->decimal('amount');
-            $table->foreign('token_wallet_id')->references('id')->on('token_wallets')->onDelete('cascade');
-            $table->enum('transaction_type', ['send','receive']);
+
+            $table->enum('transaction_type', ['send', 'receive']);
             $table->enum('status', ['sent', 'received', 'failed']);
-            $table->foreign('sender_member_id')->references('id')->on('members')->onDelete('cascade');
-            $table->foreign('receive_member_id')->references('id')->on('members')->onDelete('cascade');
+
+            $table->unsignedBigInteger('sender_member_id');
+            $table->unsignedBigInteger('receive_member_id');
+
+            // Foreign Keys
+            $table->foreign('token_wallet_id')
+                ->references('id')->on('token_wallets')
+                ->onDelete('cascade');
+
+            $table->foreign('sender_member_id')
+                ->references('id')->on('members')
+                ->onDelete('cascade');
+
+            $table->foreign('receive_member_id')
+                ->references('id')->on('members')
+                ->onDelete('cascade');
+
             $table->softDeletes();
             $table->timestamps();
         });
     }
+
     /**
      * Reverse the migrations.
      */
