@@ -340,7 +340,7 @@ class WalletController extends Controller
 
         public function internalTransfer(Request $request){
             $request->validate([
-                'recipient_member_code' => ['required', 'string', 'exists:members,member_code'],
+                'recipient_member_code' => ['required', 'string', 'exists:users,id_code'],
                 'amount' => ['required', 'numeric', 'min:1'],
             ]);
             $user = Auth::user();
