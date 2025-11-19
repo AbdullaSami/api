@@ -326,6 +326,17 @@ class WalletController extends Controller
             }
         }
 
+        public function tokenWallet(Request $request)
+        {
+            $user = Auth::user();
+            $member = $user->member;
+            $tokenWallet = $member->tokenWallet;
+
+            return response()->json([
+                'status' => true,
+                'token_wallet_balance' => $tokenWallet->token_balance
+            ]);
+        }
     /**
      * Create Token Wallet
      * abdulla sami 2024-18-NOV
