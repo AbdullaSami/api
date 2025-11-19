@@ -346,8 +346,8 @@ class WalletController extends Controller
             $user = Auth::user();
             $member = $user->member;
             $wallet = $member->tokenWallet;
-            $recipientMember = Member::where('member_code', $request->input('recipient_member_code'))->first();
-            $recipientWallet = $recipientMember->tokenWallet;
+            $recipientMember = User::where('id_code', $request->input('recipient_member_code'))->first();
+            $recipientWallet = $recipientMember->member->tokenWallet;
 
             if (!$recipientMember) {
                 return response()->json([
