@@ -337,6 +337,55 @@ class WalletController extends Controller
                 'token_wallet_balance' => $tokenWallet->token_balance
             ]);
         }
+
+        public function internalTransfer(Request $request){
+            $request->validate([
+                'recipient_member_code' => ['required', 'string', 'exists:members,member_code'],
+                'amount' => ['required', 'numeric', 'min:1'],
+            ]);
+            $user = Auth::user();
+            $member = $user->member;
+            $wallet = $member->tokenWallet;
+            $recipientMember = Member::where('member_code', $request->input('recipient_member_code'))->first();
+            $recipientWallet = $recipientMember->tokenWallet;
+
+            if (!$recipientMember) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Recipient member not found.'
+                ], 404);
+            }
+
+            if ($wallet->token_balance < $request->input('amount')) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Insufficient balance for transfer.'
+                ], 400);
+            }
+
+            DB::beginTransaction();
+            try {
+                // Deduct from sender's wallet
+                $wallet->decrement('token_balance', $request->input('amount'));
+
+                // Add to recipient's wallet
+                $recipientWallet->increment('token_balance', $request->input('amount'));
+
+                DB::commit();
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Internal transfer successful.',
+                    'sender_wallet_balance' => $wallet->token_balance
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Transfer failed: ' . $e->getMessage()
+                ], 500);
+            }
+        }
     /**
      * Create Token Wallet
      * abdulla sami 2024-18-NOV

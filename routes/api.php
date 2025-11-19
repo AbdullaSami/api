@@ -88,7 +88,6 @@ route::prefix('v1')->group(function () {
         route::get('all-deposit-tarnsactions', [WalletController::class, 'myDepositTransactions']);
         route::post('withdrawal', [WalletController::class, 'withdrawal']);
         route::post('charging-credit', [WalletController::class, 'chargingCredit']);
-        route::post('internal-transfer', [WalletController::class, 'internalTransfer']);
 
         //abdulla sami 2025-17-NOV
         route::get('wallet-totals', [WalletController::class, 'getTotals']);
@@ -97,6 +96,7 @@ route::prefix('v1')->group(function () {
         route::post('transfer-to-token-wallet', [WalletController::class, 'transferToTokenWallet']);
         //abdulla sami 2025-19-NOV
         route::get('token-wallet-balance', [WalletController::class, 'tokenWallet']);
+        route::post('internal-transfer', [WalletController::class, 'internalTransfer']);
 
 
         // rank
