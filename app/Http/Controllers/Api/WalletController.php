@@ -137,7 +137,7 @@ class WalletController extends Controller
     {
         try {
             $user = Auth::user();
-            $transactions = $user->member->wallet->tarnsactions()->paginate(10);
+            $transactions = $user->member->wallet->transactions()->paginate(10);
             $data =  TransactionsResource::collection($transactions)->response()->getData(true);
             return response()->json([
                 'data' => $data
@@ -264,7 +264,7 @@ class WalletController extends Controller
                 $wallet->update([
                     'balance' => $wallet->balance + $code->credit
                 ]);
-                $wallet->tarnsactions()->create([
+                $wallet->transactions()->create([
                     'transaction_type' => 'direct_credit',
                     'amount' => $code->credit,
                     'status' => 'accepted',
