@@ -75,6 +75,10 @@ class User extends Authenticatable
         );
     }
 
+public function pin()
+{
+    return $this->morphOne(\App\Models\Pin::class, 'pinable');
+}
 
 
     public function member()

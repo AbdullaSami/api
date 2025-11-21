@@ -65,6 +65,7 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'confirmed'],
             'image' => ['nullable', 'image'],
             'sponsor_id' => ['required'],
+            'pin_code'=> ['required', 'confirmed', 'digits:4' ],
         ]);
 
         if ($validator->fails()) {
@@ -92,7 +93,14 @@ class AuthController extends Controller
             if ($request->hasFile('image')) {
                 $userData['image'] = $imageService->saveImage('profile_images', $request->file('image'));
             }
+
+            // create user
             $user = User::create($userData);
+
+            // create hash and save pin for user
+            $user->pin()->create([
+                'pin_hash' => Hash::make($userData['pin_code']),
+            ]);
 
             // Step 2: Add the user to the members table
             $member = Member::create([

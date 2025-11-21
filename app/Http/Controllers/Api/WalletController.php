@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Contracts\PinCheckerInterface;
 use App\Models\User;
 use App\Models\Member;
 use App\Models\CreditCodes;
@@ -20,6 +21,13 @@ use function Symfony\Component\String\u;
 class WalletController extends Controller
 {
     use ApiResponseTrait;
+
+    protected $pins;
+
+    public function __construct(PinCheckerInterface $pins)
+    {
+        $this->pins = $pins;
+    }
 
 
     public function myCurrentBalance()
@@ -291,6 +299,11 @@ class WalletController extends Controller
 
         public function transferToTokenWallet(Request $request)
         {
+
+            $request->validate([
+                'amount' => ['required', 'numeric'],
+                'pin_code' => ['required', 'string'],
+            ]);
             $user = Auth::user();
             $member = $user->member;
             $wallet = $member->wallet;
@@ -312,6 +325,14 @@ class WalletController extends Controller
                 ], 400);
             }
 
+            // verify PIN code
+            $pinVerification = $this->pins->check($user, $request->input('pin_code'));
+            if(!$pinVerification['ok']){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid PIN code.'
+                ], 400);
+            }
             DB::beginTransaction();
             try {
                 // Deduct from commission wallet
@@ -366,6 +387,7 @@ class WalletController extends Controller
             $request->validate([
                 'recipient_member_code' => ['required', 'string', 'exists:users,id_code'],
                 'amount' => ['required', 'numeric', 'min:1'],
+                'pin_code'=> ['required', 'string'],
             ]);
             $user = Auth::user();
             $member = $user->member;
@@ -387,6 +409,14 @@ class WalletController extends Controller
                 ], 400);
             }
 
+            // verify PIN code
+            $pinVerification = $this->pins->check($user, $request->input('pin_code'));
+            if(!$pinVerification['ok']){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid PIN code.'
+                ], 400);
+            }
             DB::beginTransaction();
             try {
                 // Deduct from sender's wallet
