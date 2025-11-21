@@ -32,11 +32,11 @@ class SubscriptionController extends Controller
         $member = $user->member;
 
         // Safety Checks
-        if (!$member || !$member->wallet) {
+        if (!$member || !$member->tokenWallet) {
             return $this->failedResponse("Member or wallet not found.");
         }
 
-        $member_balance = $member->wallet->balance;
+        $member_balance = $member->tokenWallet->token_balance;
         $package = Package::find($request->package_id);
 
         if (!$package) {
@@ -161,9 +161,9 @@ class SubscriptionController extends Controller
 
     private function updateMemberWallatBallnce(Member $member, $value, $packageName)
     {
-        $wallet = $member->wallet;
+        $wallet = $member->tokenWallet;
         $wallet->update([
-            'balance' => $wallet->balance - $value
+            'token_balance' => $wallet->token_balance - $value
         ]);
 
         $wallet->transactions()->create([
@@ -172,7 +172,7 @@ class SubscriptionController extends Controller
             'status' => 'accepted',
             'package_name' => $packageName,
         ]);
-        return $wallet->balance;
+        return $wallet->token_balance;
     }
 
     private function getLegMembers($legId)
