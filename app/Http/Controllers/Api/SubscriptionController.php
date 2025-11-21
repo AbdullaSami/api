@@ -167,10 +167,11 @@ class SubscriptionController extends Controller
         ]);
 
         $wallet->transaction()->create([
-            'transaction_type' => 'buy_package',
+            'transaction_type' => 'receive',
+            'sender_member_id' => $member->id,
+            'receive_member_id' => $member->id,
             'amount' =>  $value,
-            'status' => 'accepted',
-            'package_name' => $packageName,
+            'status' => 'sent',
         ]);
         return $wallet->token_balance;
     }
