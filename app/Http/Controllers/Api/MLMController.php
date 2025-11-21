@@ -130,15 +130,6 @@ class MLMController extends Controller
                 $referral->is_first = 'no';
                 $referral->save();
                 $sponsor->save();
-
-                //create Token Wallets for both sponsor and referral
-                $walletController = new WalletController();
-                if ($sponsor->tokenWallet == null) {
-                $walletController->createTokenWallet($sponsor->id);
-                }
-                if ($referral->tokenWallet == null) {
-                $walletController->createTokenWallet($referral->id);
-                }
             }
 
             DB::commit();
