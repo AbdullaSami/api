@@ -152,7 +152,7 @@ class WalletController extends Controller
 
             return response()->json([
                 'data' => $data,
-                'token'=> $tokenData,
+                'token' => $tokenData,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -292,169 +292,193 @@ class WalletController extends Controller
     }
 
 
-        /**
+    /**
      * Create transfer to token wallet from commission wallet
      * abdulla sami 2024-18-NOV
      */
 
-        public function transferToTokenWallet(Request $request)
-        {
+    public function transferToTokenWallet(Request $request)
+    {
 
-            $request->validate([
-                'amount' => ['required', 'numeric'],
-                'pin_code' => ['required', 'string'],
-            ]);
-            $user = Auth::user();
-            $member = $user->member;
-            $wallet = $member->wallet;
-            $tokenWallet = $member->tokenWallet;
+        $request->validate([
+            'amount' => ['required', 'numeric'],
+            'pin_code' => ['required', 'string'],
+        ]);
+        $user = Auth::user();
+        $member = $user->member;
+        $wallet = $member->wallet;
+        $tokenWallet = $member->tokenWallet;
 
-            if($request->input('amount') <= 0){
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Transfer amount must be greater than zero.'
-                ], 400);
-            }
-
-            $amount = $request->input('amount');
-
-            if ($wallet->balance < $amount) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Insufficient balance in commission wallet.'
-                ], 400);
-            }
-
-            // verify PIN code
-            $pinVerification = $this->pins->check($user, $request->input('pin_code'));
-            if(!$pinVerification['ok']){
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Invalid PIN code.'
-                ], 400);
-            }
-            DB::beginTransaction();
-            try {
-                // Deduct from commission wallet
-                $wallet->decrement('balance', $amount);
-                $wallet->transactions()->create([
-                    'transaction_type' => 'send_internal_transfer',
-                    'amount' => $amount,
-                    'status' => 'accepted',
-                    'receive_member_id' => $member->id,
-                ]);
-
-                // Add to token wallet
-                $tokenWallet->increment('token_balance', $amount);
-                $tokenWallet->transaction()->create([
-                    'transaction_type' => 'receive',
-                    'status' => 'received',
-                    'amount' => $amount,
-                    'sender_member_id' => $member->id,
-                    'receive_member_id' => $member->id,
-                ]);
-
-                DB::commit();
-
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Transfer to token wallet successful.',
-                    'commission_wallet_balance' => $wallet->balance,
-                    'token_wallet_balance' => $tokenWallet->token_balance
-                ]);
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Transfer failed: ' . $e->getMessage()
-                ], 500);
-            }
+        if ($request->input('amount') <= 0) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Transfer amount must be greater than zero.'
+            ], 400);
         }
 
-        public function tokenWallet(Request $request)
-        {
-            $user = Auth::user();
-            $member = $user->member;
-            $tokenWallet = $member->tokenWallet;
+        $amount = $request->input('amount');
+
+        if ($wallet->balance < $amount) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Insufficient balance in commission wallet.'
+            ], 400);
+        }
+
+        // verify PIN code
+        $result = $this->pins->check($user, $request->input('pin_code'));
+
+        // Handle various error reasons
+        if ($result['status'] == 'invalid') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid PIN code.'
+            ], 400);
+        } elseif ($result['status'] == 'locked') {
+            return response()->json([
+                'status' => false,
+                'message' => 'PIN code is locked. Try again after ' . $result['locked_until']
+            ], 403);
+        } elseif ($result['status'] == 'no_pin_set') {
+            return response()->json([
+                'status' => false,
+                'message' => 'No PIN code set for this user.'
+            ], 400);
+        }
+        DB::beginTransaction();
+        try {
+            // Deduct from commission wallet
+            $wallet->decrement('balance', $amount);
+            $wallet->transactions()->create([
+                'transaction_type' => 'send_internal_transfer',
+                'amount' => $amount,
+                'status' => 'accepted',
+                'receive_member_id' => $member->id,
+            ]);
+
+            // Add to token wallet
+            $tokenWallet->increment('token_balance', $amount);
+            $tokenWallet->transaction()->create([
+                'transaction_type' => 'receive',
+                'status' => 'received',
+                'amount' => $amount,
+                'sender_member_id' => $member->id,
+                'receive_member_id' => $member->id,
+            ]);
+
+            DB::commit();
 
             return response()->json([
                 'status' => true,
+                'message' => 'Transfer to token wallet successful.',
+                'commission_wallet_balance' => $wallet->balance,
                 'token_wallet_balance' => $tokenWallet->token_balance
             ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Transfer failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function tokenWallet(Request $request)
+    {
+        $user = Auth::user();
+        $member = $user->member;
+        $tokenWallet = $member->tokenWallet;
+
+        return response()->json([
+            'status' => true,
+            'token_wallet_balance' => $tokenWallet->token_balance
+        ]);
+    }
+
+    public function internalTransfer(Request $request)
+    {
+        $request->validate([
+            'recipient_member_code' => ['required', 'string', 'exists:users,id_code'],
+            'amount' => ['required', 'numeric', 'min:1'],
+            'pin_code' => ['required', 'string'],
+        ]);
+        $user = Auth::user();
+        $member = $user->member;
+        $wallet = $member->tokenWallet;
+        $recipientMember = User::where('id_code', $request->input('recipient_member_code'))->first();
+        $recipientWallet = $recipientMember->member->tokenWallet;
+
+        if (!$recipientMember) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Recipient member not found.'
+            ], 404);
         }
 
-        public function internalTransfer(Request $request){
-            $request->validate([
-                'recipient_member_code' => ['required', 'string', 'exists:users,id_code'],
-                'amount' => ['required', 'numeric', 'min:1'],
-                'pin_code'=> ['required', 'string'],
+        if ($wallet->token_balance < $request->input('amount')) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Insufficient balance for transfer.'
+            ], 400);
+        }
+
+        // verify PIN code
+        $result = $this->pins->check($user, $request->input('pin_code'));
+        // Handle various error reasons
+        if ($result['status'] == 'invalid') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid PIN code.'
+            ], 400);
+        } elseif ($result['status'] == 'locked') {
+            return response()->json([
+                'status' => false,
+                'message' => 'PIN code is locked. Try again after ' . $result['locked_until']
+            ], 403);
+        } elseif ($result['status'] == 'no_pin_set') {
+            return response()->json([
+                'status' => false,
+                'message' => 'No PIN code set for this user.'
+            ], 400);
+        }
+        DB::beginTransaction();
+        try {
+            // Deduct from sender's wallet
+            $wallet->decrement('token_balance', $request->input('amount'));
+            $wallet->transaction()->create([
+                'transaction_type' => 'send',
+                'amount' => $request->input('amount'),
+                'status' => 'sent',
+                'receive_member_id' => $recipientMember->member->id,
+                'sender_member_id' => $member->id,
+
             ]);
-            $user = Auth::user();
-            $member = $user->member;
-            $wallet = $member->tokenWallet;
-            $recipientMember = User::where('id_code', $request->input('recipient_member_code'))->first();
-            $recipientWallet = $recipientMember->member->tokenWallet;
 
-            if (!$recipientMember) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Recipient member not found.'
-                ], 404);
-            }
+            // Add to recipient's wallet
+            $recipientWallet->increment('token_balance', $request->input('amount'));
+            $recipientWallet->transaction()->create([
+                'transaction_type' => 'receive',
+                'amount' => $request->input('amount'),
+                'status' => 'received',
+                'receive_member_id' => $recipientMember->member->id,
+                'sender_member_id' => $member->id,
+            ]);
 
-            if ($wallet->token_balance < $request->input('amount')) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Insufficient balance for transfer.'
-                ], 400);
-            }
+            DB::commit();
 
-            // verify PIN code
-            $pinVerification = $this->pins->check($user, $request->input('pin_code'));
-            if(!$pinVerification['ok']){
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Invalid PIN code.'
-                ], 400);
-            }
-            DB::beginTransaction();
-            try {
-                // Deduct from sender's wallet
-                $wallet->decrement('token_balance', $request->input('amount'));
-                $wallet->transaction()->create([
-                    'transaction_type' => 'send',
-                    'amount' => $request->input('amount'),
-                    'status' => 'sent',
-                    'receive_member_id' => $recipientMember->member->id,
-                    'sender_member_id' => $member->id,
-
-                ]);
-
-                // Add to recipient's wallet
-                $recipientWallet->increment('token_balance', $request->input('amount'));
-                $recipientWallet->transaction()->create([
-                    'transaction_type' => 'receive',
-                    'amount' => $request->input('amount'),
-                    'status' => 'received',
-                    'receive_member_id' => $recipientMember->member->id,
-                    'sender_member_id' => $member->id,
-                ]);
-
-                DB::commit();
-
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Internal transfer successful.',
-                    'sender_wallet_balance' => $wallet->token_balance
-                ]);
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Transfer failed: ' . $e->getMessage()
-                ], 500);
-            }
+            return response()->json([
+                'status' => true,
+                'message' => 'Internal transfer successful.',
+                'sender_wallet_balance' => $wallet->token_balance
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Transfer failed: ' . $e->getMessage()
+            ], 500);
         }
+    }
     /**
      * Create Token Wallet
      * abdulla sami 2024-18-NOV
