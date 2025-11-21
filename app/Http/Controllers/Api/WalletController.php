@@ -425,17 +425,17 @@ class WalletController extends Controller
         // verify PIN code
         $result = $this->pins->check($user, $request->input('pin_code'));
         // Handle various error reasons
-        if ($result['status'] == 'invalid') {
+        if ($result['reason'] == 'invalid') {
             return response()->json([
                 'status' => false,
                 'message' => 'Invalid PIN code.'
             ], 400);
-        } elseif ($result['status'] == 'locked') {
+        } elseif ($result['reason'] == 'locked') {
             return response()->json([
                 'status' => false,
                 'message' => 'PIN code is locked. Try again after ' . $result['locked_until']
             ], 403);
-        } elseif ($result['status'] == 'no_pin_set') {
+        } elseif ($result['reason'] == 'no_pin_set') {
             return response()->json([
                 'status' => false,
                 'message' => 'No PIN code set for this user.'
