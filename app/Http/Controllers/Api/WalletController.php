@@ -296,6 +296,13 @@ class WalletController extends Controller
             $wallet = $member->wallet;
             $tokenWallet = $member->tokenWallet;
 
+            if($request->input('amount') <= 0){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Transfer amount must be greater than zero.'
+                ], 400);
+            }
+
             $amount = $request->input('amount');
 
             if ($wallet->balance < $amount) {
