@@ -141,7 +141,7 @@ class WalletController extends Controller
             $data =  TransactionsResource::collection($transactions)->response()->getData(true);
             $tokenTransactions = $user->member->tokenWallet->transaction()->paginate(10);
             $tokenData = TransactionsResource::collection($tokenTransactions)->response()->getData(true);
-            
+
             return response()->json([
                 'data' => $data,
                 'token'=> $tokenData,
@@ -384,9 +384,24 @@ class WalletController extends Controller
             try {
                 // Deduct from sender's wallet
                 $wallet->decrement('token_balance', $request->input('amount'));
+                $wallet->transaction()->create([
+                    'transaction_type' => 'send',
+                    'amount' => $request->input('amount'),
+                    'status' => 'sent',
+                    'receive_member_id' => $recipientMember->member->id,
+                    'sender_member_id' => $member->id,
+
+                ]);
 
                 // Add to recipient's wallet
                 $recipientWallet->increment('token_balance', $request->input('amount'));
+                $recipientWallet->transaction()->create([
+                    'transaction_type' => 'receive',
+                    'amount' => $request->input('amount'),
+                    'status' => 'received',
+                    'receive_member_id' => $recipientMember->member->id,
+                    'sender_member_id' => $member->id,
+                ]);
 
                 DB::commit();
 
