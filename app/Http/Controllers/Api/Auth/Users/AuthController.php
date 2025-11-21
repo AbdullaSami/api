@@ -65,7 +65,7 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'confirmed'],
             'image' => ['nullable', 'image'],
             'sponsor_id' => ['required'],
-            'pin_code'=> ['required', 'confirmed', 'digits:4' ],
+            'pin_code'=> ['required', 'digits:4' ],
         ]);
 
         if ($validator->fails()) {
