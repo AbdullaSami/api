@@ -166,7 +166,7 @@ class SubscriptionController extends Controller
             'token_balance' => $wallet->token_balance - $value
         ]);
 
-        $wallet->transactions()->create([
+        $wallet->transaction()->create([
             'transaction_type' => 'buy_package',
             'amount' =>  $value,
             'status' => 'accepted',
