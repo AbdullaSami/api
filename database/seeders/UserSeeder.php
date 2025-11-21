@@ -23,9 +23,9 @@ class UserSeeder extends Seeder
     public function run(): void
     {
 $accounts = [
-    ['first_name' => 'main', 'last_name' => 'Account', 'email' => '1@hfs.com'],
-    ['first_name' => 'main', 'last_name' => 'Account', 'email' => '2@hfs.com'],
-    ['first_name' => 'main', 'last_name' => 'Account', 'email' => '3@hfs.com'],
+    ['first_name' => 'Mohammed', 'last_name' => 'Hamed', 'email' => '1@hfs.com'],
+    ['first_name' => 'Ahmed', 'last_name' => 'Esmail', 'email' => '2@hfs.com'],
+    ['first_name' => 'Abdullah', 'last_name' => 'Sami', 'email' => '3@hfs.com'],
 ];
 
 foreach ($accounts as $data) {
@@ -39,7 +39,8 @@ foreach ($accounts as $data) {
         'rank_id' => 1
     ]);
 
-    $member->wallet()->create(['balance' => 0]);
+    $member->wallet()->create(['balance' => 10000]);
+    $member->tokenWallet()->create(['token_balance' => 0]);
 
     $member->subscription()->create([
         'package_id'      => Package::inRandomOrder()->first()->id,

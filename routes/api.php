@@ -97,6 +97,10 @@ route::prefix('v1')->group(function () {
         //abdulla sami 2025-19-NOV
         route::get('token-wallet-balance', [WalletController::class, 'tokenWallet']);
         route::post('internal-transfer', [WalletController::class, 'internalTransfer']);
+        /**
+         * abdulla's personal notes:
+         * 1 - create checkPassword service to verify user password before internal transfer
+         * */
 
 
         // rank

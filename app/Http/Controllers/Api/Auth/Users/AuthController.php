@@ -11,6 +11,7 @@ use App\Services\ImageService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\TokenWallet;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -110,6 +111,10 @@ class AuthController extends Controller
             Wallet::create([
                 'member_id' => $member->id,
                 'balance' => 0.00, // Initial balance is zero
+            ]);
+            TokenWallet::create([
+                'member_id' => $member->id,
+                'token_balance' => 0.00, // Initial balance is zero
             ]);
 
             DB::commit();

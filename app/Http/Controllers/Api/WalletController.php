@@ -139,8 +139,12 @@ class WalletController extends Controller
             $user = Auth::user();
             $transactions = $user->member->wallet->transactions()->paginate(10);
             $data =  TransactionsResource::collection($transactions)->response()->getData(true);
+            $tokenTransactions = $user->member->tokenWallet->transaction()->paginate(10);
+            $tokenData = TransactionsResource::collection($tokenTransactions)->response()->getData(true);
+            
             return response()->json([
-                'data' => $data
+                'data' => $data,
+                'token'=> $tokenData,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -305,9 +309,22 @@ class WalletController extends Controller
             try {
                 // Deduct from commission wallet
                 $wallet->decrement('balance', $amount);
+                $wallet->transactions()->create([
+                    'transaction_type' => 'send_internal_transfer',
+                    'amount' => $amount,
+                    'status' => 'accepted',
+                    'receive_member_id' => $member->id,
+                ]);
 
                 // Add to token wallet
                 $tokenWallet->increment('token_balance', $amount);
+                $tokenWallet->transaction()->create([
+                    'transaction_type' => 'receive',
+                    'status' => 'received',
+                    'amount' => $amount,
+                    'sender_member_id' => $member->id,
+                    'receive_member_id' => $member->id,
+                ]);
 
                 DB::commit();
 

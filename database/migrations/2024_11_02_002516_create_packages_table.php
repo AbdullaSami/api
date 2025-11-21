@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('packages', function (Blueprint $table) {
             $table->id();
-            $table->enum('name', ['Basic-init', 'Basic-init-plus', 'Premium-init', 'Pro-init', 'Essential', 'Basic', 'Premium', 'Pro', 'Ultimate']);
+            $table->string('name');
             $table->decimal('price', 8, 2);
             $table->enum('billing_period', ['Monthly', 'Annual', 'Quarterly', 'Biannual', 'Lifelong']); // e.g., Monthly or Annual
             $table->integer('cv'); // Commission Value (CV) for the MLM system
