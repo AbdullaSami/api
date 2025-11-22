@@ -58,13 +58,13 @@ class WalletController extends Controller
         $totalReceive = $member->tokenWallet->transaction()
             ->where('transaction_type', 'receive')
             ->where('status', 'received')
+            ->where('sender_member_id', '!=',$member->id)
             ->sum('amount');
 
         // 3 - Sent transfer
         $totalTransfer = $member->wallet->transactions()
             ->where('transaction_type', 'send_internal_transfer')
             ->where('status', 'accepted')
-            ->where('sender_member_id', '!=',$member->id)
             ->sum('amount');
 
         // 4 - Deposit
