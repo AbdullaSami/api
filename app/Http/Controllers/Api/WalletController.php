@@ -55,9 +55,9 @@ class WalletController extends Controller
         $totalEarnings = $member->commission->sum('commission_value');
 
         // 2 - Received internal transfer
-        $totalReceive = $member->wallet->transactions()
-            ->where('transaction_type', 'receive_internal_transfer')
-            ->where('status', 'accepted')
+        $totalReceive = $member->tokenWallet->transaction()
+            ->where('transaction_type', 'receive')
+            ->where('status', 'received')
             ->sum('amount');
 
         // 3 - Sent transfer
