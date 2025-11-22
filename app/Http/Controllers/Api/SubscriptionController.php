@@ -94,8 +94,10 @@ class SubscriptionController extends Controller
             $newBalance = $this->updateMemberWallatBallnce($member, $package_price, $package->name);
 
             // Add Direct Commission to member
-            $member->total_commision += $directCommissionValue;
-            $member->save();
+
+            $sponsorWallet = $member->wallet;
+            $sponsorWallet->balance += $directCommissionValue;
+            $sponsorWallet->save();
 
             // Uplines
             $uplines = $member->getAllTreeUplines();
