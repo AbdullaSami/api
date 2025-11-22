@@ -52,9 +52,7 @@ class WalletController extends Controller
         $member = $user->member;
 
         // 1 - Earnings (You must decide the correct model/table)
-        $totalEarnings = $member->wallet
-            ->transactions()
-            ->sum('amount');
+        $totalEarnings = $member->commission->sum('commission_value');
 
         // 2 - Received internal transfer
         $totalReceive = $member->wallet->transactions()
