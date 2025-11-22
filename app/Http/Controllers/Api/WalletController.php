@@ -65,6 +65,7 @@ class WalletController extends Controller
         $totalTransfer = $member->wallet->transactions()
             ->where('transaction_type', 'send_internal_transfer')
             ->where('status', 'accepted')
+            ->where('receive_member_id', '!=',$member->id)
             ->sum('amount');
 
         // 4 - Deposit
