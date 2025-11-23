@@ -99,7 +99,7 @@ class SubscriptionController extends Controller
             $sponsorWallet->save();
 
             // Uplines
-            $uplines = $member->getAllTreeUplines();
+            $uplines = $member->getAllUplines();
 
             // Create direct commission
             if ($member->sponsor_id) {
