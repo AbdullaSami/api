@@ -123,18 +123,18 @@ class SubscriptionController extends Controller
                 }
 
                 // Downline Volume Logic (if not first)
-                if ($member->is_first === 'no') {
+                // if ($member->is_first === 'no') {
 
                     // Left side
-                    if ($upline->left_leg_id == $member->id || in_array($member->id, $this->getLegMembers($upline->left_leg_id))) {
+                    if ($upline->left_leg_id == $member->id) {
                         $upline->totla_left_volume += $packageCv;
                     }
 
                     // Right side
-                    if ($upline->right_leg_id == $member->id || in_array($member->id, $this->getLegMembers($upline->right_leg_id))) {
+                    if ($upline->right_leg_id == $member->id) {
                         $upline->totla_right_volume += $packageCv;
                     }
-                }
+                // }
 
                 // Current CV update
                 $upline->current_cv += $packageCv;
