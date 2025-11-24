@@ -99,8 +99,6 @@ class SubscriptionController extends Controller
             $sponsorWallet->save();
 
             // Uplines
-            $uplines = $member->getAllUplines();
-
             // Create direct commission
             if ($member->sponsor_id) {
                 Commission::create([
@@ -110,11 +108,25 @@ class SubscriptionController extends Controller
                 ]);
             }
 
-            // Handle Binary + CV Updates
-            foreach ($uplines as $upline) {
+            $currentMember = $member; // current member who purchased the package
+            $packageCv = $package->cv; // CV of the purchased package
 
-                // Binary Commission: Skip direct upline (already handled above)
-                if ($upline->id != $member->sponsor_id) {
+            while ($currentMember->sponsor_id) { // traverse up until the top
+                $upline = $currentMember->sponsor; // assume you have a 'sponsor' relation
+
+                // Determine which leg this member is on
+                if ($upline->left_leg_id == $currentMember->id) {
+                    $upline->totla_left_volume += $packageCv;
+                } elseif ($upline->right_leg_id == $currentMember->id) {
+                    $upline->totla_right_volume += $packageCv;
+                }
+
+                // Update current CV for upline
+                $upline->current_cv += $packageCv;
+                $upline->save();
+
+                // Create binary commission for this upline (if needed)
+                if ($upline->id != $member->sponsor_id) { // skip direct sponsor if already handled
                     Commission::create([
                         'sponsor_id'       => $upline->id,
                         'commission_value' => $binaryCommissionValue,
@@ -122,24 +134,10 @@ class SubscriptionController extends Controller
                     ]);
                 }
 
-                // Downline Volume Logic (if not first)
-                // if ($member->is_first === 'no') {
-
-                    // Left side
-                    if ($upline->left_leg_id == $member->id) {
-                        $upline->totla_left_volume += $packageCv;
-                    }
-
-                    // Right side
-                    if ($upline->right_leg_id == $member->id) {
-                        $upline->totla_right_volume += $packageCv;
-                    }
-                // }
-
-                // Current CV update
-                $upline->current_cv += $packageCv;
-                $upline->save();
+                // Move one level up
+                $currentMember = $upline;
             }
+
 
             DB::commit();
 
