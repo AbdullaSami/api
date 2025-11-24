@@ -12,8 +12,8 @@ class CommissionController extends Controller
     public function index()
     {
         try{
-            $user = auth()->user();
-            $commissions = $user->member->commission;
+            $user = auth()->user()->member;
+            $commissions = $user->commission;
             return response()->json(['commissions' => $commissions], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to retrieve commissions', 'message' => $e->getMessage()],500);
