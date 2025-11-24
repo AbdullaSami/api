@@ -15,7 +15,7 @@ class CommissionController extends Controller
         try {
             $user = auth()->user();
             $commissions = Commission::query()
-                ->where('sponsor_id', $user->id)
+                ->where('commissions.sponsor_id', $user->id)
 
                 ->leftJoin('members as r', 'commissions.referral_id', '=', 'r.id')
                 ->leftJoin('users as ru', 'r.user_id', '=', 'ru.id') // referral user
