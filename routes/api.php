@@ -99,7 +99,7 @@ route::prefix('v1')->group(function () {
         route::get('token-wallet-balance', [WalletController::class, 'tokenWallet']);
         route::post('internal-transfer', [WalletController::class, 'internalTransfer']);
         //abdulla sami 2025-24-NOV
-        route::get('commission-summary', [CommissionController::class, 'commissionSummary']);
+        route::get('commission-summary', [CommissionController::class, 'index']);
         /**
          * abdulla's personal notes:
          * 1 - create checkPassword service to verify user password before internal transfer
