@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Admin\Users\AdminUserController;
 use App\Http\Controllers\Api\Auth\Users\ResetPasswordController;
 use App\Http\Controllers\Api\Admin\Credits\AdminCreditController;
 use App\Http\Controllers\Api\WalletController;
+use App\Http\Controllers\CommissionController;
 
 route::any('login', function () {
     return response()->json('you are unauthorized', 400);
@@ -97,6 +98,8 @@ route::prefix('v1')->group(function () {
         //abdulla sami 2025-19-NOV
         route::get('token-wallet-balance', [WalletController::class, 'tokenWallet']);
         route::post('internal-transfer', [WalletController::class, 'internalTransfer']);
+        //abdulla sami 2025-24-NOV
+        route::get('commission-summary', [CommissionController::class, 'commissionSummary']);
         /**
          * abdulla's personal notes:
          * 1 - create checkPassword service to verify user password before internal transfer

@@ -50,6 +50,11 @@ class Member extends Model
         );
     }
 
+    public function commission(): HasMany
+    {
+        return $this->hasMany(Commission::class, 'sponsor_id', 'id');
+    }
+
     /**
      * End of Abdulla updates
      */
@@ -64,13 +69,6 @@ class Member extends Model
     {
         return $this->belongsTo(Rank::class);
     }
-
-
-    public function commission(): HasMany
-    {
-        return $this->hasMany(Commission::class, 'sponsor_id', 'id');
-    }
-
 
     public function commissionReferral(): HasMany
     {
