@@ -14,8 +14,8 @@ class CommissionController extends Controller
         try{
             $user = auth()->user()->member;
             $commissions = $user->commission()->with([
-                'sponsor.user:username, id_code',
-                'referral.user:username, id_code'])->get();
+                'sponsor.user:id,username,id_code',
+                'referral.user:id,username,id_code'])->get();
             return response()->json(['commissions' => $commissions], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to retrieve commissions', 'message' => $e->getMessage()],500);
