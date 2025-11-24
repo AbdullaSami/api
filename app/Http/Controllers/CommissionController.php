@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Commission;
 
 class CommissionController extends Controller
 {
@@ -11,14 +12,26 @@ class CommissionController extends Controller
      */
     public function index()
     {
-        try{
-            $user = auth()->user()->member;
-            $commissions = $user->commission()->with([
-                'sponsor.user:id,username,id_code',
-                'referral.user:id,username,id_code'])->get();
+        try {
+            $user = auth()->user();
+            $commissions = Commission::query()
+                ->where('sponsor_id', $user->id)
+
+                ->leftJoin('members as r', 'commissions.referral_id', '=', 'r.id')
+                ->leftJoin('users as ru', 'r.user_id', '=', 'ru.id') // referral user
+                ->select([
+                    'commissions.*',
+                    'commissions.commission_type',
+                    'commissions.created_at',
+
+                    // referral fields
+                    'ru.username as referral_username',
+                    'ru.id_code as referral_id_code',
+                ])
+                ->get();
             return response()->json(['commissions' => $commissions], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to retrieve commissions', 'message' => $e->getMessage()],500);
+            return response()->json(['error' => 'Failed to retrieve commissions', 'message' => $e->getMessage()], 500);
         }
     }
 
