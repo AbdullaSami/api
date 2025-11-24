@@ -13,7 +13,7 @@ class CommissionController extends Controller
     {
         try{
             $user = auth()->user()->member;
-            $commissions = $user->commission;
+            $commissions = $user->commission()->with(['sponsor', 'referral'])->get();
             return response()->json(['commissions' => $commissions], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to retrieve commissions', 'message' => $e->getMessage()],500);
