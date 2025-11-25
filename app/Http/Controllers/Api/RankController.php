@@ -134,6 +134,7 @@ class RankController extends Controller
         $user = auth()->user();
         $member = $user->member;
         $rank = $member->rank;
+        $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
         if (!$rank)
             return  response()->json([
                 'status' => false,
@@ -144,10 +145,12 @@ class RankController extends Controller
             'status' => true,
             'message' => 'rank get successfully',
             'rank' => [
-                'id'    => $rank->id,
-                'name'  => $rank->name,
-                'image' => $rank->image
-            ]
+                'name'=> $rank->name,
+                'image'=> $rank->image,
+                'package'=> $rank->package
+            ],
+            'next_rank'=> $nextRank
+
         ], 200);
     }
 
