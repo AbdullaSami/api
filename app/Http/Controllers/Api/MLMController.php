@@ -515,6 +515,7 @@ class MLMController extends Controller
      */
     public function getDownlineDetails()
     {
+        try {
         $user = auth()->user();
         $member = $user->member->load('rank');
 
@@ -528,6 +529,13 @@ class MLMController extends Controller
             'member_id' => $member->id,
             'downline_details' => $downlineDetails,
         ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'An error occurred while retrieving downline details.',
+            'error' => $e->getMessage(),
+        ]);
+    }
     }
 
     public function getYearlySales()

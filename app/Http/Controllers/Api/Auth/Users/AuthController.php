@@ -7,7 +7,6 @@ use App\Models\Member;
 use App\Models\Wallet;
 use App\Models\UserTank;
 use Illuminate\Http\Request;
-use App\Services\ImageService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -16,6 +15,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\URL;
 
 class AuthController extends Controller
 {
@@ -55,7 +57,7 @@ class AuthController extends Controller
     }
 
 
-    public function register(Request $request, ImageService $imageService)
+    public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'username' => ['required', 'string', 'unique:users,username', 'max:255'],
@@ -90,8 +92,10 @@ class AuthController extends Controller
             }
             $userData;
             $userData['password'] = bcrypt($userData['password']); // Hash password
+
             if ($request->hasFile('image')) {
-                $userData['image'] = $imageService->saveImage('profile_images', $request->file('image'));
+                $imagePath = $request->file('image')->store('image', 'public');
+                $userData['image']= URL::to(Storage::url($imagePath));
             }
 
             // create user
@@ -187,24 +191,13 @@ class AuthController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'user data get successfully',
-            'user data' => [
-                'id'                => $user->id,
-                'id_code'           => $user->id_code,
-                'username'          => $user->username,
-                'first_name'        => $user->first_name,
-                'last_name'         => $user->last_name,
-                'image'             => $user->image,
-                'sponsor_name'      => $user->member->sponsor->user->username ?? "this is main acount",
-                'sponsor_id_code'   => $user->member->sponsor->user->id_code ?? "this is main acount",
-                'rank_name'         => $user->member ? $user->member->rank->name : 'no rank',
-                'subscription'      => $user->member ? $user->member->subscription->package->name : 'no subscription',
-            ]
+            'user data' => $user
         ]);
     }
 
-    public function ProfilebyId($id)
+    public function profileById($id_code)
     {
-        $user = User::findOrFail($id);
+        $user = User::where('id_code', $id_code);
         $user->load('member', 'member.rank:id,name');
         return response()->json([
             'status' => true,

@@ -40,7 +40,7 @@ route::prefix('v1')->group(function () {
 
         // user profile data
         route::get('user/data', [AuthController::class, 'userProfile']);
-        route::get('user/data/{id}', [AuthController::class, 'ProfilebyId']);
+        route::get('user/data/{id_code}', [AuthController::class, 'profileById']); // Abdulla Sami 2025-25-NOV
         route::post('user/edit', [AuthController::class, 'editUserProfile']);
         route::post('user/delete', [AuthController::class, 'deleteMyUser']);
         route::post('user/active', [AuthController::class, 'activeUser']);
