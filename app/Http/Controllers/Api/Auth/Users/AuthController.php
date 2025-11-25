@@ -191,7 +191,8 @@ class AuthController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'user data get successfully',
-            'user data' => $user
+            'user data' => $user,
+            'subscription'=> $user->member ? $user->member->subscription->package->name : 'no subscription',
         ]);
     }
 
