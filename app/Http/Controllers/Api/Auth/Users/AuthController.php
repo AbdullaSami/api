@@ -193,6 +193,7 @@ class AuthController extends Controller
             'message' => 'user data get successfully',
             'user data' => $user,
             'subscription'=> $user->member ? $user->member->subscription->package->name : 'no subscription',
+            'sponsor'=> $user->member->sponsor
         ]);
     }
 
