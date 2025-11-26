@@ -184,18 +184,37 @@ class AuthController extends Controller
     }
 
 
-    public function userProfile()
-    {
-        $user = (auth()->user());
-        $user->load('member');
-        return response()->json([
-            'status' => true,
-            'message' => 'user data get successfully',
-            'user data' => $user,
-            'subscription'=> $user->member ? $user->member->subscription->package->name : 'no subscription',
-            'sponsor'=> $user->member->sponsor
-        ]);
-    }
+public function userProfile()
+{
+    $user = auth()->user();
+
+    // Eager load relationships
+    $user->load([
+        'member.sponsor.user', // To get sponsor's user info
+        'member.subscription.package'
+    ]);
+
+    $member = $user->member;
+    $sponsor = $member ? $member->sponsor : null;
+    $sponsorUser = $sponsor ? $sponsor->user : null;
+
+    return response()->json([
+        'status' => true,
+        'message' => 'user data get successfully',
+        'data' => [
+            'user_first_name'     => $user->first_name,
+            'user_last_name'      => $user->last_name,
+            'sponsor_name'        => $sponsorUser ? $sponsorUser->username : null,
+            'sponsor_id_code'     => $sponsorUser ? $sponsorUser->id_code : null,
+            'subscription'        => $member && $member->subscription ? $member->subscription->package->name : 'no subscription',
+            'id_code'             => $user->id_code,
+            'current_cv'          => $member ? $member->current_cv : 0,
+            'total_left_leg_cv'   => $member ? $member->total_left_leg_cv : 0,
+            'total_right_leg_cv'  => $member ? $member->total_right_leg_cv : 0,
+            'status'              => $user->status,
+        ]
+    ]);
+}
 
     public function profileById($id_code)
     {
