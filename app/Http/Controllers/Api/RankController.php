@@ -134,6 +134,7 @@ class RankController extends Controller
         $user = auth()->user();
         $member = $user->member;
         $rank = $member->rank;
+        $subscription = $member->subscription;
         $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
         if (!$rank)
             return  response()->json([
@@ -149,7 +150,8 @@ class RankController extends Controller
                 'image'=> $rank->image,
                 'package'=> $rank->package
             ],
-            'next_rank'=> $nextRank
+            'next_rank'=> $nextRank,
+            'remaining_days' => $subscription ? $subscription->expiration_date->diffInDays(now()) : null
 
         ], 200);
     }

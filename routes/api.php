@@ -31,12 +31,9 @@ route::prefix('v1')->group(function () {
     //ranks
     route::get('ranks', [RankController::class, 'ranks']);
 
-
-
     route::middleware('auth:sanctum')->group(function () {
         // logout
         route::post('logout', [AuthController::class, 'logout']);
-
 
         // user profile data
         route::get('user/data', [AuthController::class, 'userProfile']);
@@ -49,11 +46,9 @@ route::prefix('v1')->group(function () {
         // single sign-On
         Route::get('get-login-user', [AuthController::class, 'getUser']);
 
-
         // user reset password
         Route::post('user/password/email', [ResetPasswordController::class, 'sendResetLinkEmail']);
         Route::post('user/password/reset', [ResetPasswordController::class, 'reset'])->name('password.reset');
-
 
         //tank
         route::get('user-tank', [MLMController::class, 'mtTank']);
@@ -70,7 +65,6 @@ route::prefix('v1')->group(function () {
         Route::get('/members/downlines', [MLMController::class, 'getDownlineDetails']);
 
         Route::get('/members/yearly-sales', [MLMController::class, 'getYearlySales']);
-
 
         //packeage
         Route::get('packages', [PackageController::class, 'index']);
@@ -104,7 +98,6 @@ route::prefix('v1')->group(function () {
          * abdulla's personal notes:
          * 1 - create checkPassword service to verify user password before internal transfer
          * */
-
 
         // rank
         Route::get('rank', [RankController::class, 'myRank']);
