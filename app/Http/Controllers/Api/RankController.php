@@ -147,7 +147,7 @@ class RankController extends Controller
         $remainingDays = null;
         if ($subscription && $subscription->expiration_date) {
             // Use Carbon::parse to ensure we have a Carbon instance and avoid magic property type issues
-            $remainingDays = \Illuminate\Support\Carbon::parse($subscription->expiration_date)->diffInDays(now());
+            $remainingDays = \Illuminate\Support\Carbon::parse(now())->diffInDays($subscription->expiration_date);
         }
 
         return  response()->json([
@@ -159,7 +159,7 @@ class RankController extends Controller
                 'package'=> $rank->package
             ],
             'next_rank'=> $nextRank,
-            'remaining_days' => $remainingDays
+            'remaining_days' =>  round($remainingDays)
 
         ], 200);
     }
