@@ -231,7 +231,9 @@ class AuthController extends Controller
     {
         $user = auth()->user();
         $validator = Validator::make($request->all(), [
-            'name' => ['nullable', 'string', 'max:100'],
+            'username' => ['nullable', 'string', 'max:100'],
+            'first_name' => ['nullable', 'string', 'max:100'],
+            'last_name' => ['nullable', 'string', 'max:100'],
             'email' => [
                 'nullable',
                 'string',
@@ -248,7 +250,10 @@ class AuthController extends Controller
             return $this->failedResponse($validator->errors(), 422);
         }
         try {
-            $request->name ? $user->name = $request->name : $user->name;
+            $request->username ? $user->username = $request->username : $user->username;
+            $request->first_name ? $user->first_name = $request->first_name : $user->first_name;
+            $request->last_name ? $user->last_name = $request->last_name : $user->last_name;
+            $request->email ? $user->email = $request->email : $user->email;
             $request->phone ? $user->phone = $request->phone : $user->phone;
             $user->save();
             return $this->successResponse('user data updated successfully ', 'user', $user);
