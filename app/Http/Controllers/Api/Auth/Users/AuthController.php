@@ -68,6 +68,7 @@ class AuthController extends Controller
             'image' => ['nullable', 'image'],
             'sponsor_id' => ['required'],
             'pin_code'=> ['required', 'digits:4' ],
+            'phone'=> ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -208,6 +209,7 @@ class AuthController extends Controller
                 'total_left_leg_cv'   => $member ? $member->totla_left_volume : 0,
                 'total_right_leg_cv'  => $member ? $member->totla_right_volume : 0,
                 'status'              => $user->status,
+                'phone'               => $user->phone
             ]
         ]);
     }
