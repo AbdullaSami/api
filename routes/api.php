@@ -48,7 +48,7 @@ route::prefix('v1')->group(function () {
 
         // user reset password
         Route::post('user/password/email', [ResetPasswordController::class, 'sendResetLinkEmail']);
-        Route::post('user/password/reset', [ResetPasswordController::class, 'reset']);
+        Route::patch('user/password/reset', [ResetPasswordController::class, 'reset']);
 
         //tank
         route::get('user-tank', [MLMController::class, 'mtTank']);
