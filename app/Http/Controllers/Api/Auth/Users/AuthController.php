@@ -67,7 +67,7 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'confirmed'],
             'image' => ['nullable', 'image'],
             'sponsor_id' => ['required'],
-            'pin_code'=> ['required', 'digits:4' ],
+            'pin_code' => ['required', 'digits:4'],
         ]);
 
         if ($validator->fails()) {
@@ -95,7 +95,7 @@ class AuthController extends Controller
 
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('image', 'public');
-                $userData['image']= URL::to(Storage::url($imagePath));
+                $userData['image'] = URL::to(Storage::url($imagePath));
             }
 
             // create user
@@ -184,37 +184,37 @@ class AuthController extends Controller
     }
 
 
-public function userProfile()
-{
-    $user = auth()->user();
+    public function userProfile()
+    {
+        $user = auth()->user();
 
-    // Eager load relationships
-    $user->load([
-        'member.sponsor.user', // To get sponsor's user info
-        'member.subscription.package'
-    ]);
+        // Eager load relationships
+        $user->load([
+            'member.sponsor.user', // To get sponsor's user info
+            'member.subscription.package'
+        ]);
 
-    $member = $user->member;
-    $sponsor = $member ? $member->sponsor : null;
-    $sponsorUser = $sponsor ? $sponsor->user : null;
+        $member = $user->member;
+        $sponsor = $member ? $member->sponsor : null;
+        $sponsorUser = $sponsor ? $sponsor->user : null;
 
-    return response()->json([
-        'status' => true,
-        'message' => 'user data get successfully',
-        'data' => [
-            'user_first_name'     => $user->first_name,
-            'user_last_name'      => $user->last_name,
-            'sponsor_name'        => $sponsorUser ? $sponsorUser->username : null,
-            'sponsor_id_code'     => $sponsorUser ? $sponsorUser->id_code : null,
-            'subscription'        => $member && $member->subscription ? $member->subscription->package->name : 'no subscription',
-            'id_code'             => $user->id_code,
-            'current_cv'          => $member ? $member->current_cv : 0,
-            'total_left_leg_cv'   => $member ? $member->total_left_leg_cv : 0,
-            'total_right_leg_cv'  => $member ? $member->total_right_leg_cv : 0,
-            'status'              => $user->status,
-        ]
-    ]);
-}
+        return response()->json([
+            'status' => true,
+            'message' => 'user data get successfully',
+            'data' => [
+                'user_first_name'     => $user->first_name,
+                'user_last_name'      => $user->last_name,
+                'sponsor_name'        => $sponsorUser ? $sponsorUser->username : null,
+                'sponsor_id_code'     => $sponsorUser ? $sponsorUser->id_code : null,
+                'subscription'        => $member && $member->subscription ? $member->subscription->package->name : 'no subscription',
+                'id_code'             => $user->id_code,
+                'current_cv'          => $member ? $member->current_cv : 0,
+                'total_left_leg_cv'   => $member ? $member->totla_left_volume : 0,
+                'total_right_leg_cv'  => $member ? $member->totla_right_volume : 0,
+                'status'              => $user->status,
+            ]
+        ]);
+    }
 
     public function profileById($id_code)
     {
