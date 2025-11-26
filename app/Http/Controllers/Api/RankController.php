@@ -135,12 +135,20 @@ class RankController extends Controller
         $member = $user->member;
         $rank = $member->rank;
         $subscription = $member->subscription;
-        $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
+
         if (!$rank)
             return  response()->json([
                 'status' => false,
                 'message' => 'no rank asigned'
             ], 400);
+
+        $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
+
+        $remainingDays = null;
+        if ($subscription && $subscription->expiration_date) {
+            // Use Carbon::parse to ensure we have a Carbon instance and avoid magic property type issues
+            $remainingDays = \Illuminate\Support\Carbon::parse($subscription->expiration_date)->diffInDays(now());
+        }
 
         return  response()->json([
             'status' => true,
@@ -151,7 +159,7 @@ class RankController extends Controller
                 'package'=> $rank->package
             ],
             'next_rank'=> $nextRank,
-            'remaining_days' => $subscription ? $subscription->expiration_date->diffInDays(now()) : null
+            'remaining_days' => $remainingDays
 
         ], 200);
     }
