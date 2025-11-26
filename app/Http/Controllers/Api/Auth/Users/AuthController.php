@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\Rule;
+
 
 class AuthController extends Controller
 {
@@ -67,8 +69,8 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'confirmed'],
             'image' => ['nullable', 'image'],
             'sponsor_id' => ['required'],
-            'pin_code'=> ['required', 'digits:4' ],
-            'phone'=> ['required'],
+            'pin_code' => ['required', 'digits:4'],
+            'phone' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -96,7 +98,7 @@ class AuthController extends Controller
 
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('image', 'public');
-                $userData['image']= URL::to(Storage::url($imagePath));
+                $userData['image'] = URL::to(Storage::url($imagePath));
             }
 
             // create user
@@ -196,8 +198,8 @@ class AuthController extends Controller
             'status' => true,
             'message' => 'user data get successfully',
             'user data' => $user,
-            'subscription'=> $user->member?->subscription?->package?->name ?? 'no subscription',
-            'sponsor'=> $user->member->sponsor,
+            'subscription' => $user->member?->subscription?->package?->name ?? 'no subscription',
+            'sponsor' => $user->member->sponsor,
             'profile' => [
                 'user_first_name'     => $user->first_name,
                 'user_last_name'      => $user->last_name,
@@ -229,8 +231,18 @@ class AuthController extends Controller
     {
         $user = auth()->user();
         $validator = Validator::make($request->all(), [
-            'name' =>  ['nullable', 'string', 'max:100'],
-            'phone' => ['nullable', 'string', 'unique:users,phone,' . $user->id]
+            'name' => ['nullable', 'string', 'max:100'],
+            'email' => [
+                'nullable',
+                'string',
+                'email',
+                Rule::unique('users', 'email')->ignore($user->id)
+            ],
+            'phone' => [
+                'nullable',
+                'string',
+                Rule::unique('users', 'phone')->ignore($user->id)
+            ],
         ]);
         if ($validator->fails()) {
             return $this->failedResponse($validator->errors(), 422);
