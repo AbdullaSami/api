@@ -7,6 +7,7 @@ use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -41,33 +42,34 @@ class ResetPasswordController extends Controller
 
 
     // Handle password reset
-    public function reset(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+public function reset(Request $request)
+{
+    $user = Auth::user();
 
-        if ($validator->fails())
-            return $this->failedResponse($validator->errors());
+    // Validate fields
+    $validator = Validator::make($request->all(), [
+        'old_password' => ['required', 'string'],
+        'password'      => ['required', 'string', 'min:8', 'confirmed'],
+    ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                    'remember_token' => Str::random(60),
-                ])->save();
-            }
-        );
-
-        if ($status === Password::PASSWORD_RESET) {
-            return response()->json(['status' => __($status)]);
-        }
-
-        throw ValidationException::withMessages([
-            'email' => [trans($status)],
-        ]);
+    if ($validator->fails()) {
+        return $this->failedResponse($validator->errors());
     }
+
+    // Check if old password is correct
+    if (!Hash::check($request->old_password, $user->password)) {
+        return $this->failedResponse(['old_password' => ['Old password is incorrect']]);
+    }
+
+    // Update user password
+    $user->update([
+        'password' => Hash::make($request->password),
+    ]);
+
+    return response()->json([
+        'status'  => true,
+        'message' => 'Password updated successfully.',
+    ]);
+}
+
 }
