@@ -102,7 +102,8 @@ class SubscriptionController extends Controller
             // Create direct commission
             if ($member->sponsor_id) {
                 Commission::create([
-                    'sponsor_id'       => $member->sponsor->id,
+                    'sponsor_id' => $member->sponsor->id,
+                    'referral_id' => $member->id,
                     'commission_value' => $directCommissionValue,
                     'commission_type'  => 'direct',
                 ]);
