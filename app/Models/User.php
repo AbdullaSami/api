@@ -68,6 +68,10 @@ class User extends Authenticatable
         });
     }
 
+    public function tickets()
+    {
+        return $this->hasMany(Tickets::class);
+    }
     public function image(): Attribute
     {
         return new Attribute(

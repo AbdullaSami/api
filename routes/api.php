@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Auth\Users\ResetPasswordController;
 use App\Http\Controllers\Api\Admin\Credits\AdminCreditController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\CommissionController;
+use App\Http\Controllers\TicketsController;
 
 route::any('login', function () {
     return response()->json('you are unauthorized', 400);
@@ -94,6 +95,10 @@ route::prefix('v1')->group(function () {
         route::post('internal-transfer', [WalletController::class, 'internalTransfer']);
         //abdulla sami 2025-24-NOV
         route::get('commission-summary', [CommissionController::class, 'index']);
+        //abdulla sami 2025-1-DEC
+        route::get('yearly-sales-in-Weeks', [WalletController::class,'dashboardReports']);
+        route::get('user-tickets', [TicketsController::class,'showUserTickets']);
+        route::post('create-ticket', [TicketsController::class,'store']);
         /**
          * abdulla's personal notes:
          * 1 - create checkPassword service to verify user password before internal transfer
@@ -108,8 +113,9 @@ route::prefix('v1')->group(function () {
         //validation node => for developer only
         Route::get('/members/validate', [NodeValidationController::class, 'validateNode']);
     });
-    // admin routes
 
+
+    // admin routes
     route::prefix('admin')->group(function () {
         route::post('login', [AdminAuthController::class, 'login']);
         route::middleware('auth:admin')->group(function () {

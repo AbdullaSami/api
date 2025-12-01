@@ -139,6 +139,39 @@ class WalletController extends Controller
         ]);
     }
 
+    public function dashboardReports(){
+        $user = Auth::user();
+        $member = $user->member;
+        $wallet = $member->wallet;
+
+        $currentYear = now()->year;
+
+        // Weekly Earnings
+        $weeklyEarnings = $wallet->transactions()
+            ->whereYear('created_at', $currentYear)
+            ->where('transaction_type', 'earning') // change if needed
+            ->where('status', 'accepted')
+            ->selectRaw('WEEK(created_at) as week, SUM(amount) as total')
+            ->groupBy('week')
+            ->orderBy('week')
+            ->get();
+
+        // Generate full 52-week report
+        $fullWeeklyEarnings = collect(range(1, 52))->map(function ($week) use ($currentYear, $weeklyEarnings) {
+            $weekData = $weeklyEarnings->firstWhere('week', $week);
+            return [
+                'week' => $week,
+                'total' => $weekData ? $weekData->total : 0,
+            ];
+        });
+
+        return response()->json([
+            'status'          => true,
+            'weekly_earnings' => $fullWeeklyEarnings,
+            'targets' => 45,
+        ]);
+    }
+
 
 
     public function myAllTransactions()
