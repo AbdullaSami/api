@@ -61,8 +61,6 @@ route::prefix('v1')->group(function () {
         route::get('get-direct-downline-members/{id}', [MLMController::class, 'getDirectDownlineMembersById']);
         route::get('left-downline-members', [MLMController::class, 'getLeftDownlineMembers']);
         route::get('right-downline-members', [MLMController::class, 'getRightDownlineMembers']);
-        route::get('downline-counts', [MLMController::class, 'getDownlineCounts']);
-        route::get('downlines-volume', [MLMController::class, 'getNetworkVolume']);
         Route::get('/members/downlines', [MLMController::class, 'getDownlineDetails']);
 
         Route::get('/members/yearly-sales', [MLMController::class, 'getYearlySales']);
@@ -99,6 +97,9 @@ route::prefix('v1')->group(function () {
         route::get('yearly-sales-in-Weeks', [WalletController::class,'dashboardReports']);
         route::get('user-tickets', [TicketsController::class,'showUserTickets']);
         route::post('create-ticket', [TicketsController::class,'store']);
+        //abdulla sami 2025-2-DEC
+        route::get('total-down-line', [MLMController::class, 'getDownlineCounts']);
+        route::get('network-volume', [MLMController::class, 'getNetworkVolume']);
         /**
          * abdulla's personal notes:
          * 1 - create checkPassword service to verify user password before internal transfer
