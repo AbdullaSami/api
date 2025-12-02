@@ -34,7 +34,7 @@ class Member extends Model
      * Abdulla updates
      */
 
-        public function tokenWallet()
+    public function tokenWallet()
     {
         return $this->hasOne(TokenWallet::class);
     }
@@ -301,16 +301,34 @@ class Member extends Model
         $ranks = Rank::all();
 
         $data = [];
+        $totalLeft = 0;
+        $totalRight = 0;
+
         foreach ($ranks as $rank) {
+            $leftCount = $leftRanks[$rank->id] ?? 0;
+            $rightCount = $rightRanks[$rank->id] ?? 0;
+
             $data[] = [
                 'rank' => $rank->name,
-                'left' => $leftRanks[$rank->id] ?? 0,
-                'right' => $rightRanks[$rank->id] ?? 0,
+                'left' => $leftCount,
+                'right' => $rightCount,
             ];
+
+            // Add to totals
+            $totalLeft += $leftCount;
+            $totalRight += $rightCount;
         }
+
+        // Add totals row if needed
+        $data[] = [
+            'rank' => 'Total',
+            'left' => $totalLeft,
+            'right' => $totalRight,
+        ];
 
         return $data;
     }
+
 
 
     /**
