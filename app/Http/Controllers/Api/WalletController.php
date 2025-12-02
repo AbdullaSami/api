@@ -149,7 +149,7 @@ class WalletController extends Controller
         // Weekly Earnings
         $weeklyEarnings = $wallet->transactions()
             ->whereYear('created_at', $currentYear)
-            ->where('transaction_type', 'earning') // change if needed
+            ->where('transaction_type', 'earning')
             ->where('status', 'accepted')
             ->selectRaw('WEEK(created_at) as week, SUM(amount) as total')
             ->groupBy('week')
@@ -157,7 +157,7 @@ class WalletController extends Controller
             ->get();
 
         // Generate full 52-week report
-        $fullWeeklyEarnings = collect(range(1, 52))->map(function ($week) use ($currentYear, $weeklyEarnings) {
+        $fullWeeklyEarnings = collect(range(1, 52))->map(function ($week) use ($weeklyEarnings) {
             $weekData = $weeklyEarnings->firstWhere('week', $week);
             return [
                 'week' => $week,
@@ -165,10 +165,28 @@ class WalletController extends Controller
             ];
         });
 
+        // Monthly Earnings (by month number -> total)
+        $rawMonthly = $wallet->transactions()
+            ->whereYear('created_at', $currentYear)
+            ->where('transaction_type', 'earning')
+            ->where('status', 'accepted')
+            ->selectRaw('MONTH(created_at) as month, SUM(amount) as total')
+            ->groupBy('month')
+            ->pluck('total', 'month'); // [1 => 100, 3 => 250, ...]
+
+        // Generate full 12-month report with names
+        $monthlyEarnings = collect(range(1, 12))->map(function ($monthNumber) use ($rawMonthly) {
+            return [
+                'month' => \Carbon\Carbon::create()->month($monthNumber)->format('F'),
+                'total' => $rawMonthly[$monthNumber] ?? 0,
+            ];
+        });
+
         return response()->json([
-            'status'          => true,
-            'weekly_earnings' => $fullWeeklyEarnings,
-            'targets' => 45,
+            'status'           => true,
+            'weekly_earnings'  => $fullWeeklyEarnings,
+            'monthly_earnings' => $monthlyEarnings,
+            'targets'          => 45,
         ]);
     }
 
