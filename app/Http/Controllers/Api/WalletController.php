@@ -92,16 +92,14 @@ class WalletController extends Controller
     {
         $user = Auth::user();
         $member = $user->member;
-        $wallet = $member->wallet;
+        // $wallet = $member->wallet;
 
         $currentYear = now()->year;
 
         // Weekly Earnings
-        $weeklyEarnings = $wallet->transactions()
+        $weeklyEarnings = $member->commission()
             ->whereYear('created_at', $currentYear)
-            ->where('transaction_type', 'earning') // change if needed
-            ->where('status', 'accepted')
-            ->selectRaw('WEEK(created_at) as week, SUM(amount) as total')
+            ->selectRaw('WEEK(created_at) as week, SUM(commission_value) as total')
             ->groupBy('week')
             ->orderBy('week')
             ->get();
@@ -116,11 +114,9 @@ class WalletController extends Controller
         });
 
         // Raw Monthly bounce from DB
-        $rawBounce = $wallet->transactions()
+        $rawBounce = $member->commission()
             ->whereYear('created_at', $currentYear)
-            ->where('transaction_type', 'deposit')
-            ->where('status', 'accepted')
-            ->selectRaw('MONTH(created_at) as month, SUM(amount) as total')
+            ->selectRaw('MONTH(created_at) as month, SUM(commission_value) as total')
             ->groupBy('month')
             ->pluck('total', 'month'); // returns: [3 => 200, 7 => 500]
 
@@ -142,16 +138,14 @@ class WalletController extends Controller
     public function dashboardReports(){
         $user = Auth::user();
         $member = $user->member;
-        $wallet = $member->wallet;
+        // $wallet = $member->wallet;
 
         $currentYear = now()->year;
 
         // Weekly Earnings
-        $weeklyEarnings = $wallet->transactions()
+        $weeklyEarnings = $member->commission()
             ->whereYear('created_at', $currentYear)
-            ->where('transaction_type', 'earning')
-            ->where('status', 'accepted')
-            ->selectRaw('WEEK(created_at) as week, SUM(amount) as total')
+            ->selectRaw('WEEK(created_at) as week, SUM(commission_value) as total')
             ->groupBy('week')
             ->orderBy('week')
             ->get();
@@ -166,11 +160,9 @@ class WalletController extends Controller
         });
 
         // Monthly Earnings (by month number -> total)
-        $rawMonthly = $wallet->transactions()
+        $rawMonthly = $member->commission()
             ->whereYear('created_at', $currentYear)
-            ->where('transaction_type', 'earning')
-            ->where('status', 'accepted')
-            ->selectRaw('MONTH(created_at) as month, SUM(amount) as total')
+            ->selectRaw('MONTH(created_at) as month, SUM(commission_value) as total')
             ->groupBy('month')
             ->pluck('total', 'month'); // [1 => 100, 3 => 250, ...]
 
