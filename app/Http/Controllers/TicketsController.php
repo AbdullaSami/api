@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTicketsRequest;
 use App\Http\Requests\UpdateTicketsRequest;
 use App\Models\Tickets;
+use App\Models\User;
+use Illuminate\Container\Attributes\Auth;
 
 class TicketsController extends Controller
 {
@@ -36,7 +38,7 @@ class TicketsController extends Controller
     public function store(StoreTicketsRequest $request)
     {
         try{
-            $user = auth()->user()->id;
+            $user = User::findOrFail(auth()->id());
             $validatedData = $request->validate([
                 'subject' => 'required|string|max:255',
                 'description' => 'required|string'

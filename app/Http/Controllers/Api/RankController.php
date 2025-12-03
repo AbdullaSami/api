@@ -81,7 +81,36 @@ class RankController extends Controller
         ]);
     }
 
+    public function rankHistory()
+    {
+        try {
+        $user = auth()->user();
+        $member = $user->member;
+        $userRank = $member->rank; // the user's current rank
 
+        // Get all ranks
+        $ranks = Rank::orderBy('id')->get();
+
+        // Build response with true/false flag
+        $rankStatus = $ranks->map(function ($rank) use ($userRank) {
+            return [
+                'rank_id'   => $rank->id,
+                'rank_name' => $rank->name,
+                'active'    => $rank->id <= $userRank->id, // true for user's rank and all before
+            ];
+        });
+        return response()->json([
+            'status' => 'success',
+            'data' => $rankStatus
+        ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve rank history',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     private function meetsDownlineRequirements(Member $member, $downlineRequirements)
     {
@@ -154,11 +183,11 @@ class RankController extends Controller
             'status' => true,
             'message' => 'rank get successfully',
             'rank' => [
-                'name'=> $rank->name,
-                'image'=> $rank->image,
-                'package'=> $rank->package
+                'name' => $rank->name,
+                'image' => $rank->image,
+                'package' => $rank->package
             ],
-            'next_rank'=> $nextRank,
+            'next_rank' => $nextRank,
             'remaining_days' =>  round($remainingDays)
 
         ], 200);

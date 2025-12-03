@@ -100,6 +100,8 @@ route::prefix('v1')->group(function () {
         //abdulla sami 2025-2-DEC
         route::get('total-down-line', [MLMController::class, 'getDownlineCounts']);
         route::get('network-volume', [MLMController::class, 'getNetworkVolume']);
+        //abdulla sami 2025-3-DEC
+        route::get('my-ranks', [RankController::class, 'rankHistory']);
         /**
          * abdulla's personal notes:
          * 1 - create checkPassword service to verify user password before internal transfer
