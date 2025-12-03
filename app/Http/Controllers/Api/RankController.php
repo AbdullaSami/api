@@ -96,6 +96,7 @@ class RankController extends Controller
             return [
                 'rank_id'   => $rank->id,
                 'rank_name' => $rank->name,
+                'rank_image'=> $rank->image,
                 'active'    => $rank->id <= $userRank->id, // true for user's rank and all before
             ];
         });
