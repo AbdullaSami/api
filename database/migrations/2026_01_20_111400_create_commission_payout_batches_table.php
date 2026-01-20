@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('commission_payout_batches', function (Blueprint $table) {
             $table->id();
-            $table->timestamp('window_start');
-            $table->timestamp('window_end');
+            $table->timestamp('window_start')->nullable();
+            $table->timestamp('window_end')->nullable();
             $table->enum('status', ['processing', 'completed', 'failed'])->default('processing');
             $table->unsignedInteger('total_commissions')->default(0);
             $table->decimal('total_amount', 15, 2)->default(0);
