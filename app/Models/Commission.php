@@ -13,7 +13,14 @@ class Commission extends Model
         'commission_value',
         'commission_type',
         'referral_id',
-        'withdrawn'
+        'withdrawn',
+        'payout_batch_id',
+        'withdrawn_at'
+    ];
+
+    protected $casts = [
+        'withdrawn' => 'boolean',
+        'withdrawn_at' => 'datetime',
     ];
 
 
@@ -29,5 +36,10 @@ class Commission extends Model
     public function referral(): BelongsTo
     {
         return $this->belongsTo(Member::class, 'referral_id', 'id');
+    }
+
+    public function payoutBatch(): BelongsTo
+    {
+        return $this->belongsTo(CommissionPayoutBatch::class, 'payout_batch_id', 'id');
     }
 }

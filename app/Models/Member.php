@@ -55,6 +55,64 @@ class Member extends Model
         return $this->hasMany(Commission::class, 'sponsor_id', 'id');
     }
 
+    // Members that this member has referred
+    public function directReferrals(): HasMany
+    {
+        return $this->hasMany(Referal::class, 'sponsor_id', 'id');
+    }
+
+    // Who referred this member (his sponsor)
+    public function directSponsor()
+    {
+        return $this->belongsTo(Referal::class, 'id', 'referral_id');
+    }
+    public function leftLegCount()
+    {
+        $memberId = $this->id;
+        return Referal::where('sponsor_id', $memberId)
+            ->where('commission_type', 'direct')
+            ->where('leg', 'left')
+            ->count();
+    }
+    public function rightLegCount()
+    {
+        $memberId = $this->id;
+        return Referal::where('sponsor_id', $memberId)
+            ->where('commission_type', 'direct')
+            ->where('leg', 'right')
+            ->count();
+    }
+
+    public function upgradeRank()
+    {
+        // Get current rank
+        $currentRank = $this->rank_id;
+
+
+        // Get next rank
+        $nextRank = Rank::where('id', '>', $currentRank)
+            ->orderBy('id')
+            ->first();
+
+        if (! $nextRank) {
+            return false; // Already at top rank
+        }
+
+        // Example requirement checks
+        $leftSum = $this->totla_left_volume;        // adjust to your structure
+        $rightSum = $this->totla_right_volume;
+        $directRefs = $this->directReferrals()->count();
+
+        if ($leftSum >= $nextRank->left_volume && $rightSum >= $nextRank->right_volume && $directRefs >= $nextRank->direct_referrals) {
+            $this->rank_id = $nextRank->id;
+            $this->save();
+
+            return true; // Rank updated
+        }
+
+        return false; // Requirements not yet met
+    }
+
     /**
      * End of Abdulla updates
      */

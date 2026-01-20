@@ -12,139 +12,190 @@ use App\Models\CommissionFactor;
 use App\Traits\ApiResponseTrait;
 use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PlaceReferralRequest;
 use App\Http\Controllers\Api\WalletController;
+use App\Models\Referal;
 
 class MLMController extends Controller
 {
     use ApiResponseTrait;
 
+    // abdulla edits start here
     public function placeReferral(PlaceReferralRequest $request)
     {
-        $user = auth()->user();
-        $sponsor = $user->member;
-        $referral = Member::findOrFail($request->referral_id);
-        $packageCv = $referral->subscription->package->cv;
+        $sponsor     = auth()->user()->member;
+        $referral    = Member::findOrFail($request->referral_id);
 
-        if (empty($referral->id)) {
-            return response()->json('Sorry, this referral not belongs to any sponsor.', 402);
-        }
-        if (!$referral->subscription){
-
-            return response()->json('Sorry, this referral is not subscribed to any packages.', 402);
-        }
-        if (
-            $referral->id == 1 ||
-            $referral->id == $sponsor->id ||
-            $referral->id == $sponsor->left_leg_id ||
-            $referral->id == $sponsor->right_leg_id
-        ){
-            return response()->json(config('consts.REFERRAL_BLOCK_MESSAGE', 'This process cannot be completed.'));
+        // Validate referral before processing
+        $validationError = $this->validateReferralPlacement($sponsor, $referral);
+        if ($validationError) {
+            return $this->failedResponse($validationError, 402);
         }
 
-        if ($referral->id == $this->findFarLeft($sponsor)->id || $referral->id == $this->findFarRight($sponsor)->id){
-            return response()->json('referral is already present on the far right or on the far left, it cannot be added twice');
+        // Get referral CV (must have subscription)
+        $subscription   = $referral->subscription;
+        $packageCv      = $subscription->package->cv;
+
+        // Determine where to place referral (left or right)
+        $placementNode = $this->resolvePlacementNode($sponsor, $referral, $request->placement);
+        if ($placementNode instanceof JsonResponse) {
+            return $placementNode; // error response
         }
 
-        if ($referral->sponsor->id !== $sponsor->id){
-            return response()->json('Sorry, this referral belongs to another sponsor.');
-        }
+        // Apply the placement
+        $this->applyPlacement($sponsor, $placementNode, $referral, $request->placement, $packageCv);
 
-        // Determine placement: left, right, or traverse tree
-        if ($request->placement == 'left') {
-            if (!$sponsor->left_leg_id) {
-                $sponsor->left_leg_id = $referral->id;
-                $sponsor->totla_left_volume += $referral->current_cv;
-            } else {
-                $placementNode = $this->findFarLeft($sponsor);
-                $placementNode->left_leg_id = $referral->id;
-                $placementNode->save();
-            }
-        } elseif ($request->placement == 'right') {
-            if (!$sponsor->right_leg_id) {
-                $sponsor->right_leg_id = $referral->id;
-                $sponsor->totla_right_volume += $referral->current_cv;
-            } else {
-                $placementNode = $this->findFarRight($sponsor);
-                $placementNode->right_leg_id = $referral->id;
-                $placementNode->save();
-            }
-        } else {
-            return $this->failedResponse('something went wrong , Invalid placement request.', 400);
-        }
-        $commissionFactor = CommissionFactor::first();
-        if (empty($commissionFactor)) {
-            return $this->failedResponse('something went wrong , There is no commission calculation plan.');
-        }
-        $binaryRate =  $commissionFactor->binary_rate;
-        $binaryCommissionValue = ($packageCv * $binaryRate) / 100;
+        $uplines               = $referral->getAllTreeUplines();
 
-        $uplines = $referral->getAllTreeUplines();
+        DB::beginTransaction();
+
         try {
-            DB::beginTransaction();
-            $sponsor->save();
 
-            // Remove referral from tank
-            $tank = UserTank::where('member_id', $request->referral_id)->first();
-            if ($tank) $tank->delete();
+            // Remove referral from tank if exists
+            UserTank::where('member_id', $referral->id)->delete();
 
+            // Process uplines commissions (only for first-time placement)
+            if ($referral->is_first === 'yes') {
+                $this->processUplinesCommission(
+                    $uplines,
+                    $sponsor,
+                    $referral,
+                    $packageCv
+                );
 
-            if ($referral->is_first == 'yes') {
-
-                if ($request->placement == 'right')
-                    $sponsor->totla_right_volume = $packageCv;
-                if ($request->placement == 'left')
-                    $sponsor->totla_left_volume = $packageCv;
-
-                foreach ($uplines as $upline) {
-                    // Skip the direct upline for binary commission
-                    if ($upline->id == $sponsor->id) {
-                        continue; // Skip to the next upline
-                    }
-
-                    // Check if the current member belongs to the left leg of the upline
-                    if ($upline->left_leg_id == $referral->id || in_array($referral->id, $this->getLegMembers($upline->left_leg_id))) {
-                        $upline->totla_left_volume += $packageCv;
-                        Commission::create([
-                            'sponsor_id'        => $upline->id,
-                            'commission_value'  => $binaryCommissionValue,
-                            'commission_type'   => 'binary',
-                        ]);
-                    }
-                    // Check if the current member belongs to the right leg of the upline
-                    elseif ($upline->right_leg_id == $referral->id || in_array($referral->id, $this->getLegMembers($upline->right_leg_id))) {
-                        $upline->totla_right_volume += $packageCv;
-                        Commission::create([
-                            'sponsor_id'        => $upline->id,
-                            'commission_value'  => $binaryCommissionValue,
-                            'commission_type'   => 'binary',
-                        ]);
-                    }
-
-                    // Update current CV for all uplines
-                    $upline->current_cv += $packageCv;
-                    $upline->save();
-                }
+                Referal::create([
+                    'sponsor_id'  => $sponsor->id,
+                    'referral_id' => $referral->id,
+                    'leg'         => $request->placement,
+                ]);
 
                 $referral->is_first = 'no';
                 $referral->save();
-                $sponsor->save();
             }
+
+            // re-save sponsor after updates
+            $sponsor->save();
+
+            // upgrade sponsor rank if eligible
+            $sponsor->upgradeRank();
 
             DB::commit();
 
             return $this->successResponse(
-                "The referral: " . $referral->user->name . " has been successfully added to Sponsor: " . $sponsor->user->name . " in " . $request->placement . " leg",
+                "Referral '{$referral->user->name}' added under sponsor '{$sponsor->user->name}' in the {$request->placement} leg.",
                 'sponsor',
                 $sponsor
             );
         } catch (\Exception $e) {
+
             DB::rollBack();
-            return $this->failedResponse('Sorry, this process cannot be completed.' . $e, 500);
+            return $this->failedResponse('Process failed: ' . $e->getMessage(), 500);
         }
     }
 
+    private function validateReferralPlacement($sponsor, $referral)
+    {
+        if (!$referral->subscription) {
+            return 'This referral is not subscribed to any package.';
+        }
+
+        // Block if referral is invalid or same as sponsor
+        if (in_array($referral->id, [1, $sponsor->id, $sponsor->left_leg_id, $sponsor->right_leg_id])) {
+            return config('consts.REFERRAL_BLOCK_MESSAGE', 'This process cannot be completed.');
+        }
+
+        // Block if already in far left/right chain
+        if (
+            $referral->id == $this->findFarLeft($sponsor)->id ||
+            $referral->id == $this->findFarRight($sponsor)->id
+        ) {
+            return 'Referral already exists on far left or far right.';
+        }
+
+        // Referral must belong to current sponsor
+        if ($referral->sponsor->id !== $sponsor->id) {
+            return 'This referral belongs to another sponsor.';
+        }
+
+        return null;
+    }
+    private function resolvePlacementNode($sponsor, $referral, $placement)
+    {
+        if (!in_array($placement, ['left', 'right'])) {
+            return $this->failedResponse('Invalid placement request.', 400);
+        }
+
+        if ($placement === 'left') {
+            return $sponsor->left_leg_id
+                ? $this->findFarLeft($sponsor)
+                : $sponsor;
+        }
+
+        if ($placement === 'right') {
+            return $sponsor->right_leg_id
+                ? $this->findFarRight($sponsor)
+                : $sponsor;
+        }
+    }
+    private function applyPlacement($sponsor, $placementNode, $referral, $placement, $packageCv)
+    {
+        if ($placementNode->id === $sponsor->id) {
+
+            // Place directly under sponsor
+            if ($placement === 'left') {
+                $sponsor->left_leg_id      = $referral->id;
+                $sponsor->totla_left_volume += $packageCv;
+            } else {
+                $sponsor->right_leg_id      = $referral->id;
+                $sponsor->totla_right_volume += $packageCv;
+            }
+
+            return;
+        }
+
+        // Place deeper in the tree
+        if ($placement === 'left') {
+            $placementNode->left_leg_id = $referral->id;
+        } else {
+            $placementNode->right_leg_id = $referral->id;
+        }
+
+        $placementNode->save();
+    }
+    private function processUplinesCommission($uplines, $directSponsor, $referral, $packageCv)
+    {
+        foreach ($uplines as $upline) {
+
+            // Skip the direct sponsor for binary commission
+            if ($upline->id === $directSponsor->id) {
+                continue;
+            }
+
+            $referralId = $referral->id;
+
+            // Check which leg the referral belongs to
+            $belongsLeft  = $upline->left_leg_id == $referralId ||
+                in_array($referralId, $this->getLegMembers($upline->left_leg_id));
+
+            $belongsRight = $upline->right_leg_id == $referralId ||
+                in_array($referralId, $this->getLegMembers($upline->right_leg_id));
+
+            if ($belongsLeft) {
+                $upline->totla_left_volume += $packageCv;
+            }
+
+            if ($belongsRight) {
+                $upline->totla_right_volume += $packageCv;
+            }
+
+            $upline->current_cv += $packageCv;
+            $upline->save();
+        }
+    }
+
+    // end abdulla edits
     private function getLegMembers($legId)
     {
         if (!$legId) {
@@ -330,7 +381,7 @@ class MLMController extends Controller
 
         // Check if the member is not found
         if (!$member) {
-            return response()->josn('Member not found', 404);
+            return response()->json('Member not found', 404);
         }
 
         // Fetch only the necessary fields
@@ -516,26 +567,26 @@ class MLMController extends Controller
     public function getDownlineDetails()
     {
         try {
-        $user = auth()->user();
-        $member = $user->member->load('rank');
+            $user = auth()->user();
+            $member = $user->member->load('rank');
 
-        if (!$member) {
-            return response()->json(['message' => 'Member not found'], 404);
+            if (!$member) {
+                return response()->json(['message' => 'Member not found'], 404);
+            }
+
+            $downlineDetails = $member->getDownlineDetailsByRank();
+
+            return response()->json([
+                'member_id' => $member->id,
+                'downline_details' => $downlineDetails,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while retrieving downline details.',
+                'error' => $e->getMessage(),
+            ]);
         }
-
-        $downlineDetails = $member->getDownlineDetailsByRank();
-
-        return response()->json([
-            'member_id' => $member->id,
-            'downline_details' => $downlineDetails,
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => false,
-            'message' => 'An error occurred while retrieving downline details.',
-            'error' => $e->getMessage(),
-        ]);
-    }
     }
 
     public function getYearlySales()

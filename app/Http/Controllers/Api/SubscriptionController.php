@@ -93,50 +93,27 @@ class SubscriptionController extends Controller
             // Update Member Wallet Balance
             $newBalance = $this->updateMemberWallatBallnce($member, $package_price, $package->name);
 
-            // Add Direct Commission to member
-            $sponsorWallet = $member->sponsor->wallet;
-            $sponsorWallet->balance += $directCommissionValue;
-            $sponsorWallet->save();
-
-            // Uplines
-            // Create direct commission
+            // Create direct commission (ledger only)
             if ($member->sponsor_id) {
                 Commission::create([
-                    'sponsor_id' => $member->sponsor->id,
-                    'referral_id' => $member->id,
-                    'commission_value' => $directCommissionValue,
-                    'commission_type'  => 'direct',
+                    'sponsor_id'        => $member->sponsor_id,
+                    'referral_id'       => $member->id,
+                    'commission_value'  => $directCommissionValue,
+                    'commission_type'   => 'direct',
                 ]);
-            }
 
-            $currentMember = $member; // current member who purchased the package
-            $packageCv = $package->cv; // CV of the purchased package
-
-            while ($currentMember->sponsor_id) { // traverse up until the top
-                $upline = $currentMember->sponsor; // assume you have a 'sponsor' relation
-
-                // Determine which leg this member is on
-                if ($upline->left_leg_id == $currentMember->id) {
-                    $upline->totla_left_volume += $packageCv;
-                } elseif ($upline->right_leg_id == $currentMember->id) {
-                    $upline->totla_right_volume += $packageCv;
-                }
-
-                // Update current CV for upline
-                $upline->current_cv += $packageCv;
-                $upline->save();
-
-                // Create binary commission for this upline (if needed)
-                if ($upline->id != $member->sponsor_id) { // skip direct sponsor if already handled
+                // Create indirect commissions for all uplines in sponsor chain (ledger only)
+                $upline = optional($member->sponsor)->sponsor;
+                while ($upline) {
                     Commission::create([
-                        'sponsor_id'       => $upline->id,
-                        'commission_value' => $binaryCommissionValue,
-                        'commission_type'  => 'binary',
+                        'sponsor_id'        => $upline->id,
+                        'referral_id'       => $member->id,
+                        'commission_value'  => $binaryCommissionValue,
+                        'commission_type'   => 'binary',
                     ]);
-                }
 
-                // Move one level up
-                $currentMember = $upline;
+                    $upline = $upline->sponsor;
+                }
             }
 
 

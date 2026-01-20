@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\CommissionFactor;
 use App\Models\Package;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
 use App\Models\UserTank;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -22,32 +24,34 @@ class UserSeeder extends Seeder
 
     public function run(): void
     {
-$accounts = [
-    ['first_name' => 'Mohammed', 'last_name' => 'Hamed', 'email' => '1@hfs.com'],
-    ['first_name' => 'Ahmed', 'last_name' => 'Esmail', 'email' => '2@hfs.com'],
-    ['first_name' => 'Abdullah', 'last_name' => 'Sami', 'email' => '3@hfs.com'],
-];
+        $accounts = [
+            ['first_name' => 'Mohammed', 'last_name' => 'Hamed', 'email' => '1@nova.com'],
+            ['first_name' => 'Ahmed', 'last_name' => 'Esmail', 'email' => '2@nova.com'],
+            ['first_name' => 'Abdullah', 'last_name' => 'Sami', 'email' => '3@nova.com'],
+        ];
 
-foreach ($accounts as $data) {
+        foreach ($accounts as $data) {
 
-    $user = User::factory()->create([
-        'username' => fake()->userName(),
-        ...$data
-    ]);
+            $user = User::factory()->create([
+                'username' => $data['first_name'] . '_' . $data['last_name'],
+                ...$data
+            ]);
 
-    $member = $user->member()->create([
-        'rank_id' => 1
-    ]);
+            // create hash and save pin for user
+            $user->pin()->create([
+                'pin_hash' => Hash::make('1234'),
+            ]);
+            $member = $user->member()->create([
+                'rank_id' => 1
+            ]);
 
-    $member->wallet()->create(['balance' => 10000]);
-    $member->tokenWallet()->create(['token_balance' => 0]);
+            $member->wallet()->create(['balance' => 10000]);
+            $member->tokenWallet()->create(['token_balance' => 10000]);
 
-    $member->subscription()->create([
-        'package_id'      => Package::inRandomOrder()->first()->id,
-        'expiration_date' => now()->addMonth()
-    ]);
-}
-
-
+            $member->subscription()->create([
+                'package_id'      => Package::inRandomOrder()->first()->id,
+                'expiration_date' => now()->addMonth()
+            ]);
+        }
     }
 }

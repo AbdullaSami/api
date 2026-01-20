@@ -12,8 +12,10 @@ use App\Http\Controllers\Api\Admin\Users\AdminUserController;
 use App\Http\Controllers\Api\Auth\Users\ResetPasswordController;
 use App\Http\Controllers\Api\Admin\Credits\AdminCreditController;
 use App\Http\Controllers\Api\WalletController;
+use App\Http\Controllers\Api\CommissionPayoutBatchController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\TicketsController;
+use App\Http\Controllers\Api\Admin\Commissions\AdminCommissionPayoutBatchController;
 
 route::any('login', function () {
     return response()->json('you are unauthorized', 400);
@@ -93,6 +95,8 @@ route::prefix('v1')->group(function () {
         route::post('internal-transfer', [WalletController::class, 'internalTransfer']);
         //abdulla sami 2025-24-NOV
         route::get('commission-summary', [CommissionController::class, 'index']);
+        route::get('commission-payout-batches', [CommissionPayoutBatchController::class, 'index']); //new
+        route::get('commission-payout-batches/{id}', [CommissionPayoutBatchController::class, 'show']); //new
         //abdulla sami 2025-1-DEC
         route::get('yearly-sales-in-Weeks', [WalletController::class,'dashboardReports']);
         route::get('user-tickets', [TicketsController::class,'showUserTickets']);
@@ -124,6 +128,9 @@ route::prefix('v1')->group(function () {
         route::middleware('auth:admin')->group(function () {
             //logout
             route::post('logout', [AdminAuthController::class, 'logout']);
+
+            route::get('commission-payout-batches', [AdminCommissionPayoutBatchController::class, 'index']); //new  
+            route::get('commission-payout-batches/{id}', [AdminCommissionPayoutBatchController::class, 'show']); //new
 
             // Users Management
             route::get('users', [AdminUserController::class, 'index']);

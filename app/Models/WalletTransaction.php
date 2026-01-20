@@ -16,6 +16,7 @@ class WalletTransaction extends Model
         'sender_member_id',
         'package_name',
         'credit_code',
+        'payout_batch_id',
     ];
 
 
@@ -23,6 +24,11 @@ class WalletTransaction extends Model
     public function wallet(): BelongsTo
     {
         return $this->belongsTo(Wallet::class, 'wallet_id', 'id');
+    }
+
+    public function payoutBatch(): BelongsTo
+    {
+        return $this->belongsTo(CommissionPayoutBatch::class, 'payout_batch_id', 'id');
     }
 
 }
