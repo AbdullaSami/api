@@ -47,7 +47,7 @@ class MLMController extends Controller
         // Apply the placement
         $this->applyPlacement($sponsor, $placementNode, $referral, $request->placement, $packageCv);
 
-        $uplines               = $referral->getAllTreeUplines();
+        $uplines= $referral->getAllTreeUplines();
 
         DB::beginTransaction();
 
@@ -144,16 +144,17 @@ class MLMController extends Controller
     private function applyPlacement($sponsor, $placementNode, $referral, $placement, $packageCv)
     {
         if ($placementNode->id === $sponsor->id) {
-
             // Place directly under sponsor
             if ($placement === 'left') {
-                $sponsor->left_leg_id      = $referral->id;
+                $sponsor->left_leg_id= $referral->id;
                 $sponsor->totla_left_volume += $packageCv;
+                $sponsor->current_cv += $packageCv;
             } else {
-                $sponsor->right_leg_id      = $referral->id;
+                $sponsor->right_leg_id= $referral->id;
                 $sponsor->totla_right_volume += $packageCv;
+                $sponsor->current_cv += $packageCv;
             }
-
+            $sponsor->save();
             return;
         }
 
