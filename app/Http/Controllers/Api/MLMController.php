@@ -82,8 +82,7 @@ class MLMController extends Controller
             $sponsor->upgradeRank();
 
                 // Apply indirect CV to all uplines
-                $mySponsor = $sponsor->sponsor;
-                $this->applyIndirectCV($mySponsor->id, $request->placement);
+                $this->applyIndirectCV($sponsor->id);
             DB::commit();
 
             return $this->successResponse(
@@ -167,20 +166,23 @@ class MLMController extends Controller
 
         $placementNode->save();
     }
-    private function applyIndirectCV($memberId, $side){
+    private function applyIndirectCV($memberId){
         try {
         $member = Member::find($memberId);
         $packageCv = $member->subscription->package->cv;
-        \Log::info("Applying indirect CV: Member ID {$member->id}, Side: {$side}, CV: {$packageCv}");
+        \Log::info("Applying indirect CV: Member ID {$member->id}, Sponsor ID: {$member->directSponsor}, CV: {$packageCv}");
         while ($member->sponsor){
-            $sponsor = $member->sponsor;
-            if($side == 'left'){
+            $referal = $member->directSponsor;
+            $sponsor = $referal->sponsorMember;
+            \Log::info("Processing upline: SponsorID {$referal->sponsorMember}, Member  ID: {$referal->referredMember}, Leg: {$referal->leg}");
+            if($referal->leg == 'left'){
                 $sponsor->totla_left_volume += $packageCv;
             } else {
                 $sponsor->totla_right_volume += $packageCv;
             }
             $sponsor->current_cv += $packageCv;
             $sponsor->save();
+            $referal->save();
             $member = $sponsor;
         }
         } catch (\Exception $e) {
