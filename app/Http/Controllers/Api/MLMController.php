@@ -58,12 +58,12 @@ class MLMController extends Controller
 
             // Process uplines commissions (only for first-time placement)
             if ($referral->is_first === 'yes') {
-                // $this->processUplinesCommission(
-                //     $uplines,
-                //     $sponsor,
-                //     $referral,
-                //     $packageCv
-                // );
+                $this->processUplinesCommission(
+                    $uplines,
+                    $sponsor,
+                    $referral,
+                    $packageCv
+                );
 
                 Referal::create([
                     'sponsor_id'  => $sponsor->id,
@@ -75,11 +75,11 @@ class MLMController extends Controller
                 $referral->save();
             }
             // Apply Direct CV to sponsor
-            if ($request->placement === 'left') {
-                $sponsor->totla_left_volume += $packageCv;
-            } else {
-                $sponsor->totla_right_volume += $packageCv;
-            }
+            // if ($request->placement === 'left') {
+            //     $sponsor->totla_left_volume += $packageCv;
+            // } else {
+            //     $sponsor->totla_right_volume += $packageCv;
+            // }
             $sponsor->current_cv += $packageCv;
             // re-save sponsor after updates
             $sponsor->save();
@@ -199,9 +199,9 @@ class MLMController extends Controller
         foreach ($uplines as $upline) {
 
             // Skip the direct sponsor for binary commission
-            if ($upline->id === $directSponsor->id) {
-                continue;
-            }
+            // if ($upline->id === $directSponsor->id) {
+            //     continue;
+            // }
 
             $referralId = $referral->id;
 
