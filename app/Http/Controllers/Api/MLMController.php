@@ -81,6 +81,8 @@ class MLMController extends Controller
             // upgrade sponsor rank if eligible
             $sponsor->upgradeRank();
 
+                // Apply indirect CV to all uplines
+                $this->applyIndirectCV($referral->id);
             DB::commit();
 
             return $this->successResponse(
@@ -163,6 +165,18 @@ class MLMController extends Controller
         }
 
         $placementNode->save();
+    }
+    private function applyIndirectCV($userId){
+        $user = User::find($userId);
+        $member = $user->member;
+        $packageCv = $member->subscription ? $member->subscription->package->cv : 0;
+        while ($member->sponsorMember){
+            $sponsor = $member->sponsorMember;
+            $sponsor->current_cv += $packageCv;
+            $sponsor->save();
+            $member = $sponsor;
+        }
+
     }
     private function processUplinesCommission($uplines, $directSponsor, $referral, $packageCv)
     {
