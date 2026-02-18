@@ -75,13 +75,11 @@ class MLMController extends Controller
                 $referral->save();
             }
             // Apply Direct CV to sponsor
-            if ($request->placement === 'left') {
-                $sponsor->left_leg_id = $referral->id;
-                $sponsor->totla_left_volume += $packageCv;
-            } else {
-                $sponsor->right_leg_id = $referral->id;
-                $sponsor->totla_right_volume += $packageCv;
-            }
+            // if ($request->placement === 'left') {
+            //     $sponsor->totla_left_volume += $packageCv;
+            // } else {
+            //     $sponsor->totla_right_volume += $packageCv;
+            // }
             $sponsor->current_cv += $packageCv;
             // re-save sponsor after updates
             $sponsor->save();
