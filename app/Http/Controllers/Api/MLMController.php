@@ -65,7 +65,7 @@ class MLMController extends Controller
                     $packageCv
                 );
 
-                Referal::create([
+                    Referal::create([
                     'sponsor_id'  => $sponsor->id,
                     'referral_id' => $referral->id,
                     'leg'         => $request->placement,
@@ -82,7 +82,8 @@ class MLMController extends Controller
             $sponsor->upgradeRank();
 
                 // Apply indirect CV to all uplines
-                $this->applyIndirectCV($referral->id);
+                $mySponsor = $sponsor->sponsorMember;
+                $this->applyIndirectCV($mySponsor->id, $request->placement);
             DB::commit();
 
             return $this->successResponse(
@@ -166,12 +167,16 @@ class MLMController extends Controller
 
         $placementNode->save();
     }
-    private function applyIndirectCV($userId){
-        $user = User::find($userId);
-        $member = $user->member;
+    private function applyIndirectCV($memberId, $side){
+        $member = Member::find($memberId);
         $packageCv = $member->subscription ? $member->subscription->package->cv : 0;
         while ($member->sponsorMember){
             $sponsor = $member->sponsorMember;
+            if($side == 'left'){
+                $sponsor->totla_left_volume += $packageCv;
+            } else {
+                $sponsor->totla_right_volume += $packageCv;
+            }
             $sponsor->current_cv += $packageCv;
             $sponsor->save();
             $member = $sponsor;
