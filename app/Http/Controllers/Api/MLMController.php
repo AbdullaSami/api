@@ -82,7 +82,7 @@ class MLMController extends Controller
             $sponsor->upgradeRank();
 
                 // Apply indirect CV to all uplines
-                $mySponsor = $sponsor->sponsorMember;
+                $mySponsor = $sponsor->sponsor;
                 $this->applyIndirectCV($mySponsor->id, $request->placement);
             DB::commit();
 
@@ -170,8 +170,8 @@ class MLMController extends Controller
     private function applyIndirectCV($memberId, $side){
         $member = Member::find($memberId);
         $packageCv = $member->subscription ? $member->subscription->package->cv : 0;
-        while ($member->sponsorMember){
-            $sponsor = $member->sponsorMember;
+        while ($member->sponsor){
+            $sponsor = $member->sponsor;
             if($side == 'left'){
                 $sponsor->totla_left_volume += $packageCv;
             } else {
