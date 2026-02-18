@@ -170,7 +170,8 @@ class MLMController extends Controller
     private function applyIndirectCV($memberId, $side){
         try {
         $member = Member::find($memberId);
-        $packageCv = $member->subscription ? $member->subscription->package->cv : 0;
+        $packageCv = $member->subscription->package->cv;
+        \Log::info("Applying indirect CV: Member ID {$member->id}, Side: {$side}, CV: {$packageCv}");
         while ($member->sponsor){
             $sponsor = $member->sponsor;
             if($side == 'left'){
