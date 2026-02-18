@@ -73,6 +73,8 @@ class MLMController extends Controller
 
                 $referral->is_first = 'no';
                 $referral->save();
+            }else {
+                $this->applyIndirectCV($sponsor->id);
             }
             // Apply Direct CV to sponsor
             // if ($request->placement === 'left') {
@@ -88,7 +90,6 @@ class MLMController extends Controller
             $sponsor->upgradeRank();
 
             // Apply indirect CV to all uplines
-            $this->applyIndirectCV($sponsor->id);
             DB::commit();
 
             return $this->successResponse(
