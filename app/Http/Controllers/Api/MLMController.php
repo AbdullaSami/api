@@ -177,11 +177,10 @@ class MLMController extends Controller
         try {
             $member = Member::find($memberId);
             $packageCv = $member->subscription->package->cv;
-            \Log::info("Applying indirect CV: Member ID {$member->id}, Sponsor ID: {$member->directSponsor}, CV: {$packageCv}");
             while ($member->sponsor) {
                 $referal = $member->directSponsor;
                 $sponsor = $referal->sponsorMember;
-                \Log::info("Processing upline: SponsorID {$referal->sponsorMember}, Member  ID: {$referal->referredMember}, Leg: {$referal->leg}");
+                \Log::info(" before: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 if ($referal->leg == 'left') {
                     $sponsor->totla_left_volume += $packageCv;
                 } else {
@@ -189,6 +188,7 @@ class MLMController extends Controller
                 }
                 $sponsor->current_cv += $packageCv;
                 $sponsor->save();
+                \Log::info(" after: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 $member = $sponsor;
             }
         } catch (\Exception $e) {
