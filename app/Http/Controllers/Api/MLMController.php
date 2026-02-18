@@ -47,7 +47,7 @@ class MLMController extends Controller
         // Apply the placement
         $this->applyPlacement($sponsor, $placementNode, $referral, $request->placement, $packageCv);
 
-        $uplines= $referral->getAllTreeUplines();
+        $uplines = $referral->getAllTreeUplines();
 
         DB::beginTransaction();
 
@@ -65,7 +65,7 @@ class MLMController extends Controller
                     $packageCv
                 );
 
-                    Referal::create([
+                Referal::create([
                     'sponsor_id'  => $sponsor->id,
                     'referral_id' => $referral->id,
                     'leg'         => $request->placement,
@@ -74,15 +74,23 @@ class MLMController extends Controller
                 $referral->is_first = 'no';
                 $referral->save();
             }
-
+            // Apply Direct CV to sponsor
+            if ($request->placement === 'left') {
+                $sponsor->left_leg_id = $referral->id;
+                $sponsor->totla_left_volume += $packageCv;
+            } else {
+                $sponsor->right_leg_id = $referral->id;
+                $sponsor->totla_right_volume += $packageCv;
+            }
+            $sponsor->current_cv += $packageCv;
             // re-save sponsor after updates
             $sponsor->save();
 
             // upgrade sponsor rank if eligible
             $sponsor->upgradeRank();
 
-                // Apply indirect CV to all uplines
-                $this->applyIndirectCV($sponsor->id);
+            // Apply indirect CV to all uplines
+            $this->applyIndirectCV($sponsor->id);
             DB::commit();
 
             return $this->successResponse(
@@ -146,15 +154,12 @@ class MLMController extends Controller
         if ($placementNode->id === $sponsor->id) {
             // Place directly under sponsor
             if ($placement === 'left') {
-                $sponsor->left_leg_id= $referral->id;
+                $sponsor->left_leg_id = $referral->id;
                 $sponsor->totla_left_volume += $packageCv;
-                $sponsor->current_cv += $packageCv;
             } else {
-                $sponsor->right_leg_id= $referral->id;
+                $sponsor->right_leg_id = $referral->id;
                 $sponsor->totla_right_volume += $packageCv;
-                $sponsor->current_cv += $packageCv;
             }
-            $sponsor->save();
             return;
         }
 
@@ -167,30 +172,29 @@ class MLMController extends Controller
 
         $placementNode->save();
     }
-    private function applyIndirectCV($memberId){
+    private function applyIndirectCV($memberId)
+    {
         try {
-        $member = Member::find($memberId);
-        $packageCv = $member->subscription->package->cv;
-        \Log::info("Applying indirect CV: Member ID {$member->id}, Sponsor ID: {$member->directSponsor}, CV: {$packageCv}");
-        while ($member->sponsor){
-            $referal = $member->directSponsor;
-            $sponsor = $referal->sponsorMember;
-            \Log::info("Processing upline: SponsorID {$referal->sponsorMember}, Member  ID: {$referal->referredMember}, Leg: {$referal->leg}");
-            if($referal->leg == 'left'){
-                $sponsor->totla_left_volume += $packageCv;
-            } else {
-                $sponsor->totla_right_volume += $packageCv;
+            $member = Member::find($memberId);
+            $packageCv = $member->subscription->package->cv;
+            \Log::info("Applying indirect CV: Member ID {$member->id}, Sponsor ID: {$member->directSponsor}, CV: {$packageCv}");
+            while ($member->sponsor) {
+                $referal = $member->directSponsor;
+                $sponsor = $referal->sponsorMember;
+                \Log::info("Processing upline: SponsorID {$referal->sponsorMember}, Member  ID: {$referal->referredMember}, Leg: {$referal->leg}");
+                if ($referal->leg == 'left') {
+                    $sponsor->totla_left_volume += $packageCv;
+                } else {
+                    $sponsor->totla_right_volume += $packageCv;
+                }
+                $sponsor->current_cv += $packageCv;
+                $sponsor->save();
+                $member = $sponsor;
             }
-            $sponsor->current_cv += $packageCv;
-            $sponsor->save();
-            $referal->save();
-            $member = $sponsor;
-        }
         } catch (\Exception $e) {
             // Log the error for debugging
             \Log::error('Error applying indirect CV: ' . $e->getMessage());
         }
-
     }
     private function processUplinesCommission($uplines, $directSponsor, $referral, $packageCv)
     {
