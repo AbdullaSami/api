@@ -488,8 +488,8 @@ class MLMController extends Controller
             $data = [
                 'left_leg_member' => [
                     'id'                => $member->leftLeg->id,
-                    'rank_id'           => $member->leftLeg->rank->id,
-                    'rank_name'         => $member->leftLeg->rank->name,
+                    'rank_id'           => $member->leftLeg?->rank?->id,
+                    'rank_name'         => $member->leftLeg?->rank?->name,
                     'user_name'         => $member->leftLeg->user->username,
                     'user_id_code'      => $member->leftLeg->user->id_code,
                     'user_first_name'   => $member->leftLeg->user->first_name,
@@ -498,8 +498,8 @@ class MLMController extends Controller
                 ],
                 'right_leg_member' => [
                     'id'                => $member->rightLeg->id,
-                    'rank_id'           => $member->rightLeg->rank->id,
-                    'rank_name'         => $member->rightLeg->rank->name,
+                    'rank_id'           => $member->rightLeg?->rank?->id,
+                    'rank_name'         => $member->rightLeg?->rank?->name,
                     'user_name'         => $member->rightLeg->user->username,
                     'user_id_code'      => $member->rightLeg->user->id_code,
                     'user_first_name'   => $member->rightLeg->user->first_name,
@@ -512,8 +512,8 @@ class MLMController extends Controller
             $data = [
                 'left_leg_member' => [
                     'id'                => $member->leftLeg->id,
-                    'rank_id'           => $member->leftLeg->rank->id,
-                    'rank_name'         => $member->leftLeg->rank->name,
+                    'rank_id'           => $member->leftLeg?->rank?->id,
+                    'rank_name'         => $member->leftLeg?->rank?->name,
                     'user_name'         => $member->leftLeg->user->username,
                     'user_id_code'      => $member->leftLeg->user->id_code,
                     'user_first_name'   => $member->leftLeg->user->first_name,
@@ -528,8 +528,8 @@ class MLMController extends Controller
                 'left_leg_member' => null,
                 'right_leg_member' => [
                     'id'                => $member->rightLeg->id,
-                    'rank_id'           => $member->rightLeg->rank->id,
-                    'rank_name'         => $member->rightLeg->rank->name,
+                    'rank_id'           => $member->rightLeg?->rank?->id,
+                    'rank_name'         => $member->rightLeg?->rank?->name,
                     'user_name'         => $member->rightLeg->user->username,
                     'user_id_code'      => $member->rightLeg->user->id_code,
                     'user_first_name'   => $member->rightLeg->user->first_name,
