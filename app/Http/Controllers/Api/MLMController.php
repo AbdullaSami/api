@@ -168,6 +168,7 @@ class MLMController extends Controller
         $placementNode->save();
     }
     private function applyIndirectCV($memberId, $side){
+        try {
         $member = Member::find($memberId);
         $packageCv = $member->subscription ? $member->subscription->package->cv : 0;
         while ($member->sponsor){
@@ -180,6 +181,10 @@ class MLMController extends Controller
             $sponsor->current_cv += $packageCv;
             $sponsor->save();
             $member = $sponsor;
+        }
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error applying indirect CV: ' . $e->getMessage());
         }
 
     }
