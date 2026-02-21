@@ -179,7 +179,7 @@ class MLMController extends Controller
             while ($member->sponsor) {
                 $referal = $member->directSponsor;
                 $sponsor = $referal->sponsorMember;
-                \Log::info(" before: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
+                // \Log::info(" before: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 if ($referal->leg == 'left') {
                     $sponsor->totla_left_volume += $packageCv;
                 } else {
@@ -187,7 +187,7 @@ class MLMController extends Controller
                 }
                 $sponsor->current_cv += $packageCv;
                 $sponsor->save();
-                \Log::info(" after: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
+                // \Log::info(" after: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 $member = $sponsor;
             }
         } catch (\Exception $e) {

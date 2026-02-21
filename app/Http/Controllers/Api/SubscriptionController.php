@@ -102,6 +102,7 @@ class SubscriptionController extends Controller
                     'commission_type'   => 'direct',
                 ]);
 
+                $sponsor = $member->sponsor->wallet->increment('balance', $directCommissionValue);
                 // Create indirect commissions for all uplines in sponsor chain (ledger only)
                 $upline = optional($member->sponsor)->sponsor;
                 while ($upline) {
