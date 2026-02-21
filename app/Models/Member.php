@@ -34,6 +34,10 @@ class Member extends Model
      * Abdulla updates
      */
 
+    public function cvCommissions()
+    {
+        return $this->hasMany(CvCommission::class);
+    }
     public function tokenWallet()
     {
         return $this->hasOne(TokenWallet::class);

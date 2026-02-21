@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PlaceReferralRequest;
 use App\Http\Controllers\Api\WalletController;
+use App\Models\CvCommission;
 use App\Models\Referal;
 
 class MLMController extends Controller
@@ -182,8 +183,18 @@ class MLMController extends Controller
                 // \Log::info(" before: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 if ($referal->leg == 'left') {
                     $sponsor->totla_left_volume += $packageCv;
+                    $sponsor->cvCommissions()->create([
+                        'package_id' => $member->subscription->package->id,
+                        'side' => 'left',
+                        'amount' => $packageCv,
+                    ]);
                 } else {
                     $sponsor->totla_right_volume += $packageCv;
+                    $sponsor->cvCommissions()->create([
+                        'package_id' => $member->subscription->package->id,
+                        'side' => 'right',
+                        'amount' => $packageCv,
+                    ]);
                 }
                 $sponsor->current_cv += $packageCv;
                 $sponsor->save();
@@ -215,10 +226,22 @@ class MLMController extends Controller
 
             if ($belongsLeft) {
                 $upline->totla_left_volume += $packageCv;
+
+                $upline->cvCommissions()->create([
+                    'package_id' => $referral->subscription->package->id,
+                    'side' => 'left',
+                    'amount' => $packageCv,
+                ]);
             }
 
             if ($belongsRight) {
                 $upline->totla_right_volume += $packageCv;
+
+                $upline->cvCommissions()->create([
+                    'package_id' => $referral->subscription->package->id,
+                    'side' => 'right',
+                    'amount' => $packageCv,
+                ]);
             }
 
             $upline->current_cv += $packageCv;

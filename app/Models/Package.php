@@ -21,6 +21,10 @@ class Package extends Model
         'features' => 'array',
     ];
 
+    public function cvCommissions()
+    {
+        return $this->hasMany(CvCommission::class);
+    }
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);
