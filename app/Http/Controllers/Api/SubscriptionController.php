@@ -103,6 +103,7 @@ class SubscriptionController extends Controller
                 ]);
 
                 $sponsor = $member->sponsor->wallet->increment('balance', $directCommissionValue);
+                \Log::info("Direct commission of {$directCommissionValue} added to sponsor (ID: {$member->sponsor_id}). New balance: {$sponsor->balance}");
                 // Create indirect commissions for all uplines in sponsor chain (ledger only)
                 $upline = optional($member->sponsor)->sponsor;
                 while ($upline) {
