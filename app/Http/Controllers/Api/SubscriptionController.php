@@ -114,7 +114,7 @@ class SubscriptionController extends Controller
                         'commission_value'  => $binaryCommissionValue,
                         'commission_type'   => 'binary',
                     ]);
-
+                    \Log::info("Binary commission of {$binaryCommissionValue} added to upline (ID: {$upline->id}).");
                     $upline = $upline->sponsor;
                 }
             }
