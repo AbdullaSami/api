@@ -183,20 +183,20 @@ class MLMController extends Controller
                 // \Log::info(" before: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 if ($referal->leg == 'left') {
                     $sponsor->totla_left_volume += $package->cv;
-                    CvCommission::create([
-                        'member_id' => $sponsor->id,
-                        'package_id' => $package->id,
-                        'side' => 'left',
-                        'amount' => $package->cv,
-                    ]);
+                    // CvCommission::create([
+                    //     'member_id' => $sponsor->id,
+                    //     'package_id' => $package->id,
+                    //     'side' => 'left',
+                    //     'amount' => $package->cv,
+                    // ]);
                 } else {
                     $sponsor->totla_right_volume += $package->cv;
-                    CvCommission::create([
-                        'member_id' => $sponsor->id,
-                        'package_id' => $package->id,
-                        'side' => 'right',
-                        'amount' => $package->cv,
-                    ]);
+                    // CvCommission::create([
+                    //     'member_id' => $sponsor->id,
+                    //     'package_id' => $package->id,
+                    //     'side' => 'right',
+                    //     'amount' => $package->cv,
+                    // ]);
                 }
                 $sponsor->current_cv += $package->cv;
                 $sponsor->save();
@@ -229,23 +229,23 @@ class MLMController extends Controller
             if ($belongsLeft) {
                 $upline->totla_left_volume += $packageCv;
 
-                CvCommission::create([
-                    'member_id' => $upline->id,
-                    'package_id' => $referral->subscription->package->id,
-                    'side' => 'left',
-                    'amount' => $packageCv,
-                ]);
+                // CvCommission::create([
+                //     'member_id' => $upline->id,
+                //     'package_id' => $referral->subscription->package->id,
+                //     'side' => 'left',
+                //     'amount' => $packageCv,
+                // ]);
             }
 
             if ($belongsRight) {
                 $upline->totla_right_volume += $packageCv;
 
-                CvCommission::create([
-                    'member_id' => $upline->id,
-                    'package_id' => $referral->subscription->package->id,
-                    'side' => 'right',
-                    'amount' => $packageCv,
-                ]);
+                // CvCommission::create([
+                //     'member_id' => $upline->id,
+                //     'package_id' => $referral->subscription->package->id,
+                //     'side' => 'right',
+                //     'amount' => $packageCv,
+                // ]);
             }
 
             $upline->current_cv += $packageCv;
