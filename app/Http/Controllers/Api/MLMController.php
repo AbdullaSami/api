@@ -176,27 +176,29 @@ class MLMController extends Controller
     {
         try {
             $member = Member::find($memberId);
-            $packageCv = $member->subscription->package->cv;
+            $package = $member->subscription->package;
             while ($member->sponsor) {
                 $referal = $member->directSponsor;
                 $sponsor = $referal->sponsorMember;
                 // \Log::info(" before: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 if ($referal->leg == 'left') {
-                    $sponsor->totla_left_volume += $packageCv;
-                    $sponsor->cvCommissions()->create([
-                        'package_id' => $member->subscription->package->id,
+                    $sponsor->totla_left_volume += $package->cv;
+                    CvCommission::create([
+                        'member_id' => $sponsor->id,
+                        'package_id' => $package->id,
                         'side' => 'left',
-                        'amount' => $packageCv,
+                        'amount' => $package->cv,
                     ]);
                 } else {
-                    $sponsor->totla_right_volume += $packageCv;
-                    $sponsor->cvCommissions()->create([
-                        'package_id' => $member->subscription->package->id,
+                    $sponsor->totla_right_volume += $package->cv;
+                    CvCommission::create([
+                        'member_id' => $sponsor->id,
+                        'package_id' => $package->id,
                         'side' => 'right',
-                        'amount' => $packageCv,
+                        'amount' => $package->cv,
                     ]);
                 }
-                $sponsor->current_cv += $packageCv;
+                $sponsor->current_cv += $package->cv;
                 $sponsor->save();
                 // \Log::info(" after: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 $member = $sponsor;
@@ -227,7 +229,8 @@ class MLMController extends Controller
             if ($belongsLeft) {
                 $upline->totla_left_volume += $packageCv;
 
-                $upline->cvCommissions()->create([
+                CvCommission::create([
+                    'member_id' => $upline->id,
                     'package_id' => $referral->subscription->package->id,
                     'side' => 'left',
                     'amount' => $packageCv,
@@ -237,7 +240,8 @@ class MLMController extends Controller
             if ($belongsRight) {
                 $upline->totla_right_volume += $packageCv;
 
-                $upline->cvCommissions()->create([
+                CvCommission::create([
+                    'member_id' => $upline->id,
                     'package_id' => $referral->subscription->package->id,
                     'side' => 'right',
                     'amount' => $packageCv,
