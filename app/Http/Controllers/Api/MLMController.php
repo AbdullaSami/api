@@ -185,11 +185,9 @@ class MLMController extends Controller
             \Log::info('Placement Applied Successfully');
 
             // 6️⃣ Get Uplines
-            $uplines = $referral->getAllTreeUplines();
+            // $uplines = $referral->getAllTreeUplines();
+            $uplines = optional($referral->sponsor);
 
-            \Log::info('Uplines Retrieved', [
-                'count' => count($uplines)
-            ]);
 
             // 7️⃣ Remove from Tank
             UserTank::where('member_id', $referral->id)->delete();
@@ -370,7 +368,8 @@ class MLMController extends Controller
     {
         \Log::info("Checking uplines for referral ID: {$referral->id}, Package CV: {$packageCv}");
 
-        foreach ($uplines as $upline) {
+        $upline = $uplines;
+        while ($upline) {
             try {
 
                 $referralId = $referral->id;

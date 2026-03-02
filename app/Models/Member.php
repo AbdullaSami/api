@@ -93,25 +93,42 @@ class Member extends Model
         $currentRank = $this->rank_id;
 
 
-        // Get next rank
-        $nextRank = Rank::where('id', '>', $currentRank)
+        if($currentRank){
+            // Get next rank
+            $nextRank = Rank::where('id', '>', $currentRank)
             ->orderBy('id')
             ->first();
 
-        if (! $nextRank) {
-            return false; // Already at top rank
-        }
+            if (! $nextRank) {
+                return false; // Already at top rank
+                }
 
-        // Example requirement checks
-        $leftSum = $this->totla_left_volume;        // adjust to your structure
-        $rightSum = $this->totla_right_volume;
-        $directRefs = $this->directReferrals()->count();
+                // Example requirement checks
+                $leftSum = $this->totla_left_volume;        // adjust to your structure
+                $rightSum = $this->totla_right_volume;
+                $directRefs = $this->directReferrals()->count();
 
-        if ($leftSum >= $nextRank->left_volume && $rightSum >= $nextRank->right_volume && $directRefs >= $nextRank->direct_referrals) {
-            $this->rank_id = $nextRank->id;
-            $this->save();
+                if ($leftSum >= $nextRank->left_volume && $rightSum >= $nextRank->right_volume && $directRefs >= $nextRank->direct_referrals) {
+                    $this->rank_id = $nextRank->id;
+                    $this->save();
 
-            return true; // Rank updated
+                    return true; // Rank updated
+                    }
+        } else {
+            // If no current rank, assign the first rank if requirements are met
+            $firstRank = Rank::orderBy('id')->first();
+            if ($firstRank) {
+                $leftSum = $this->totla_left_volume;        // adjust to your structure
+                $rightSum = $this->totla_right_volume;
+                $directRefs = $this->directReferrals()->count();
+
+                if ($leftSum >= $firstRank->left_volume && $rightSum >= $firstRank->right_volume && $directRefs >= $firstRank->direct_referrals) {
+                    $this->rank_id = $firstRank->id;
+                    $this->save();
+
+                    return true; // Rank updated
+                }
+            }
         }
 
         return false; // Requirements not yet met

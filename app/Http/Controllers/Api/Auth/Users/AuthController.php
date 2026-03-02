@@ -113,7 +113,7 @@ class AuthController extends Controller
             $member = Member::create([
                 'user_id'       => $user->id,
                 'sponsor_id'    =>  $userData['sponsor_id'],
-                'rank_id'       => 1,
+                'rank_id'       => null, // Set default rank or handle as needed
             ]);
 
             // Step 3: Add the new member to the UserTank
