@@ -407,12 +407,12 @@ class MLMController extends Controller
     {
         $user = auth()->user();
         $member = $user->member;
-        $data['left_leg_volume'] = $member->totla_left_volume;
-        $data['right_leg_volume'] = $member->totla_right_volume;
+        $data['left_leg_volume'] = $member->leftSideCvCommissions()->sum('amount');
+        $data['right_leg_volume'] = $member->rightSideCvCommissions()->sum('amount');
         return response()->json([
             'status' => true,
-            'maessage' => 'all network valoum get successfully ',
-            'notwork_voluum' => $data,
+            'message' => 'all network volume get successfully ',
+            'network_volume' => $data,
         ]);
     }
 

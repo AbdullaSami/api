@@ -38,6 +38,15 @@ class Member extends Model
     {
         return $this->hasMany(CvCommission::class);
     }
+
+    public function rightSideCvCommissions()
+    {
+        return $this->cvCommissions()->where('side', 'right');
+    }
+    public function leftSideCvCommissions()
+    {
+        return $this->cvCommissions()->where('side', 'left');
+    }
     public function tokenWallet()
     {
         return $this->hasOne(TokenWallet::class);
