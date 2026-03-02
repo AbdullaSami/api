@@ -364,143 +364,149 @@ class MLMController extends Controller
             \Log::error('Error applying indirect CV: ' . $e->getMessage());
         }
     }
+    // private function processUplinesCommission($uplines, $directSponsor, $referral, $packageCv)
+    // {
+    //     \Log::info("Checking uplines for referral ID: {$referral->id}, Package CV: {$packageCv}");
+
+    //     $upline = $uplines;
+    //     while ($upline) {
+    //         try {
+
+    //             $referralId = $referral->id;
+
+    //             // Cache leg members to avoid multiple DB/recursive calls
+    //             $leftLegMembers  = $upline->left_leg_id
+    //                 ? $this->getLegMembers($upline->left_leg_id)
+    //                 : [];
+
+    //             $rightLegMembers = $upline->right_leg_id
+    //                 ? $this->getLegMembers($upline->right_leg_id)
+    //                 : [];
+
+    //             $belongsLeft  = $upline->left_leg_id == $referralId
+    //                 || in_array($referralId, $leftLegMembers);
+
+    //             $belongsRight = $upline->right_leg_id == $referralId
+    //                 || in_array($referralId, $rightLegMembers);
+
+    //             \Log::info("Processing upline ID: {$upline->id}", [
+    //                 'belongsLeft' => $belongsLeft,
+    //                 'belongsRight' => $belongsRight,
+    //                 'packageCv' => $packageCv
+    //             ]);
+
+    //             $updated = false;
+
+    //             \DB::transaction(function () use (
+    //                 $upline,
+    //                 $referral,
+    //                 $packageCv,
+    //                 $belongsLeft,
+    //                 $belongsRight,
+    //                 &$updated
+    //             ) {
+
+    //                 if ($belongsLeft) {
+    //                     $upline->totla_left_volume += $packageCv;
+
+    //                     CvCommission::create([
+    //                         'member_id' => $upline->id,
+    //                         'package_id' => $referral->subscription->package->id,
+    //                         'side' => 'left',
+    //                         'amount' => $packageCv,
+    //                     ]);
+
+    //                     $updated = true;
+    //                 }
+
+    //                 if ($belongsRight) {
+    //                     $upline->totla_right_volume += $packageCv;
+
+    //                     CvCommission::create([
+    //                         'member_id' => $upline->id,
+    //                         'package_id' => $referral->subscription->package->id,
+    //                         'side' => 'right',
+    //                         'amount' => $packageCv,
+    //                     ]);
+
+    //                     $updated = true;
+    //                 }
+
+    //                 // Keep your original logic: always increase current_cv
+    //                 $upline->current_cv += $packageCv;
+
+    //                 if ($updated || $packageCv > 0) {
+    //                     $upline->save();
+    //                 }
+    //             });
+
+    //             \Log::info("Upline ID: {$upline->id} processed successfully.");
+    //         } catch (\Throwable $e) {
+    //             \Log::error("Error processing upline ID {$upline->id}: " . $e->getMessage(), [
+    //                 'trace' => $e->getTraceAsString()
+    //             ]);
+    //         }
+
+    //         $upline = $upline->sponsor; // Move up to the next upline
+    //     }
+    // }
+
     private function processUplinesCommission($uplines, $directSponsor, $referral, $packageCv)
     {
-        \Log::info("Checking uplines for referral ID: {$referral->id}, Package CV: {$packageCv}");
+        \Log::info("Cheking uplines for referral ID: {$referral->id}, Package CV: {$packageCv}, Uplines: {$uplines}");
 
         $upline = $uplines;
         while ($upline) {
             try {
 
+                // Skip the direct sponsor for binary commission
+                // if ($upline->id === $directSponsor->id) {
+                //     continue;
+                // }
+
                 $referralId = $referral->id;
+                // Check which leg the referral belongs to
+                $belongsLeft  = $upline->left_leg_id == $referralId ||
+                    in_array($referralId, $this->getLegMembers($upline->left_leg_id));
+                $belongsRight = $upline->right_leg_id == $referralId ||
+                    in_array($referralId, $this->getLegMembers($upline->right_leg_id));
+                \Log::info("Processing upline ID: {$upline->id}, belongsLeft: {$belongsLeft}, belongsRight: {$belongsRight}, package CV: {$packageCv}");
 
-                // Cache leg members to avoid multiple DB/recursive calls
-                $leftLegMembers  = $upline->left_leg_id
-                    ? $this->getLegMembers($upline->left_leg_id)
-                    : [];
-
-                $rightLegMembers = $upline->right_leg_id
-                    ? $this->getLegMembers($upline->right_leg_id)
-                    : [];
-
-                $belongsLeft  = $upline->left_leg_id == $referralId
-                    || in_array($referralId, $leftLegMembers);
-
-                $belongsRight = $upline->right_leg_id == $referralId
-                    || in_array($referralId, $rightLegMembers);
-
-                \Log::info("Processing upline ID: {$upline->id}", [
-                    'belongsLeft' => $belongsLeft,
-                    'belongsRight' => $belongsRight,
-                    'packageCv' => $packageCv
-                ]);
-
-                $updated = false;
-
-                \DB::transaction(function () use (
-                    $upline,
-                    $referral,
-                    $packageCv,
-                    $belongsLeft,
-                    $belongsRight,
-                    &$updated
-                ) {
-
-                    if ($belongsLeft) {
-                        $upline->totla_left_volume += $packageCv;
-
-                        CvCommission::create([
-                            'member_id' => $upline->id,
-                            'package_id' => $referral->subscription->package->id,
-                            'side' => 'left',
-                            'amount' => $packageCv,
-                        ]);
-
-                        $updated = true;
-                    }
-
-                    if ($belongsRight) {
-                        $upline->totla_right_volume += $packageCv;
-
-                        CvCommission::create([
-                            'member_id' => $upline->id,
-                            'package_id' => $referral->subscription->package->id,
-                            'side' => 'right',
-                            'amount' => $packageCv,
-                        ]);
-
-                        $updated = true;
-                    }
-
-                    // Keep your original logic: always increase current_cv
-                    $upline->current_cv += $packageCv;
-
-                    if ($updated || $packageCv > 0) {
-                        $upline->save();
-                    }
-                });
-
-                \Log::info("Upline ID: {$upline->id} processed successfully.");
-            } catch (\Throwable $e) {
-                \Log::error("Error processing upline ID {$upline->id}: " . $e->getMessage(), [
-                    'trace' => $e->getTraceAsString()
-                ]);
+                if ($belongsLeft) {
+                    $upline->totla_left_volume += $packageCv;
+                    \Log::info("Upline ID: {$upline->id} - Adding {$packageCv} CV to left leg. New left volume: {$upline->totla_left_volume}");
+                    CvCommission::create([
+                        'member_id' => $upline->id,
+                        'package_id' => $referral->subscription->package->id,
+                        'amount' => $packageCv,
+                        'side' => 'left',
+                    ]);
+                    \Log::info("CvCommission created for upline ID: {$upline->id} on left leg with amount: {$packageCv}");
+                }
+                if ($belongsRight) {
+                    $upline->totla_right_volume += $packageCv;
+                    \Log::info("Upline ID: {$upline->id} - Adding {$packageCv} CV to right leg. New right volume: {$upline->totla_right_volume}");
+                    CvCommission::create([
+                        'member_id' => $upline->id,
+                        'package_id' => $referral->subscription->package->id,
+                        'amount' => $packageCv,
+                        'side' => 'right',
+                    ]);
+                    \Log::info("CvCommission created for upline ID: {$upline->id} on right leg with amount: {$packageCv}");
+                }
+                $upline->current_cv += $packageCv;
+                \Log::info("Upline ID: {$upline->id} - Adding {$packageCv} CV to current CV. New current CV: {$upline->current_cv}");
+                $upline->save();
+                \Log::info("Upline ID: {$upline->id} - CV update saved successfully.");
+            } catch (\Exception $e) {
+                // Log the error for debugging
+                \Log::error('Error processing uplines commission: ' . $e->getMessage());
             }
 
-            $upline = $upline->sponsor; // Move up to the next upline
+                $upline = $upline->sponsor; // Move up to the next upline
+                \Log::info("Moving to next upline. Current upline ID: " . ($upline ? $upline->id : 'None'));
         }
     }
-    // private function processUplinesCommission($uplines, $directSponsor, $referral, $packageCv)
-    // {
-    //     \Log::info("Cheking uplines for referral ID: {$referral->id}, Package CV: {$packageCv}, Uplines: {$uplines}");
-    //     foreach ($uplines as $upline) {
-    //         try {
-
-    //             // Skip the direct sponsor for binary commission
-    //             // if ($upline->id === $directSponsor->id) {
-    //             //     continue;
-    //             // }
-
-    //             $referralId = $referral->id;
-    //             // Check which leg the referral belongs to
-    //             $belongsLeft  = $upline->left_leg_id == $referralId ||
-    //                 in_array($referralId, $this->getLegMembers($upline->left_leg_id));
-    //             $belongsRight = $upline->right_leg_id == $referralId ||
-    //                 in_array($referralId, $this->getLegMembers($upline->right_leg_id));
-    //             \Log::info("Processing upline ID: {$upline->id}, belongsLeft: {$belongsLeft}, belongsRight: {$belongsRight}, package CV: {$packageCv}");
-
-    //             if ($belongsLeft) {
-    //                 $upline->totla_left_volume += $packageCv;
-    //                 \Log::info("Upline ID: {$upline->id} - Adding {$packageCv} CV to left leg. New left volume: {$upline->totla_left_volume}");
-    //                 CvCommission::create([
-    //                     'member_id' => $upline->id,
-    //                     'package_id' => $referral->subscription->package->id,
-    //                     'amount' => $packageCv,
-    //                     'side' => 'left',
-    //                 ]);
-    //                 \Log::info("CvCommission created for upline ID: {$upline->id} on left leg with amount: {$packageCv}");
-    //             }
-    //             if ($belongsRight) {
-    //                 $upline->totla_right_volume += $packageCv;
-    //                 \Log::info("Upline ID: {$upline->id} - Adding {$packageCv} CV to right leg. New right volume: {$upline->totla_right_volume}");
-    //                 CvCommission::create([
-    //                     'member_id' => $upline->id,
-    //                     'package_id' => $referral->subscription->package->id,
-    //                     'amount' => $packageCv,
-    //                     'side' => 'right',
-    //                 ]);
-    //                 \Log::info("CvCommission created for upline ID: {$upline->id} on right leg with amount: {$packageCv}");
-    //             }
-    //             $upline->current_cv += $packageCv;
-    //             \Log::info("Upline ID: {$upline->id} - Adding {$packageCv} CV to current CV. New current CV: {$upline->current_cv}");
-    //             $upline->save();
-    //             \Log::info("Upline ID: {$upline->id} - CV update saved successfully.");
-    //         } catch (\Exception $e) {
-    //             // Log the error for debugging
-    //             \Log::error('Error processing uplines commission: ' . $e->getMessage());
-    //         }
-    //     }
-    // }
 
     // end abdulla edits
     private function getLegMembers($legId)
