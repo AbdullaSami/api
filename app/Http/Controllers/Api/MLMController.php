@@ -24,181 +24,41 @@ class MLMController extends Controller
     use ApiResponseTrait;
 
     // abdulla edits start here
-    // public function placeReferral(PlaceReferralRequest $request)
-    // {
-    //     $sponsor     = auth()->user()->member;
-    //     $referral    = Member::findOrFail($request->referral_id);
-
-    //     // Validate referral before processing
-    //     $validationError = $this->validateReferralPlacement($sponsor, $referral);
-    //     if ($validationError) {
-    //         return $this->failedResponse($validationError, 402);
-    //     }
-
-    //     // Get referral CV (must have subscription)
-    //     $subscription   = $referral->subscription;
-    //     $packageCv      = $subscription->package->cv;
-
-    //     // Determine where to place referral (left or right)
-    //     $placementNode = $this->resolvePlacementNode($sponsor, $referral, $request->placement);
-    //     if ($placementNode instanceof JsonResponse) {
-    //         return $placementNode; // error response
-    //     }
-
-    //     // Apply the placement
-    //     $this->applyPlacement($sponsor, $placementNode, $referral, $request->placement, $packageCv);
-
-    //     $uplines = $referral->getAllTreeUplines();
-
-    //     DB::beginTransaction();
-
-    //     try {
-
-    //         // Remove referral from tank if exists
-    //         UserTank::where('member_id', $referral->id)->delete();
-
-    //         // Process uplines commissions (only for first-time placement)
-    //         if ($referral->is_first === 'yes') {
-    //             $this->processUplinesCommission(
-    //                 $uplines,
-    //                 $sponsor,
-    //                 $referral,
-    //                 $packageCv
-    //             );
-
-    //             Referal::create([
-    //                 'sponsor_id'  => $sponsor->id,
-    //                 'referral_id' => $referral->id,
-    //                 'leg'         => $request->placement,
-    //             ]);
-
-    //             $referral->is_first = 'no';
-    //             $referral->save();
-    //         } else {
-    //             $this->applyIndirectCV($sponsor->id);
-    //         }
-    //         // Apply Direct CV to sponsor
-    //         // if ($request->placement === 'left') {
-    //         //     $sponsor->totla_left_volume += $packageCv;
-    //         // } else {
-    //         //     $sponsor->totla_right_volume += $packageCv;
-    //         // }
-    //         $sponsor->current_cv += $packageCv;
-    //         // re-save sponsor after updates
-    //         $sponsor->save();
-
-    //         // upgrade sponsor rank if eligible
-    //         $sponsor->upgradeRank();
-
-    //         // Apply indirect CV to all uplines
-    //         DB::commit();
-
-    //         return $this->successResponse(
-    //             "Referral '{$referral->user->name}' added under sponsor '{$sponsor->user->name}' in the {$request->placement} leg.",
-    //             'sponsor',
-    //             $sponsor
-    //         );
-    //     } catch (\Exception $e) {
-
-    //         DB::rollBack();
-    //         return $this->failedResponse('Process failed: ' . $e->getMessage(), 500);
-    //     }
-    // }
-
     public function placeReferral(PlaceReferralRequest $request)
     {
-        \Log::info('===== START placeReferral =====', [
-            'auth_user_id' => auth()->id(),
-            'referral_id'  => $request->referral_id,
-            'placement'    => $request->placement
-        ]);
+        $sponsor     = auth()->user()->member;
+        $referral    = Member::findOrFail($request->referral_id);
+
+        // Validate referral before processing
+        $validationError = $this->validateReferralPlacement($sponsor, $referral);
+        if ($validationError) {
+            return $this->failedResponse($validationError, 402);
+        }
+
+        // Get referral CV (must have subscription)
+        $subscription   = $referral->subscription;
+        $packageCv      = $subscription->package->cv;
+
+        // Determine where to place referral (left or right)
+        $placementNode = $this->resolvePlacementNode($sponsor, $referral, $request->placement);
+        if ($placementNode instanceof JsonResponse) {
+            return $placementNode; // error response
+        }
+
+        // Apply the placement
+        $this->applyPlacement($sponsor, $placementNode, $referral, $request->placement, $packageCv);
+
+        $uplines = $referral->getAllTreeUplines();
 
         DB::beginTransaction();
 
         try {
 
-            // 1️⃣ Get Sponsor & Referral
-            $sponsor  = auth()->user()->member;
-            $referral = Member::findOrFail($request->referral_id);
-
-            \Log::info('Sponsor & Referral Loaded', [
-                'sponsor_id'  => $sponsor->id,
-                'referral_id' => $referral->id
-            ]);
-
-            // 2️⃣ Validate Referral Placement
-            $validationError = $this->validateReferralPlacement($sponsor, $referral);
-
-            if ($validationError) {
-                \Log::warning('Referral validation failed', [
-                    'error' => $validationError
-                ]);
-
-                DB::rollBack();
-                return $this->failedResponse($validationError, 402);
-            }
-
-            // 3️⃣ Validate Subscription
-            if (!$referral->subscription || !$referral->subscription->package) {
-                \Log::error('Referral has no valid subscription/package', [
-                    'referral_id' => $referral->id
-                ]);
-
-                DB::rollBack();
-                return $this->failedResponse('Referral has no active package.', 400);
-            }
-
-            $subscription = $referral->subscription;
-            $packageCv    = $subscription->package->cv;
-
-            \Log::info('Package CV Retrieved', [
-                'package_id' => $subscription->package->id,
-                'cv'         => $packageCv
-            ]);
-
-            // 4️⃣ Resolve Placement Node
-            $placementNode = $this->resolvePlacementNode(
-                $sponsor,
-                $referral,
-                $request->placement
-            );
-
-            if ($placementNode instanceof JsonResponse) {
-                \Log::warning('Placement node resolution failed');
-                DB::rollBack();
-                return $placementNode;
-            }
-
-            \Log::info('Placement Node Resolved', [
-                'node_id' => $placementNode->id
-            ]);
-
-            // 5️⃣ Apply Placement
-            $this->applyPlacement(
-                $sponsor,
-                $placementNode,
-                $referral,
-                $request->placement,
-                $packageCv
-            );
-
-            \Log::info('Placement Applied Successfully');
-
-            // 6️⃣ Get Uplines
-            // $uplines = $referral->getAllTreeUplines();
-            $uplines = $referral->sponsor;
-
-
-            // 7️⃣ Remove from Tank
+            // Remove referral from tank if exists
             UserTank::where('member_id', $referral->id)->delete();
 
-            \Log::info('Referral removed from tank if existed');
-
-            // 8️⃣ First-Time Logic
+            // Process uplines commissions (only for first-time placement)
             if ($referral->is_first === 'yes') {
-
-                \Log::info('Processing first-time placement logic');
-
                 $this->processUplinesCommission(
                     $uplines,
                     $sponsor,
@@ -212,55 +72,39 @@ class MLMController extends Controller
                     'leg'         => $request->placement,
                 ]);
 
-                \Log::info('Referral record created');
-
                 $referral->is_first = 'no';
                 $referral->save();
-
-                \Log::info('Referral marked as not first anymore');
-            } else {
-
-                \Log::info('Applying indirect CV logic');
+            }else {
                 $this->applyIndirectCV($sponsor->id);
             }
-
-            // 9️⃣ Apply Direct CV to Sponsor
+            // Apply Direct CV to sponsor
+            // if ($request->placement === 'left') {
+            //     $sponsor->totla_left_volume += $packageCv;
+            // } else {
+            //     $sponsor->totla_right_volume += $packageCv;
+            // }
             $sponsor->current_cv += $packageCv;
+            // re-save sponsor after updates
             $sponsor->save();
 
-            \Log::info('Sponsor CV Updated', [
-                'new_current_cv' => $sponsor->current_cv
-            ]);
-
-            // 🔟 Upgrade Rank
+            // upgrade sponsor rank if eligible
             $sponsor->upgradeRank();
 
-            \Log::info('Sponsor rank upgrade checked');
-
+            // Apply indirect CV to all uplines
             DB::commit();
-
-            \Log::info('===== placeReferral SUCCESS =====');
 
             return $this->successResponse(
                 "Referral '{$referral->user->name}' added under sponsor '{$sponsor->user->name}' in the {$request->placement} leg.",
                 'sponsor',
                 $sponsor
             );
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
 
             DB::rollBack();
-
-            \Log::error('===== placeReferral FAILED =====', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return $this->failedResponse(
-                'Process failed: ' . $e->getMessage(),
-                500
-            );
+            return $this->failedResponse('Process failed: ' . $e->getMessage(), 500);
         }
     }
+
     private function validateReferralPlacement($sponsor, $referral)
     {
         if (!$referral->subscription) {
@@ -336,27 +180,27 @@ class MLMController extends Controller
             while ($member->sponsor) {
                 $referal = $member->directSponsor;
                 $sponsor = $referal->sponsorMember;
-                \Log::info(" before: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
+                // \Log::info(" before: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 if ($referal->leg == 'left') {
                     $sponsor->totla_left_volume += $package->cv;
-                    CvCommission::create([
-                        'member_id' => $sponsor->id,
-                        'package_id' => $package->id,
-                        'amount' => $package->cv,
-                        'side' => 'left',
-                    ]);
+                    // CvCommission::create([
+                    //     'member_id' => $sponsor->id,
+                    //     'package_id' => $package->id,
+                    //     'side' => 'left',
+                    //     'amount' => $package->cv,
+                    // ]);
                 } else {
                     $sponsor->totla_right_volume += $package->cv;
-                    CvCommission::create([
-                        'member_id' => $sponsor->id,
-                        'package_id' => $package->id,
-                        'amount' => $package->cv,
-                        'side' => 'right',
-                    ]);
+                    // CvCommission::create([
+                    //     'member_id' => $sponsor->id,
+                    //     'package_id' => $package->id,
+                    //     'side' => 'right',
+                    //     'amount' => $package->cv,
+                    // ]);
                 }
                 $sponsor->current_cv += $package->cv;
                 $sponsor->save();
-                \Log::info(" after: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
+                // \Log::info(" after: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 $member = $sponsor;
             }
         } catch (\Exception $e) {
@@ -364,147 +208,48 @@ class MLMController extends Controller
             \Log::error('Error applying indirect CV: ' . $e->getMessage());
         }
     }
-    // private function processUplinesCommission($uplines, $directSponsor, $referral, $packageCv)
-    // {
-    //     \Log::info("Checking uplines for referral ID: {$referral->id}, Package CV: {$packageCv}");
-
-    //     $upline = $uplines;
-    //     while ($upline) {
-    //         try {
-
-    //             $referralId = $referral->id;
-
-    //             // Cache leg members to avoid multiple DB/recursive calls
-    //             $leftLegMembers  = $upline->left_leg_id
-    //                 ? $this->getLegMembers($upline->left_leg_id)
-    //                 : [];
-
-    //             $rightLegMembers = $upline->right_leg_id
-    //                 ? $this->getLegMembers($upline->right_leg_id)
-    //                 : [];
-
-    //             $belongsLeft  = $upline->left_leg_id == $referralId
-    //                 || in_array($referralId, $leftLegMembers);
-
-    //             $belongsRight = $upline->right_leg_id == $referralId
-    //                 || in_array($referralId, $rightLegMembers);
-
-    //             \Log::info("Processing upline ID: {$upline->id}", [
-    //                 'belongsLeft' => $belongsLeft,
-    //                 'belongsRight' => $belongsRight,
-    //                 'packageCv' => $packageCv
-    //             ]);
-
-    //             $updated = false;
-
-    //             \DB::transaction(function () use (
-    //                 $upline,
-    //                 $referral,
-    //                 $packageCv,
-    //                 $belongsLeft,
-    //                 $belongsRight,
-    //                 &$updated
-    //             ) {
-
-    //                 if ($belongsLeft) {
-    //                     $upline->totla_left_volume += $packageCv;
-
-    //                     CvCommission::create([
-    //                         'member_id' => $upline->id,
-    //                         'package_id' => $referral->subscription->package->id,
-    //                         'side' => 'left',
-    //                         'amount' => $packageCv,
-    //                     ]);
-
-    //                     $updated = true;
-    //                 }
-
-    //                 if ($belongsRight) {
-    //                     $upline->totla_right_volume += $packageCv;
-
-    //                     CvCommission::create([
-    //                         'member_id' => $upline->id,
-    //                         'package_id' => $referral->subscription->package->id,
-    //                         'side' => 'right',
-    //                         'amount' => $packageCv,
-    //                     ]);
-
-    //                     $updated = true;
-    //                 }
-
-    //                 // Keep your original logic: always increase current_cv
-    //                 $upline->current_cv += $packageCv;
-
-    //                 if ($updated || $packageCv > 0) {
-    //                     $upline->save();
-    //                 }
-    //             });
-
-    //             \Log::info("Upline ID: {$upline->id} processed successfully.");
-    //         } catch (\Throwable $e) {
-    //             \Log::error("Error processing upline ID {$upline->id}: " . $e->getMessage(), [
-    //                 'trace' => $e->getTraceAsString()
-    //             ]);
-    //         }
-
-    //         $upline = $upline->sponsor; // Move up to the next upline
-    //     }
-    // }
-
     private function processUplinesCommission($uplines, $directSponsor, $referral, $packageCv)
     {
-        \Log::info("Cheking uplines for referral ID: {$referral->id}, Package CV: {$packageCv}, Uplines: {$uplines}");
+        foreach ($uplines as $upline) {
 
-        $upline = $uplines;
-        while ($upline) {
-            try {
+            // Skip the direct sponsor for binary commission
+            // if ($upline->id === $directSponsor->id) {
+            //     continue;
+            // }
 
-                // Skip the direct sponsor for binary commission
-                // if ($upline->id === $directSponsor->id) {
-                //     continue;
-                // }
+            $referralId = $referral->id;
 
-                $referralId = $referral->id;
-                // Check which leg the referral belongs to
-                $belongsLeft  = $upline->left_leg_id == $referralId ||
-                    in_array($referralId, $this->getLegMembers($upline->left_leg_id));
-                $belongsRight = $upline->right_leg_id == $referralId ||
-                    in_array($referralId, $this->getLegMembers($upline->right_leg_id));
-                \Log::info("Processing upline ID: {$upline->id}, belongsLeft: {$belongsLeft}, belongsRight: {$belongsRight}, package CV: {$packageCv}");
+            // Check which leg the referral belongs to
+            $belongsLeft  = $upline->left_leg_id == $referralId ||
+                in_array($referralId, $this->getLegMembers($upline->left_leg_id));
 
-                if ($belongsLeft) {
-                    $upline->totla_left_volume += $packageCv;
-                    \Log::info("Upline ID: {$upline->id} - Adding {$packageCv} CV to left leg. New left volume: {$upline->totla_left_volume}");
-                    CvCommission::create([
-                        'member_id' => $upline->id,
-                        'package_id' => $referral->subscription->package->id,
-                        'amount' => $packageCv,
-                        'side' => 'left',
-                    ]);
-                    \Log::info("CvCommission created for upline ID: {$upline->id} on left leg with amount: {$packageCv}");
-                }
-                if ($belongsRight) {
-                    $upline->totla_right_volume += $packageCv;
-                    \Log::info("Upline ID: {$upline->id} - Adding {$packageCv} CV to right leg. New right volume: {$upline->totla_right_volume}");
-                    CvCommission::create([
-                        'member_id' => $upline->id,
-                        'package_id' => $referral->subscription->package->id,
-                        'amount' => $packageCv,
-                        'side' => 'right',
-                    ]);
-                    \Log::info("CvCommission created for upline ID: {$upline->id} on right leg with amount: {$packageCv}");
-                }
-                $upline->current_cv += $packageCv;
-                \Log::info("Upline ID: {$upline->id} - Adding {$packageCv} CV to current CV. New current CV: {$upline->current_cv}");
-                $upline->save();
-                \Log::info("Upline ID: {$upline->id} - CV update saved successfully.");
-            } catch (\Exception $e) {
-                // Log the error for debugging
-                \Log::error('Error processing uplines commission: ' . $e->getMessage());
+            $belongsRight = $upline->right_leg_id == $referralId ||
+                in_array($referralId, $this->getLegMembers($upline->right_leg_id));
+
+            if ($belongsLeft) {
+                $upline->totla_left_volume += $packageCv;
+
+                // CvCommission::create([
+                //     'member_id' => $upline->id,
+                //     'package_id' => $referral->subscription->package->id,
+                //     'side' => 'left',
+                //     'amount' => $packageCv,
+                // ]);
             }
 
-                $upline = $upline->sponsor; // Move up to the next upline
-                \Log::info("Moving to next upline. Current upline ID: " . ($upline ? $upline->id : 'None'));
+            if ($belongsRight) {
+                $upline->totla_right_volume += $packageCv;
+
+                // CvCommission::create([
+                //     'member_id' => $upline->id,
+                //     'package_id' => $referral->subscription->package->id,
+                //     'side' => 'right',
+                //     'amount' => $packageCv,
+                // ]);
+            }
+
+            $upline->current_cv += $packageCv;
+            $upline->save();
         }
     }
 
