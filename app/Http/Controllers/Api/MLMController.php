@@ -446,6 +446,8 @@ class MLMController extends Controller
                     'trace' => $e->getTraceAsString()
                 ]);
             }
+
+            $upline = $upline->sponsor; // Move up to the next upline
         }
     }
     // private function processUplinesCommission($uplines, $directSponsor, $referral, $packageCv)
