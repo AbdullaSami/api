@@ -229,23 +229,23 @@ class MLMController extends Controller
             if ($belongsLeft) {
                 $upline->totla_left_volume += $packageCv;
 
-                // CvCommission::create([
-                //     'member_id' => $upline->id,
-                //     'package_id' => $referral->subscription->package->id,
-                //     'side' => 'left',
-                //     'amount' => $packageCv,
-                // ]);
+                CvCommission::create([
+                    'member_id' => $upline->id,
+                    'package_id' => $referral->subscription->package->id,
+                    'side' => 'left',
+                    'amount' => $packageCv,
+                ]);
             }
 
             if ($belongsRight) {
                 $upline->totla_right_volume += $packageCv;
 
-                // CvCommission::create([
-                //     'member_id' => $upline->id,
-                //     'package_id' => $referral->subscription->package->id,
-                //     'side' => 'right',
-                //     'amount' => $packageCv,
-                // ]);
+                CvCommission::create([
+                    'member_id' => $upline->id,
+                    'package_id' => $referral->subscription->package->id,
+                    'side' => 'right',
+                    'amount' => $packageCv,
+                ]);
             }
 
             $upline->current_cv += $packageCv;
