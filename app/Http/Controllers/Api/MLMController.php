@@ -186,7 +186,7 @@ class MLMController extends Controller
 
             // 6️⃣ Get Uplines
             // $uplines = $referral->getAllTreeUplines();
-            $uplines = optional($referral->sponsor);
+            $uplines = $referral->sponsor;
 
 
             // 7️⃣ Remove from Tank
