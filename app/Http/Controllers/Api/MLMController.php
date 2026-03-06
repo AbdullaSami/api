@@ -38,6 +38,7 @@ class MLMController extends Controller
         // Get referral CV (must have subscription)
         $subscription   = $referral->subscription;
         $packageCv      = $subscription->package->cv;
+        $packageId      = $subscription->package->id;
 
         // Determine where to place referral (left or right)
         $placementNode = $this->resolvePlacementNode($sponsor, $referral, $request->placement);
@@ -61,7 +62,7 @@ class MLMController extends Controller
             if ($referral->is_first === 'yes') {
                 $this->processUplinesCommission(
                     $uplines,
-                    $sponsor,
+                    $packageId,
                     $referral,
                     $packageCv
                 );
@@ -183,20 +184,20 @@ class MLMController extends Controller
                 // \Log::info(" before: current cv: {$sponsor->current_cv}, left leg: {$sponsor->totla_left_volume}, right leg: {$sponsor->totla_right_volume}");
                 if ($referal->leg == 'left') {
                     $sponsor->totla_left_volume += $package->cv;
-                    // CvCommission::create([
-                    //     'member_id' => $sponsor->id,
-                    //     'package_id' => $package->id,
-                    //     'side' => 'left',
-                    //     'amount' => $package->cv,
-                    // ]);
+                    CvCommission::create([
+                        'member_id' => $sponsor->id,
+                        'package_id' => $package->id,
+                        'side' => 'left',
+                        'amount' => $package->cv,
+                    ]);
                 } else {
                     $sponsor->totla_right_volume += $package->cv;
-                    // CvCommission::create([
-                    //     'member_id' => $sponsor->id,
-                    //     'package_id' => $package->id,
-                    //     'side' => 'right',
-                    //     'amount' => $package->cv,
-                    // ]);
+                    CvCommission::create([
+                        'member_id' => $sponsor->id,
+                        'package_id' => $package->id,
+                        'side' => 'right',
+                        'amount' => $package->cv,
+                    ]);
                 }
                 $sponsor->current_cv += $package->cv;
                 $sponsor->save();
@@ -208,7 +209,7 @@ class MLMController extends Controller
             \Log::error('Error applying indirect CV: ' . $e->getMessage());
         }
     }
-    private function processUplinesCommission($uplines, $directSponsor, $referral, $packageCv)
+    private function processUplinesCommission($uplines, $packageId, $referral, $packageCv)
     {
         foreach ($uplines as $upline) {
 
@@ -231,7 +232,7 @@ class MLMController extends Controller
 
                 CvCommission::create([
                     'member_id' => $upline->id,
-                    'package_id' => $referral->subscription->package->id,
+                    'package_id' => $packageId,
                     'side' => 'left',
                     'amount' => $packageCv,
                 ]);
@@ -242,7 +243,7 @@ class MLMController extends Controller
 
                 CvCommission::create([
                     'member_id' => $upline->id,
-                    'package_id' => $referral->subscription->package->id,
+                    'package_id' => $packageId,
                     'side' => 'right',
                     'amount' => $packageCv,
                 ]);
