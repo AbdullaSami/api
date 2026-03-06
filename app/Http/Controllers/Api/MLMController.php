@@ -229,17 +229,19 @@ class MLMController extends Controller
 
             if ($belongsLeft) {
                 $upline->totla_left_volume += $packageCv;
-
+                \Log::info("Adding {$packageCv} CV to left leg of upline ID: {$upline->id}, current left volume: {$upline->totla_left_volume}");
                 CvCommission::create([
                     'member_id' => $upline->id,
                     'package_id' => $packageId,
                     'side' => 'left',
                     'amount' => $packageCv,
                 ]);
+                \Log::info("CvCommission created for upline ID: {$upline->id} on left leg with amount: {$packageCv}");
             }
 
             if ($belongsRight) {
                 $upline->totla_right_volume += $packageCv;
+                \Log::info("Adding {$packageCv} CV to right leg of upline ID: {$upline->id}, current right volume: {$upline->totla_right_volume}");
 
                 CvCommission::create([
                     'member_id' => $upline->id,
@@ -247,6 +249,7 @@ class MLMController extends Controller
                     'side' => 'right',
                     'amount' => $packageCv,
                 ]);
+                \Log::info("CvCommission created for upline ID: {$upline->id} on right leg with amount: {$packageCv}");
             }
 
             $upline->current_cv += $packageCv;
