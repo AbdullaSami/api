@@ -47,7 +47,7 @@ class MLMController extends Controller
         }
 
         // Apply the placement
-        $this->applyPlacement($sponsor, $placementNode, $referral, $request->placement, $packageCv);
+        $this->applyPlacement($sponsor, $packageId,$placementNode, $referral, $request->placement, $packageCv);
 
         $uplines = $referral->getAllTreeUplines();
 
@@ -62,6 +62,7 @@ class MLMController extends Controller
             if ($referral->is_first === 'yes') {
                 $this->processUplinesCommission(
                     $uplines,
+                    $sponsor,
                     $packageId,
                     $referral,
                     $packageCv
@@ -150,16 +151,38 @@ class MLMController extends Controller
                 : $sponsor;
         }
     }
-    private function applyPlacement($sponsor, $placementNode, $referral, $placement, $packageCv)
+    private function applyPlacement($sponsor, $packageId, $placementNode, $referral, $placement, $packageCv)
     {
         if ($placementNode->id === $sponsor->id) {
             // Place directly under sponsor
             if ($placement === 'left') {
                 $sponsor->left_leg_id = $referral->id;
                 $sponsor->totla_left_volume += $packageCv;
+                try {
+                    CvCommission::create([
+                        'member_id' => $sponsor->id,
+                        'package_id' => $packageId,
+                        'side' => 'left',
+                        'amount' => $packageCv,
+                    ]);
+                    \Log::info("CvCommission created for upline ID: {$sponsor->id} on left leg with amount: {$packageCv}");
+                } catch (\Exception $e) {
+                    \Log::error("Failed to create CvCommission for upline ID: {$sponsor->id} on left leg. Error: " . $e->getMessage());
+                }
             } else {
                 $sponsor->right_leg_id = $referral->id;
                 $sponsor->totla_right_volume += $packageCv;
+                try {
+                    CvCommission::create([
+                        'member_id' => $sponsor->id,
+                        'package_id' => $packageId,
+                        'side' => 'right',
+                        'amount' => $packageCv,
+                    ]);
+                    \Log::info("CvCommission created for upline ID: {$sponsor->id} on right leg with amount: {$packageCv}");
+                } catch (\Exception $e) {
+                    \Log::error("Failed to create CvCommission for upline ID: {$sponsor->id} on right leg. Error: " . $e->getMessage());
+                }
             }
             return;
         }
@@ -209,14 +232,14 @@ class MLMController extends Controller
             \Log::error('Error applying indirect CV: ' . $e->getMessage());
         }
     }
-    private function processUplinesCommission($uplines, $packageId, $referral, $packageCv)
+    private function processUplinesCommission($uplines, $directSponsor, $packageId, $referral, $packageCv)
     {
         foreach ($uplines as $upline) {
 
             // Skip the direct sponsor for binary commission
-            // if ($upline->id === $directSponsor->id) {
-            //     continue;
-            // }
+            if ($upline->id === $directSponsor->id) {
+                continue;
+            }
 
             $referralId = $referral->id;
 
