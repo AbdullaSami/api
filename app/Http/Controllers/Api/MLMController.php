@@ -47,7 +47,7 @@ class MLMController extends Controller
         }
 
         // Apply the placement
-        $this->applyPlacement($sponsor, $packageId,$placementNode, $referral, $request->placement, $packageCv);
+        $this->applyPlacement($sponsor, $packageId, $placementNode, $referral, $request->placement, $packageCv);
 
         $uplines = $referral->getAllTreeUplines();
 
@@ -183,6 +183,33 @@ class MLMController extends Controller
                 } catch (\Exception $e) {
                     \Log::error("Failed to create CvCommission for upline ID: {$sponsor->id} on right leg. Error: " . $e->getMessage());
                 }
+            }
+            $sponsor->save();
+
+            if ($placementNode == 'left' && $sponsor->totla_right_volume >= $sponsor->totla_left_volume) {
+                $binaryCommissionValue  = CommissionFactor::where('commission_type', 'binary')->first();
+                // If both equal, apply binary commission
+                \Log::info("Applying binary commission for sponsor ID: {$sponsor->id} on left placement. Left volume: {$sponsor->totla_left_volume}, Right volume: {$sponsor->totla_right_volume}");
+                Commission::create([
+                    'sponsor_id'        => $sponsor->id,
+                    'referral_id'       => $referral->id,
+                    'commission_value'  => $binaryCommissionValue,
+                    'commission_type'   => 'binary',
+                ]);
+                \Log::info("Binary commission created successfully for sponsor ID: {$sponsor->id}");
+            }
+
+            if ($placementNode == 'right' && $sponsor->totla_right_volume <= $sponsor->totla_left_volume) {
+                $binaryCommissionValue  = CommissionFactor::where('commission_type', 'binary')->first();
+                // If both equal, apply binary commission
+                \Log::info("Applying binary commission for sponsor ID: {$sponsor->id} on right placement. Left volume: {$sponsor->totla_left_volume}, Right volume: {$sponsor->totla_right_volume}");
+                Commission::create([
+                    'sponsor_id'        => $sponsor->id,
+                    'referral_id'       => $referral->id,
+                    'commission_value'  => $binaryCommissionValue,
+                    'commission_type'   => 'binary',
+                ]);
+                \Log::info("Binary commission created successfully for sponsor ID: {$sponsor->id}");
             }
             return;
         }
