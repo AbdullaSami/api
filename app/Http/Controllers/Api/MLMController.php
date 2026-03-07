@@ -268,9 +268,9 @@ class MLMController extends Controller
         foreach ($uplines as $upline) {
 
             // Skip the direct sponsor for binary commission
-            // if ($upline->id === $directSponsor->id) {
-            //     continue;
-            // }
+            if ($upline->id === $directSponsor->id) {
+                continue;
+            }
 
             $referralId = $referral->id;
 
