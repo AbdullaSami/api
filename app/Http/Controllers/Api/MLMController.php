@@ -54,7 +54,6 @@ class MLMController extends Controller
         DB::beginTransaction();
 
         try {
-
             // Remove referral from tank if exists
             UserTank::where('member_id', $referral->id)->delete();
 
@@ -79,12 +78,7 @@ class MLMController extends Controller
             } else {
                 $this->applyIndirectCV($sponsor->id);
             }
-            // Apply Direct CV to sponsor
-            // if ($request->placement === 'left') {
-            //     $sponsor->totla_left_volume += $packageCv;
-            // } else {
-            //     $sponsor->totla_right_volume += $packageCv;
-            // }
+
             $sponsor->current_cv += $packageCv;
             // re-save sponsor after updates
             $sponsor->save();
@@ -215,7 +209,6 @@ class MLMController extends Controller
                 ]);
                 \Log::info("Binary commission created successfully for sponsor ID: {$sponsor->id}");
             }
-            return;
         }
 
         // Place deeper in the tree
