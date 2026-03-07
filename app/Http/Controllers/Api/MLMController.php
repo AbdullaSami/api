@@ -172,7 +172,7 @@ class MLMController extends Controller
                         'side' => 'left',
                         'amount' => $packageCv,
                     ]);
-                    \Log::info("CvCommission created for upline ID: {$sponsor->id} on left leg with amount: {$packageCv}");
+                    \Log::info("Direct CvCommission created for upline ID: {$sponsor->id} on left leg with amount: {$packageCv}");
                 } catch (\Exception $e) {
                     \Log::error("Failed to create CvCommission for upline ID: {$sponsor->id} on left leg. Error: " . $e->getMessage());
                 }
@@ -186,7 +186,7 @@ class MLMController extends Controller
                         'side' => 'right',
                         'amount' => $packageCv,
                     ]);
-                    \Log::info("CvCommission created for upline ID: {$sponsor->id} on right leg with amount: {$packageCv}");
+                    \Log::info("Direct CvCommission created for upline ID: {$sponsor->id} on right leg with amount: {$packageCv}");
                 } catch (\Exception $e) {
                     \Log::error("Failed to create CvCommission for upline ID: {$sponsor->id} on right leg. Error: " . $e->getMessage());
                 }
@@ -294,7 +294,7 @@ class MLMController extends Controller
                         'side' => 'left',
                         'amount' => $packageCv,
                     ]);
-                    \Log::info("CvCommission created for upline ID: {$upline->id} on left leg with amount: {$packageCv}");
+                    \Log::info("inDirect CvCommission created for upline ID: {$upline->id} on left leg with amount: {$packageCv}");
                 } catch (\Exception $e) {
                     \Log::error("Failed to create CvCommission for upline ID: {$upline->id} on left leg. Error: " . $e->getMessage());
                 }
@@ -312,7 +312,7 @@ class MLMController extends Controller
                         'side' => 'right',
                         'amount' => $packageCv,
                     ]);
-                    \Log::info("CvCommission created for upline ID: {$upline->id} on right leg with amount: {$packageCv}");
+                    \Log::info("inDirect CvCommission created for upline ID: {$upline->id} on right leg with amount: {$packageCv}");
                 } catch (\Exception $e) {
                     \Log::error("Failed to create CvCommission for upline ID: {$upline->id} on right leg. Error: " . $e->getMessage());
                 }
