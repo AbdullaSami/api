@@ -153,6 +153,13 @@ class MLMController extends Controller
     }
     private function applyPlacement($sponsor, $packageId, $placementNode, $referral, $placement, $packageCv)
     {
+
+    // Calculate binary commission value 
+        $commissionFactor  = CommissionFactor::first();
+        $binaryRate = $commissionFactor->binary_rate;
+        $binaryCommissionValue = ($packageCv * $binaryRate) / 100;
+
+        // start placing directly under sponsor if placement node is sponsor itself and apply binary commission if both legs have equal volume after placement
         if ($placementNode->id === $sponsor->id) {
             // Place directly under sponsor
             if ($placement === 'left') {
@@ -184,10 +191,8 @@ class MLMController extends Controller
                     \Log::error("Failed to create CvCommission for upline ID: {$sponsor->id} on right leg. Error: " . $e->getMessage());
                 }
             }
-            $sponsor->save();
 
-            if ($placementNode == 'left' && $sponsor->totla_right_volume >= $sponsor->totla_left_volume) {
-                $binaryCommissionValue  = CommissionFactor::where('commission_type', 'binary')->first();
+            if ($placement == 'left' && $sponsor->totla_right_volume >= $sponsor->totla_left_volume) {
                 // If both equal, apply binary commission
                 \Log::info("Applying binary commission for sponsor ID: {$sponsor->id} on left placement. Left volume: {$sponsor->totla_left_volume}, Right volume: {$sponsor->totla_right_volume}");
                 Commission::create([
@@ -199,8 +204,7 @@ class MLMController extends Controller
                 \Log::info("Binary commission created successfully for sponsor ID: {$sponsor->id}");
             }
 
-            if ($placementNode == 'right' && $sponsor->totla_right_volume <= $sponsor->totla_left_volume) {
-                $binaryCommissionValue  = CommissionFactor::where('commission_type', 'binary')->first();
+            if ($placement == 'right' && $sponsor->totla_right_volume <= $sponsor->totla_left_volume) {
                 // If both equal, apply binary commission
                 \Log::info("Applying binary commission for sponsor ID: {$sponsor->id} on right placement. Left volume: {$sponsor->totla_left_volume}, Right volume: {$sponsor->totla_right_volume}");
                 Commission::create([
