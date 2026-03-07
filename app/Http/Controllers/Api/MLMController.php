@@ -154,7 +154,7 @@ class MLMController extends Controller
     private function applyPlacement($sponsor, $packageId, $placementNode, $referral, $placement, $packageCv)
     {
 
-    // Calculate binary commission value 
+    // Calculate binary commission value
         $commissionFactor  = CommissionFactor::first();
         $binaryRate = $commissionFactor->binary_rate;
         $binaryCommissionValue = ($packageCv * $binaryRate) / 100;
@@ -268,9 +268,9 @@ class MLMController extends Controller
         foreach ($uplines as $upline) {
 
             // Skip the direct sponsor for binary commission
-            if ($upline->id === $directSponsor->id) {
-                continue;
-            }
+            // if ($upline->id === $directSponsor->id) {
+            //     continue;
+            // }
 
             $referralId = $referral->id;
 
