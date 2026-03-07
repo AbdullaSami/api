@@ -148,6 +148,8 @@ class MLMController extends Controller
     private function applyPlacement($sponsor, $packageId, $placementNode, $referral, $placement, $packageCv)
     {
 
+    \Log::info("//////////////////////////////////////////////////////////////");
+    \Log::info("at applyPlacement function");
         // Calculate binary commission value
         $commissionFactor  = CommissionFactor::first();
         $binaryRate = $commissionFactor->binary_rate;
@@ -258,6 +260,9 @@ class MLMController extends Controller
     }
     private function processUplinesCommission($uplines, $directSponsor, $packageId, $referral, $packageCv)
     {
+
+    \Log::info("//////////////////////////////////////////////////////////////");
+    \Log::info("at processUplinesCommission function");
         // Remove duplicate uplines by ID
         $uplines = collect($uplines)->unique('id')->values();
 
