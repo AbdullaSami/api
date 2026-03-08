@@ -202,6 +202,7 @@ class MLMController extends Controller
                 // Deduct used CV
                 $sponsor->totla_left_volume  -= $matchedVolume;
                 $sponsor->totla_right_volume -= $matchedVolume;
+                \Log::info("After binary commission deduction for sponsor {$sponsor->id} → Left: {$sponsor->totla_left_volume}, Right: {$sponsor->totla_right_volume}");
             }
 
             $sponsor->save();
@@ -339,7 +340,7 @@ class MLMController extends Controller
             \Log::info("No CV in either leg for member {$member->id}. Skipping binary commission.");
             return;
         }
-        
+
         \Log::info("Added {$packageCv} CV to {$leg} leg of member {$member->id}");
 
         // 2️⃣ Calculate matched volume (weaker leg)
