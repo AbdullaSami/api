@@ -256,79 +256,118 @@ class MLMController extends Controller
         \Log::info("//////////////////////////////////////////////////////////////");
         \Log::info("at processUplinesCommission function");
 
+        // Remove duplicate uplines
         $uplines = collect($uplines)->unique('id')->values();
-
-        $commissionFactor  = CommissionFactor::first();
-        $binaryRate = $commissionFactor->binary_rate;
 
         foreach ($uplines as $upline) {
 
             $referralId = $referral->id;
 
+            // Detect which leg the referral belongs to
             $belongsLeft  = $upline->left_leg_id == $referralId ||
                 in_array($referralId, $this->getLegMembers($upline->left_leg_id));
 
             $belongsRight = $upline->right_leg_id == $referralId ||
                 in_array($referralId, $this->getLegMembers($upline->right_leg_id));
 
+            // LEFT LEG
             if ($belongsLeft) {
 
-                $upline->totla_left_volume += $packageCv;
+                \Log::info("Adding {$packageCv} CV to LEFT leg of upline ID: {$upline->id}");
 
                 CvCommission::create([
                     'member_id' => $upline->id,
                     'package_id' => $packageId,
-                    'side' => 'left',
-                    'amount' => $packageCv,
+                    'side'       => 'left',
+                    'amount'     => $packageCv,
                 ]);
 
-                \Log::info("Indirect CV added to LEFT of {$upline->id}");
+                \Log::info("Indirect CvCommission created for upline ID: {$upline->id} on LEFT leg");
+
+                // Run binary commission logic
+                $this->processBinaryCommission(
+                    $upline,
+                    $packageCv,
+                    'left',
+                    $referralId
+                );
             }
 
+            // RIGHT LEG
             if ($belongsRight) {
 
-                $upline->totla_right_volume += $packageCv;
+                \Log::info("Adding {$packageCv} CV to RIGHT leg of upline ID: {$upline->id}");
 
                 CvCommission::create([
                     'member_id' => $upline->id,
                     'package_id' => $packageId,
-                    'side' => 'right',
-                    'amount' => $packageCv,
+                    'side'       => 'right',
+                    'amount'     => $packageCv,
                 ]);
 
-                \Log::info("Indirect CV added to RIGHT of {$upline->id}");
+                \Log::info("Indirect CvCommission created for upline ID: {$upline->id} on RIGHT leg");
+
+                // Run binary commission logic
+                $this->processBinaryCommission(
+                    $upline,
+                    $packageCv,
+                    'right',
+                    $referralId
+                );
             }
 
-            // -------- Binary Commission Logic --------
-
-            $left  = $upline->totla_left_volume;
-            $right = $upline->totla_right_volume;
-
-            $matchedVolume = min($left, $right);
-
-            if ($matchedVolume > 0) {
-
-                $commissionValue = ($matchedVolume * $binaryRate) / 100;
-
-                Commission::create([
-                    'sponsor_id'        => $upline->id,
-                    'referral_id'       => $referral->id,
-                    'commission_value'  => $commissionValue,
-                    'commission_type'   => 'binary',
-                ]);
-
-                \Log::info("Binary commission created for upline {$upline->id}. Matched CV: {$matchedVolume}");
-
-                // Deduct used CV
-                $upline->totla_left_volume  -= $matchedVolume;
-                $upline->totla_right_volume -= $matchedVolume;
-            }
-
+            // Track total CV for ranking / stats
             $upline->current_cv += $packageCv;
             $upline->save();
         }
     }
 
+    //8-march-2026
+    private function processBinaryCommission($member, $packageCv, $leg, $referralId)
+    {
+        $commissionFactor = CommissionFactor::first();
+        $binaryRate = $commissionFactor->binary_rate;
+
+        // 1️⃣ Add CV to the correct leg
+        if ($leg === 'left') {
+            $member->totla_left_volume += $packageCv;
+        } else {
+            $member->totla_right_volume += $packageCv;
+        }
+
+        \Log::info("Added {$packageCv} CV to {$leg} leg of member {$member->id}");
+
+        // 2️⃣ Calculate matched volume (weaker leg)
+        $left  = $member->totla_left_volume;
+        $right = $member->totla_right_volume;
+
+        $matchedVolume = min($left, $right);
+
+        if ($matchedVolume <= 0) {
+            $member->save();
+            return;
+        }
+
+        // 3️⃣ Calculate commission
+        $commissionValue = ($matchedVolume * $binaryRate) / 100;
+
+        Commission::create([
+            'sponsor_id'       => $member->id,
+            'referral_id'      => $referralId,
+            'commission_value' => $commissionValue,
+            'commission_type'  => 'binary',
+        ]);
+
+        \Log::info("Binary commission {$commissionValue} created for member {$member->id} using {$matchedVolume} CV");
+
+        // 4️⃣ Deduct matched CV from both legs
+        $member->totla_left_volume  -= $matchedVolume;
+        $member->totla_right_volume -= $matchedVolume;
+
+        \Log::info("After deduction for {$member->id} → Left: {$member->totla_left_volume}, Right: {$member->totla_right_volume}");
+
+        $member->save();
+    }
     // end abdulla edits
     private function getLegMembers($legId)
     {
