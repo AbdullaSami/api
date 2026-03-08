@@ -53,7 +53,7 @@ class MLMController extends Controller
         DB::beginTransaction();
 
         $uplines = $referral->getAllTreeUplines();
-        
+
         try {
             // Remove referral from tank if exists
             UserTank::where('member_id', $referral->id)->delete();
@@ -149,13 +149,8 @@ class MLMController extends Controller
     private function applyPlacement($sponsor, $packageId, $placementNode, $referral, $placement, $packageCv)
     {
 
-    \Log::info("//////////////////////////////////////////////////////////////");
-    \Log::info("at applyPlacement function");
-        // Calculate binary commission value
-        $commissionFactor  = CommissionFactor::first();
-        $binaryRate = $commissionFactor->binary_rate;
-        $binaryCommissionValue = ($packageCv * $binaryRate) / 100;
-
+        \Log::info("//////////////////////////////////////////////////////////////");
+        \Log::info("at applyPlacement function");
         // start placing directly under sponsor if placement node is sponsor itself and apply binary commission if both legs have equal volume after placement
         if ($placementNode->id === $sponsor->id) {
             // Place directly under sponsor
@@ -187,28 +182,6 @@ class MLMController extends Controller
                 } catch (\Exception $e) {
                     \Log::error("Failed to create CvCommission for upline ID: {$sponsor->id} on right leg. Error: " . $e->getMessage());
                 }
-            }
-
-            if (($placement === 'left') && ($sponsor->totla_right_volume >= $sponsor->totla_left_volume)) {
-                // If both equal, apply binary commission
-                \Log::info("Applying binary commission for sponsor ID: {$sponsor->id} on left placement. Left volume: {$sponsor->totla_left_volume}, Right volume: {$sponsor->totla_right_volume}");
-                Commission::create([
-                    'sponsor_id'        => $sponsor->id,
-                    'referral_id'       => $referral->id,
-                    'commission_value'  => $binaryCommissionValue,
-                    'commission_type'   => 'binary',
-                ]);
-                \Log::info("Binary Left commission created successfully for sponsor ID: {$sponsor->id}");
-            }else if (($placement === 'right') && ($sponsor->totla_right_volume <= $sponsor->totla_left_volume)) {
-                // If both equal, apply binary commission
-                \Log::info("Applying binary commission for sponsor ID: {$sponsor->id} on right placement. Left volume: {$sponsor->totla_left_volume}, Right volume: {$sponsor->totla_right_volume}");
-                Commission::create([
-                    'sponsor_id'        => $sponsor->id,
-                    'referral_id'       => $referral->id,
-                    'commission_value'  => $binaryCommissionValue,
-                    'commission_type'   => 'binary',
-                ]);
-                \Log::info("Binary Right commission created successfully for sponsor ID: {$sponsor->id}");
             }
         }
 
@@ -260,11 +233,16 @@ class MLMController extends Controller
     private function processUplinesCommission($uplines, $directSponsor, $packageId, $referral, $packageCv)
     {
 
-    \Log::info("//////////////////////////////////////////////////////////////");
-    \Log::info("at processUplinesCommission function");
+        \Log::info("//////////////////////////////////////////////////////////////");
+        \Log::info("at processUplinesCommission function");
         // Remove duplicate uplines by ID
         $uplines = collect($uplines)->unique('id')->values();
 
+
+        // Calculate binary commission value
+        $commissionFactor  = CommissionFactor::first();
+        $binaryRate = $commissionFactor->binary_rate;
+        $binaryCommissionValue = ($packageCv * $binaryRate) / 100;
         foreach ($uplines as $upline) {
 
             // Skip the direct sponsor for binary commission
@@ -292,7 +270,19 @@ class MLMController extends Controller
                         'amount' => $packageCv,
                     ]);
                     \Log::info("inDirect CvCommission created for upline ID: {$upline->id} on left leg with amount: {$packageCv}");
-                } catch (\Exception $e) {
+                    if ( $belongsLeft && ($upline->totla_right_volume >= $upline->totla_left_volume)) {
+                        // If both equal, apply binary commission
+                        \Log::info("Applying binary commission for sponsor ID: {$upline->id} on left placement. Left volume: {$upline->totla_left_volume}, Right volume: {$upline->totla_right_volume}");
+                        Commission::create([
+                            'sponsor_id'        => $upline->id,
+                            'referral_id'       => $referral->id,
+                            'commission_value'  => $binaryCommissionValue,
+                            'commission_type'   => 'binary',
+                        ]);
+                        \Log::info("Binary Left commission created successfully for sponsor ID: {$upline->id}");
+                    }
+
+                    } catch (\Exception $e) {
                     \Log::error("Failed to create CvCommission for upline ID: {$upline->id} on left leg. Error: " . $e->getMessage());
                 }
             }
@@ -310,7 +300,19 @@ class MLMController extends Controller
                         'amount' => $packageCv,
                     ]);
                     \Log::info("inDirect CvCommission created for upline ID: {$upline->id} on right leg with amount: {$packageCv}");
-                } catch (\Exception $e) {
+
+                    if ($belongsRight && ($upline->totla_right_volume <= $upline->totla_left_volume)) {
+                        // If both equal, apply binary commission
+                        \Log::info("Applying binary commission for sponsor ID: {$upline->id} on right placement. Left volume: {$upline->totla_left_volume}, Right volume: {$upline->totla_right_volume}");
+                        Commission::create([
+                            'sponsor_id'        => $upline->id,
+                            'referral_id'       => $referral->id,
+                            'commission_value'  => $binaryCommissionValue,
+                            'commission_type'   => 'binary',
+                        ]);
+                        \Log::info("Binary Right commission created successfully for sponsor ID: {$upline->id}");
+                    }
+                    } catch (\Exception $e) {
                     \Log::error("Failed to create CvCommission for upline ID: {$upline->id} on right leg. Error: " . $e->getMessage());
                 }
             }
