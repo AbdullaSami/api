@@ -335,6 +335,11 @@ class MLMController extends Controller
             $member->totla_right_volume += $packageCv;
         }
 
+        if ($member->totla_left_volume == 0 || $member->totla_right_volume == 0) {
+            \Log::info("No CV in either leg for member {$member->id}. Skipping binary commission.");
+            return;
+        }
+        
         \Log::info("Added {$packageCv} CV to {$leg} leg of member {$member->id}");
 
         // 2️⃣ Calculate matched volume (weaker leg)
