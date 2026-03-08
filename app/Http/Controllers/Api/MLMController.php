@@ -375,6 +375,7 @@ class MLMController extends Controller
         $member->save();
     }
     // end abdulla edits
+    
     private function getLegMembers($legId)
     {
         if (!$legId) {
