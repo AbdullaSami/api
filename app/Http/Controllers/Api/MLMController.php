@@ -49,10 +49,11 @@ class MLMController extends Controller
         // Apply the placement
         $this->applyPlacement($sponsor, $packageId, $placementNode, $referral, $request->placement, $packageCv);
 
-        $uplines = $referral->getAllTreeUplines();
 
         DB::beginTransaction();
 
+        $uplines = $referral->getAllTreeUplines();
+        
         try {
             // Remove referral from tank if exists
             UserTank::where('member_id', $referral->id)->delete();
@@ -197,7 +198,7 @@ class MLMController extends Controller
                     'commission_value'  => $binaryCommissionValue,
                     'commission_type'   => 'binary',
                 ]);
-                \Log::info("Binary commission created successfully for sponsor ID: {$sponsor->id}");
+                \Log::info("Binary Left commission created successfully for sponsor ID: {$sponsor->id}");
             }else if (($placement === 'right') && ($sponsor->totla_right_volume <= $sponsor->totla_left_volume)) {
                 // If both equal, apply binary commission
                 \Log::info("Applying binary commission for sponsor ID: {$sponsor->id} on right placement. Left volume: {$sponsor->totla_left_volume}, Right volume: {$sponsor->totla_right_volume}");
@@ -207,7 +208,7 @@ class MLMController extends Controller
                     'commission_value'  => $binaryCommissionValue,
                     'commission_type'   => 'binary',
                 ]);
-                \Log::info("Binary commission created successfully for sponsor ID: {$sponsor->id}");
+                \Log::info("Binary Right commission created successfully for sponsor ID: {$sponsor->id}");
             }
         }
 
