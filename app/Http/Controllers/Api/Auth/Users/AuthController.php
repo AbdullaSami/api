@@ -129,7 +129,7 @@ class AuthController extends Controller
             ]);
             TokenWallet::create([
                 'member_id' => $member->id,
-                'token_balance' => 5700.00, // Initial balance is zero
+                'token_balance' => 0.00, // Initial balance is zero
             ]);
 
             DB::commit();
