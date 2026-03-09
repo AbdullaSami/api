@@ -25,9 +25,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $accounts = [
-            ['first_name' => 'Mohammed', 'last_name' => 'Hamed', 'email' => '1@nova.com'],
-            ['first_name' => 'Ahmed', 'last_name' => 'Esmail', 'email' => '2@nova.com'],
-            ['first_name' => 'Abdullah', 'last_name' => 'Sami', 'email' => '3@nova.com'],
+            ['first_name' => 'Test', 'last_name' => 'Final', 'email' => '1@nova.com'],
         ];
 
         foreach ($accounts as $data) {
