@@ -238,7 +238,7 @@ class AuthController extends Controller
         if (!$isAuthorized) {
             return response()->json([
                 'status' => false,
-                'message' => 'You are not authorized to view this profile'
+                'message' => 'You are not authorized to view this profile',
                 'data' => $isAuthorized
             ]);
         }
