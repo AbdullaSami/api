@@ -18,6 +18,7 @@ use App\Http\Requests\PlaceReferralRequest;
 use App\Http\Controllers\Api\WalletController;
 use App\Models\CvCommission;
 use App\Models\Referal;
+use App\Models\Rank;
 
 class MLMController extends Controller
 {
@@ -374,8 +375,122 @@ class MLMController extends Controller
 
         $member->save();
     }
+
+    // New function to get all member's dashboard data in one call (17-march-2026)
+
+    public function dashboardData()
+    {
+        $user = auth()->user();
+        $member = $user->member->load('rank');
+
+        if (!$member) {
+            return response()->json(['message' => 'Member not found'], 404);
+        }
+
+        // get downline details by rank
+        $down_lineDetails = $member->getDownlineDetailsByRank();
+
+        // filter cv commissions based on time period (weekly, monthly, yearly)
+        // get current cv counts for left and right legs
+        $nowCvCounts = [];
+        $nowCvCounts['left_downlines_count'] = $member->countLeftDownline();
+        $nowCvCounts['right_downlines_count'] = $member->countRightDownline();
+
+        // get cv counts for left and right legs in last 7 days
+        $last7DaysCvCounts = [];
+        $last7DaysCvCounts['left_downlines_count'] = $member->leftSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(7))->sum('amount');
+        $last7DaysCvCounts['right_downlines_count'] = $member->rightSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(7))->sum('amount');
+
+        // get cv counts for left and right legs in last 30 days
+        $last30DaysCvCounts = [];
+        $last30DaysCvCounts['left_downlines_count'] = $member->leftSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(30))->sum('amount');
+        $last30DaysCvCounts['right_downlines_count'] = $member->rightSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(30))->sum('amount');
+
+        // get cv counts for left and right legs in last year
+        $lastYearCvCounts = [];
+        $lastYearCvCounts['left_downlines_count'] = $member->leftSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(365))->sum('amount');
+        $lastYearCvCounts['right_downlines_count'] = $member->rightSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(365))->sum('amount');
+
+        //get rank details
+        $rank = $member->rank;
+        $subscription = $member->subscription;
+        $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
+
+        $remainingDays = null;
+        if ($subscription && $subscription->expiration_date) {
+            // Use Carbon::parse to ensure we have a Carbon instance and avoid magic property type issues
+            $remainingDays = \Illuminate\Support\Carbon::parse(now())->diffInDays($subscription->expiration_date);
+        }
+
+        // get yearly sales in weeks
+        $currentYear = now()->year;
+
+        // Weekly Earnings
+        $weeklyEarnings = $member->commission()
+            ->whereYear('created_at', $currentYear)
+            ->selectRaw('WEEK(created_at) as week, SUM(commission_value) as total')
+            ->groupBy('week')
+            ->orderBy('week')
+            ->get();
+
+        // Generate full 52-week report
+        $fullWeeklyEarnings = collect(range(1, 52))->map(function ($week) use ($weeklyEarnings) {
+            $weekData = $weeklyEarnings->firstWhere('week', $week);
+            return [
+                'week' => $week,
+                'total' => $weekData ? $weekData->total : 0,
+            ];
+        });
+
+        // Monthly Earnings (by month number -> total)
+        $rawMonthly = $member->commission()
+            ->whereYear('created_at', $currentYear)
+            ->selectRaw('MONTH(created_at) as month, SUM(commission_value) as total')
+            ->groupBy('month')
+            ->pluck('total', 'month'); // [1 => 100, 3 => 250, ...]
+
+        // Generate full 12-month report with names
+        $monthlyEarnings = collect(range(1, 12))->map(function ($monthNumber) use ($rawMonthly) {
+            return [
+                'month' => \Carbon\Carbon::create()->month($monthNumber)->format('F'),
+                'total' => $rawMonthly[$monthNumber] ?? 0,
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Dashboard data retrieved successfully.',
+            'data' => [
+                "status" => true,
+                'down_lineDetails' => $down_lineDetails ?? null,
+                'nowCvCounts' => $nowCvCounts ?? null,
+                'last7DaysCvCounts' => $last7DaysCvCounts ?? null,
+                'last30DaysCvCounts' => $last30DaysCvCounts ?? null,
+                'lastYearCvCounts' => $lastYearCvCounts ?? null,
+                'rank' => [
+                    'name' => $rank->name ?? null,
+                    'image' => $rank->image ?? null,
+                    'package' => $rank->package ?? null
+                ] ?? null,
+                'next_rank' => [
+                    'left_volume' => $nextRank->left_volume ?? null,
+                    'user_left_volume' => $last30DaysCvCounts['left_downlines_count'] ?? null,
+                    'right_volume' => $nextRank->right_volume ?? null,
+                    'user_right_volume' => $last30DaysCvCounts['right_downlines_count'] ?? null,
+                    'left_referrals' => $nextRank->direct_referrals/2 ?? null,
+                    'user_left_referrals' => $member->leftLegCount() ?? null,
+                    'right_referrals' => $nextRank->direct_referrals/2 ?? null,
+                    'user_right_referrals' => $member->rightLegCount() ?? null,
+                ] ?? null,
+                'remaining_days' =>  round($remainingDays) ?? null,
+                'weekly_earnings'  => $fullWeeklyEarnings ?? null,
+                'monthly_earnings' => $monthlyEarnings ?? null,
+                'targets'          => 45 ?? null, // placeholder for future target metrics
+            ],
+        ], 200);
+    }
     // end abdulla edits
-    
+
     private function getLegMembers($legId)
     {
         if (!$legId) {

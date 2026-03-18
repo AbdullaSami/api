@@ -111,6 +111,19 @@ route::prefix('v1')->group(function () {
          * 1 - create checkPassword service to verify user password before internal transfer
          * */
 
+        /**
+         * ===================================================================================================
+         * Start new routes for new website 2026-18-March
+         * 1- members/downlines #done
+         * 2- total-down-line #done
+         * 3- network-volume #done
+         * 4-rank
+         * 5-yearly-sales-in-Weeks
+        */
+
+        route::get('/member/dashboard', [MLMController::class, 'dashboardData']);
+
+
         // rank
         Route::get('rank', [RankController::class, 'myRank']);
         Route::get('/rank/evaluate', [RankController::class, 'evaluateRank']);
@@ -129,7 +142,7 @@ route::prefix('v1')->group(function () {
             //logout
             route::post('logout', [AdminAuthController::class, 'logout']);
 
-            route::get('commission-payout-batches', [AdminCommissionPayoutBatchController::class, 'index']); //new  
+            route::get('commission-payout-batches', [AdminCommissionPayoutBatchController::class, 'index']); //new
             route::get('commission-payout-batches/{id}', [AdminCommissionPayoutBatchController::class, 'show']); //new
 
             // Users Management

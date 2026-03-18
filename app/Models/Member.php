@@ -79,6 +79,8 @@ class Member extends Model
     {
         return $this->belongsTo(Referal::class, 'id', 'referral_id');
     }
+
+    // get direct referrals count for left and right legs
     public function leftLegCount()
     {
         $memberId = $this->id;
@@ -113,8 +115,8 @@ class Member extends Model
                 }
 
                 // Example requirement checks
-                $leftSum = $this->totla_left_volume;        // adjust to your structure
-                $rightSum = $this->totla_right_volume;
+                $leftSum = $this->leftSideCvCommissions()->sum('amount') ?? 0;        // adjust to your structure
+                $rightSum = $this->rightSideCvCommissions()->sum('amount')  ?? 0;
                 $directRefs = $this->directReferrals()->count();
 
                 if ($leftSum >= $nextRank->left_volume && $rightSum >= $nextRank->right_volume && $directRefs >= $nextRank->direct_referrals) {
@@ -127,8 +129,8 @@ class Member extends Model
             // If no current rank, assign the first rank if requirements are met
             $firstRank = Rank::orderBy('id')->first();
             if ($firstRank) {
-                $leftSum = $this->totla_left_volume;        // adjust to your structure
-                $rightSum = $this->totla_right_volume;
+                $leftSum = $this->leftSideCvCommissions()->sum('amount') ?? 0;        // adjust to your structure
+                $rightSum = $this->rightSideCvCommissions()->sum('amount')  ?? 0;
                 $directRefs = $this->directReferrals()->count();
 
                 if ($leftSum >= $firstRank->left_volume && $rightSum >= $firstRank->right_volume && $directRefs >= $firstRank->direct_referrals) {
