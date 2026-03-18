@@ -12,6 +12,7 @@ class Package extends Model
     protected $fillable = [
         'name',
         'price',
+        'pack_card',
         'billing_period',
         'cv',
         'features'

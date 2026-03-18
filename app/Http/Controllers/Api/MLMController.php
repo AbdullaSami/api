@@ -390,26 +390,30 @@ class MLMController extends Controller
         // get downline details by rank
         $down_lineDetails = $member->getDownlineDetailsByRank();
 
+        // get downline counts for left and right legs
+        $downline = [];
+        $downline['left_downlines_count'] = $member->countLeftDownline();
+        $downline['right_downlines_count'] = $member->countRightDownline();
         // filter cv commissions based on time period (weekly, monthly, yearly)
         // get current cv counts for left and right legs
         $nowCvCounts = [];
-        $nowCvCounts['left_downlines_count'] = $member->countLeftDownline();
-        $nowCvCounts['right_downlines_count'] = $member->countRightDownline();
+        $nowCvCounts['left_cv_count'] = $member->countLeftDownline();
+        $nowCvCounts['right_cv_count'] = $member->countRightDownline();
 
         // get cv counts for left and right legs in last 7 days
         $last7DaysCvCounts = [];
-        $last7DaysCvCounts['left_downlines_count'] = $member->leftSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(7))->sum('amount');
-        $last7DaysCvCounts['right_downlines_count'] = $member->rightSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(7))->sum('amount');
+        $last7DaysCvCounts['left_cv_count'] = $member->leftSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(7))->sum('amount');
+        $last7DaysCvCounts['right_cv_count'] = $member->rightSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(7))->sum('amount');
 
         // get cv counts for left and right legs in last 30 days
         $last30DaysCvCounts = [];
-        $last30DaysCvCounts['left_downlines_count'] = $member->leftSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(30))->sum('amount');
-        $last30DaysCvCounts['right_downlines_count'] = $member->rightSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(30))->sum('amount');
+        $last30DaysCvCounts['left_cv_count'] = $member->leftSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(30))->sum('amount');
+        $last30DaysCvCounts['right_cv_count'] = $member->rightSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(30))->sum('amount');
 
         // get cv counts for left and right legs in last year
         $lastYearCvCounts = [];
-        $lastYearCvCounts['left_downlines_count'] = $member->leftSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(365))->sum('amount');
-        $lastYearCvCounts['right_downlines_count'] = $member->rightSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(365))->sum('amount');
+        $lastYearCvCounts['left_cv_count'] = $member->leftSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(365))->sum('amount');
+        $lastYearCvCounts['right_cv_count'] = $member->rightSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(365))->sum('amount');
 
         //get rank details
         $rank = $member->rank;
@@ -457,16 +461,23 @@ class MLMController extends Controller
             ];
         });
 
+        // member subscription package details
+        $packageDetails = $member->subscription()->with('package:id,name,pack_card')->first();
         return response()->json([
             'status' => true,
             'message' => 'Dashboard data retrieved successfully.',
             'data' => [
                 "status" => true,
                 'down_lineDetails' => $down_lineDetails ?? null,
+                'downline_counts' => $downline ?? null,
                 'nowCvCounts' => $nowCvCounts ?? null,
                 'last7DaysCvCounts' => $last7DaysCvCounts ?? null,
                 'last30DaysCvCounts' => $last30DaysCvCounts ?? null,
                 'lastYearCvCounts' => $lastYearCvCounts ?? null,
+                'user_package' => $packageDetails ? [
+                    'name' => $packageDetails->package->name,
+                    'pack_card' => $packageDetails->package->pack_card,
+                ] : null,
                 'rank' => [
                     'name' => $rank->name ?? null,
                     'image' => $rank->image ?? null,
