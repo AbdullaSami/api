@@ -845,8 +845,14 @@ class MLMController extends Controller
                 'user' => $sponsorUser
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
-        }
+        }else {
+            $data = [
+                'left_leg_member' => null,
+                'right_leg_member' => null,
+                'user' => $sponsorUser
+            ];
         return response()->json('no downlines members to this user');
+        }
     }
 
     private function findFarLeft(Member $member)
