@@ -857,7 +857,7 @@ class MLMController extends Controller
                 'right_leg_member' => null,
                 'user' => $profileUser
             ];
-            return response()->json('no downlines members to this user');
+            return $this->successResponse('no downlines members to this user', 'members', $data);
         }
     }
 
