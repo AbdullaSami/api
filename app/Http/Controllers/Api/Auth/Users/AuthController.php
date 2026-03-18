@@ -221,6 +221,7 @@ class AuthController extends Controller
     {
         $user = auth()->user();
 
+        // Ensure user has a member profile
         if (!$user->member) {
             return response()->json([
                 'status' => false,
@@ -230,21 +231,23 @@ class AuthController extends Controller
 
         $member = $user->member;
 
-        // Check if self OR downline
-        $isAuthorized = $id_code === $user->id_code ||
-            $member->getAllDownlinesNetwork()
-            ->where('id_code', $id_code)
+        // Check if the requested user is self OR in downline
+        $isDownline = Member::where('path', 'LIKE', "{$member->path}/%")
+            ->whereHas('user', function ($q) use ($id_code) {
+                $q->where('id_code', $id_code);
+            })
             ->exists();
 
-        if (!$isAuthorized) {
+        if ($id_code !== $user->id_code && !$isDownline) {
             return response()->json([
                 'status' => false,
                 'message' => 'You are not authorized to view this profile'
             ], 403);
         }
 
+        // Fetch user with member
         $profileUser = User::where('id_code', $id_code)
-            ->with('member')
+            ->with('member.sponsor.user')
             ->first();
 
         if (!$profileUser) {
@@ -262,8 +265,11 @@ class AuthController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'User data fetched successfully',
-            'user' => $profileUser,
-            'sponsor' => $sponsorUser,
+            'data' => [
+                'user' => $profileUser,
+                'member' => $profileMember,
+                'sponsor' => $sponsorUser,
+            ]
         ]);
     }
 
