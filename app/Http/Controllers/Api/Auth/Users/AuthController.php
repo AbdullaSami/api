@@ -219,12 +219,51 @@ class AuthController extends Controller
 
     public function profileById($id_code)
     {
-        $user = User::where('id_code', $id_code);
-        $user->load('member', 'member.rank:id,name');
+        $user = auth()->user();
+
+        if (!$user->member) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User has no member profile'
+            ], 400);
+        }
+
+        $member = $user->member;
+
+        // Check if self OR downline
+        $isAuthorized = $id_code === $user->id_code ||
+            $member->getAllDownlinesNetwork()
+            ->where('id_code', $id_code)
+            ->exists();
+
+        if (!$isAuthorized) {
+            return response()->json([
+                'status' => false,
+                'message' => 'You are not authorized to view this profile'
+            ], 403);
+        }
+
+        $profileUser = User::where('id_code', $id_code)
+            ->with('member')
+            ->first();
+
+        if (!$profileUser) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        $profileMember = $profileUser->member;
+        $sponsorUser = $profileMember && $profileMember->sponsor
+            ? $profileMember->sponsor->user
+            : null;
+
         return response()->json([
             'status' => true,
-            'message' => 'user data get successfully',
-            'user data' => $user
+            'message' => 'User data fetched successfully',
+            'user' => $profileUser,
+            'sponsor' => $sponsorUser,
         ]);
     }
 
