@@ -485,6 +485,7 @@ class MLMController extends Controller
                 ] ?? null,
                 'next_rank' => [
                     'name' => $nextRank->name ?? null,
+                    'image' => $nextRank->image ?? null,
                     'left_volume' => $nextRank->left_volume ?? null,
                     'user_left_volume' => $last30DaysCvCounts['left_downlines_count'] ?? null,
                     'right_volume' => $nextRank->right_volume ?? null,
