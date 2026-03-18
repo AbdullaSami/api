@@ -237,7 +237,7 @@ class AuthController extends Controller
         $user_id = $profileUser->id;
 
         // Check if self
-        if ($id_code === $user->id_code) {
+        if ($id_code == $user->id_code) {
             return response()->json([
                 'status' => false,
                 'message' => 'It is your profile, you can view it from the profile tab'
