@@ -772,6 +772,8 @@ class MLMController extends Controller
                     'user_name' => $member->rightLeg->user->name,
                     'user_image' => $member->rightLeg->user->image,
                 ]
+
+
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         }
@@ -782,6 +784,9 @@ class MLMController extends Controller
     {
         $user = User::findOrFail($id);
         $member = $user->member;
+        $sponsorUser = $member && $member->sponsor
+            ? $member->sponsor->user
+            : null;
         if ($member->leftLeg && $member->rightLeg) {
 
             $data = [
@@ -804,7 +809,8 @@ class MLMController extends Controller
                     'user_first_name'   => $member->rightLeg->user->first_name,
                     'user_last_name'    => $member->rightLeg->user->last_name,
                     'user_image'        => $member->rightLeg->user->image,
-                ]
+                ],
+                'user' => $sponsorUser
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } elseif ($member->leftLeg && !$member->rightLeg) {
@@ -819,7 +825,8 @@ class MLMController extends Controller
                     'user_last_name'    => $member->leftLeg->user->last_name,
                     'user_image'        => $member->leftLeg->user->image,
                 ],
-                'right_leg_member' => null
+                'right_leg_member' => null,
+                'user' => $sponsorUser
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } elseif (!$member->leftLeg && $member->rightLeg) {
@@ -834,7 +841,8 @@ class MLMController extends Controller
                     'user_first_name'   => $member->rightLeg->user->first_name,
                     'user_last_name'    => $member->rightLeg->user->last_name,
                     'user_image'        => $member->rightLeg->user->image,
-                ]
+                ],
+                'user' => $sponsorUser
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         }

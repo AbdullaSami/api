@@ -220,27 +220,26 @@ class AuthController extends Controller
     public function profileById($id_code)
     {
         $user = auth()->user();
-        $searchUser = User::where('id_code', $id_code)->first();
+        $profileUser = User::where('id_code', $id_code)->with('member')->first();
+        $user_id = $profileUser->id;
+        $member = $user->member;
+
+        // Check if the authenticated user has a member profile
         if (!$user->member) {
             return response()->json([
                 'status' => false,
                 'message' => 'User has no member profile'
             ]);
         }
-
-        if (!$searchUser) {
+        // Check if the searched user exists
+        elseif (!$profileUser) {
             return response()->json([
                 'status' => false,
                 'message' => 'User not found'
             ]);
         }
-
-        $user_id = $searchUser->id;
-        $member = $user->member;
-
         // Check if self OR downline
-
-        if (!$member->getAllDownlinesNetwork()
+        elseif (!$member->getAllDownlinesNetwork()
             ->contains('user_id', $user_id)) {
             return response()->json([
                 'status' => false,
@@ -248,21 +247,10 @@ class AuthController extends Controller
             ]);
         }
 
-        if ($id_code === $user->id_code) {
+        elseif ($id_code === $user->id_code) {
             return response()->json([
                 'status' => false,
                 'message' => 'It is your profile, you can view it from the profile tab'
-            ]);
-        }
-
-        $profileUser = User::where('id_code', $id_code)
-            ->with('member')
-            ->first();
-
-        if (!$profileUser) {
-            return response()->json([
-                'status' => false,
-                'message' => 'User not found'
             ]);
         }
 
