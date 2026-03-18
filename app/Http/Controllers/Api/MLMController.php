@@ -783,9 +783,9 @@ class MLMController extends Controller
     public function getDirectDownlineMembersById($id)
     {
         $user = User::findOrFail($id);
-        $member = $user->member;
-        $sponsorUser = $member && $member->sponsor
-            ? $member->sponsor->user
+        $member = $user?->member;
+        $sponsorUser = $member && $member?->sponsor
+            ? $member?->sponsor?->user
             : null;
         if ($member->leftLeg && $member->rightLeg) {
 
