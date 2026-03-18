@@ -220,7 +220,7 @@ class AuthController extends Controller
     public function profileById($id_code)
     {
         $user = auth()->user();
-
+        $searchUser = User::where('id_code', $id_code)->first();
         if (!$user->member) {
             return response()->json([
                 'status' => false,
@@ -228,12 +228,20 @@ class AuthController extends Controller
             ], 400);
         }
 
+        if (!$searchUser) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        $user_id = $searchUser->id;
         $member = $user->member;
 
         // Check if self OR downline
         $isAuthorized = $id_code === $user->id_code ||
             $member->getAllDownlinesNetwork()
-            ->contains('id_code', $id_code);
+            ->contains('user_id', $user_id);
 
         if (!$isAuthorized) {
             return response()->json([
