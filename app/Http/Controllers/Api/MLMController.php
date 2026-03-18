@@ -495,15 +495,15 @@ class MLMController extends Controller
                     'user_left_volume' => $last30DaysCvCounts['left_cv_count'] ?? null,
                     'right_volume' => $nextRank->right_volume ?? null,
                     'user_right_volume' => $last30DaysCvCounts['right_cv_count'] ?? null,
-                    'left_referrals' => $nextRank->direct_referrals/2 ?? null,
+                    'left_referrals' => $nextRank->direct_referrals / 2 ?? null,
                     'user_left_referrals' => $member->leftLegCount() ?? null,
-                    'right_referrals' => $nextRank->direct_referrals/2 ?? null,
+                    'right_referrals' => $nextRank->direct_referrals / 2 ?? null,
                     'user_right_referrals' => $member->rightLegCount() ?? null,
                 ] ?? null,
                 'remaining_days' =>  round($remainingDays) ?? null,
                 'weekly_earnings'  => $fullWeeklyEarnings ?? null,
                 'monthly_earnings' => $monthlyEarnings ?? null,
-                'total_commissions'=> $totalEarnings?? null, // placeholder for future target metrics
+                'total_commissions' => $totalEarnings ?? null, // placeholder for future target metrics
             ],
         ], 200);
     }
@@ -782,12 +782,16 @@ class MLMController extends Controller
 
     public function getDirectDownlineMembersById($id)
     {
-        $user =User::where('id', $id)
+        $user = User::findOrFail($id);
+        $member = $user->member;
+
+
+        $profileUser = User::where('id', $id)
             ->with('member')
             ->first();
-        $member = $user->member;
-        $sponsorUser = $member && $member->sponsor
-            ? $member->sponsor->user
+        $profileMember = $profileUser->member;
+        $sponsorUser = $profileMember && $profileMember->sponsor
+            ? $profileMember->sponsor->user
             : null;
         if ($member->leftLeg && $member->rightLeg) {
 
@@ -812,7 +816,7 @@ class MLMController extends Controller
                     'user_last_name'    => $member->rightLeg->user->last_name,
                     'user_image'        => $member->rightLeg->user->image,
                 ],
-                'user' => $sponsorUser
+                'user' => $profileUser
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } elseif ($member->leftLeg && !$member->rightLeg) {
@@ -828,7 +832,7 @@ class MLMController extends Controller
                     'user_image'        => $member->leftLeg->user->image,
                 ],
                 'right_leg_member' => null,
-                'user' => $sponsorUser
+                'user' => $profileUser
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } elseif (!$member->leftLeg && $member->rightLeg) {
@@ -844,16 +848,16 @@ class MLMController extends Controller
                     'user_last_name'    => $member->rightLeg->user->last_name,
                     'user_image'        => $member->rightLeg->user->image,
                 ],
-                'user' => $sponsorUser
+                'user' => $profileUser
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
-        }else {
+        } else {
             $data = [
                 'left_leg_member' => null,
                 'right_leg_member' => null,
-                'user' => $sponsorUser
+                'user' => $profileUser
             ];
-        return response()->json('no downlines members to this user');
+            return response()->json('no downlines members to this user');
         }
     }
 
