@@ -415,6 +415,8 @@ class MLMController extends Controller
         $lastYearCvCounts['left_cv_count'] = $member->leftSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(365))->sum('amount');
         $lastYearCvCounts['right_cv_count'] = $member->rightSideCvCommissions()->where('created_at', '>=', Carbon::now()->subDays(365))->sum('amount');
 
+        // total cv counts of left and right legs
+        $totalCvCounts = $member->leftSideCvCommissions()->sum('amount') + $member->rightSideCvCommissions()->sum('amount');
         //get rank details
         $rank = $member->rank;
         $subscription = $member->subscription;
@@ -470,6 +472,7 @@ class MLMController extends Controller
                 "status" => true,
                 'down_lineDetails' => $down_lineDetails ?? null,
                 'downline_counts' => $downline ?? null,
+                'total_cv_counts' => $totalCvCounts ?? null,
                 'nowCvCounts' => $nowCvCounts ?? null,
                 'last7DaysCvCounts' => $last7DaysCvCounts ?? null,
                 'last30DaysCvCounts' => $last30DaysCvCounts ?? null,
