@@ -220,44 +220,39 @@ class AuthController extends Controller
     public function profileById($id_code)
     {
         $user = auth()->user();
-        $profileUser = User::where('id_code', $id_code)->with('member')->first();
-        $user_id = $profileUser->id;
         $member = $user->member;
 
-        // Check if the authenticated user has a member profile
-        if (!$user->member) {
-            return response()->json([
-                'status' => false,
-                'message' => 'User has no member profile'
-            ]);
-        }
-        // Check if the searched user exists
-        elseif (!$profileUser) {
+        $profileUser = User::where('id_code', $id_code)
+            ->with('member')
+            ->first();
+
+        // ✅ FIRST: check if user exists
+        if (!$profileUser) {
             return response()->json([
                 'status' => false,
                 'message' => 'User not found'
             ]);
         }
-        // Check if self OR downline
-        elseif (!$member->getAllDownlinesNetwork()
-            ->contains('user_id', $user_id)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'You are not authorized to view this profile'
-            ]);
-        }
 
-        elseif ($id_code === $user->id_code) {
+        $user_id = $profileUser->id;
+
+        // Check if self
+        if ($id_code === $user->id_code) {
             return response()->json([
                 'status' => false,
                 'message' => 'It is your profile, you can view it from the profile tab'
             ]);
         }
 
-        $profileMember = $profileUser->member;
-        $sponsorUser = $profileMember && $profileMember->sponsor
-            ? $profileMember->sponsor->user
-            : null;
+        // Check if downline
+        if (!$member->getAllDownlinesNetwork()
+            ->contains('user_id', $user_id)) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'You are not authorized to view this profile'
+            ]);
+        }
 
         return response()->json([
             'status' => true,
