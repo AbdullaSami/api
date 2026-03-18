@@ -70,7 +70,8 @@ class AuthController extends Controller
             'image' => ['nullable', 'image'],
             'sponsor_id' => ['required'],
             'pin_code' => ['required', 'digits:4'],
-            'mobile' => ['required'],
+            'phone' => ['required'],
+            'country' => ['nullable', 'string'],
         ]);
 
         if ($validator->fails()) {
