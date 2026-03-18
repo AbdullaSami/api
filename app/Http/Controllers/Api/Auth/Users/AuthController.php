@@ -233,8 +233,7 @@ class AuthController extends Controller
         // Check if self OR downline
         $isAuthorized = $id_code === $user->id_code ||
             $member->getAllDownlinesNetwork()
-            ->where('id_code', $id_code)
-            ->contains();
+            ->contains('id_code', $id_code);
 
         if (!$isAuthorized) {
             return response()->json([
