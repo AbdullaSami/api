@@ -70,7 +70,7 @@ class AuthController extends Controller
             'image' => ['nullable', 'image'],
             'sponsor_id' => ['required'],
             'pin_code' => ['required', 'digits:4'],
-            'phone' => ['required'],
+            'phone' => ['nullable', 'string', 'unique:users,phone'],
             'country' => ['nullable', 'string'],
         ]);
 
@@ -239,7 +239,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'You are not authorized to view this profile'
-            ], 403);
+            ]);
         }
 
         $profileUser = User::where('id_code', $id_code)
