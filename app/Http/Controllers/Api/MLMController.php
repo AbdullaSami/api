@@ -397,8 +397,8 @@ class MLMController extends Controller
         // filter cv commissions based on time period (weekly, monthly, yearly)
         // get current cv counts for left and right legs
         $nowCvCounts = [];
-        $nowCvCounts['left_cv_count'] = $member->countLeftDownline();
-        $nowCvCounts['right_cv_count'] = $member->countRightDownline();
+        $nowCvCounts['left_cv_count'] = $member->leftSideCvCommissions()->sum('amount');
+        $nowCvCounts['right_cv_count'] = $member->rightSideCvCommissions()->sum('amount');
 
         // get cv counts for left and right legs in last 7 days
         $last7DaysCvCounts = [];
