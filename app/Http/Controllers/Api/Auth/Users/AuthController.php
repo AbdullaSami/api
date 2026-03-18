@@ -239,7 +239,8 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'You are not authorized to view this profile',
-                'data' => $isAuthorized
+                'data' => $isAuthorized,
+                'downlines' => $member->getAllDownlinesNetwork()
             ]);
         }
 
