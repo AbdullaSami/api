@@ -254,10 +254,15 @@ class AuthController extends Controller
             ]);
         }
 
+
+        $profileMember = $profileUser->member;
+        $sponsorUser = $profileMember && $profileMember->sponsor
+            ? $profileMember->sponsor->user
+            : null;
         return response()->json([
             'status' => true,
             'message' => 'User data fetched successfully',
-            'user' => $profileUser
+            'user' => $profileMember
         ]);
     }
 
