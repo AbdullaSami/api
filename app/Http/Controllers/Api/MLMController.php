@@ -465,6 +465,8 @@ class MLMController extends Controller
 
         // member subscription package details
         $packageDetails = $member->subscription()->with('package:id,name,pack_card')->first();
+        // total commissions earned
+        $totalEarnings = $member->commission->sum('commission_value');
         return response()->json([
             'status' => true,
             'message' => 'Dashboard data retrieved successfully.',
@@ -501,7 +503,7 @@ class MLMController extends Controller
                 'remaining_days' =>  round($remainingDays) ?? null,
                 'weekly_earnings'  => $fullWeeklyEarnings ?? null,
                 'monthly_earnings' => $monthlyEarnings ?? null,
-                'targets'          => 45 ?? null, // placeholder for future target metrics
+                'total_commissions'=> $totalEarnings?? null, // placeholder for future target metrics
             ],
         ], 200);
     }

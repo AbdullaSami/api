@@ -225,30 +225,33 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'User has no member profile'
-            ], 400);
+            ]);
         }
 
         if (!$searchUser) {
             return response()->json([
                 'status' => false,
                 'message' => 'User not found'
-            ], 404);
+            ]);
         }
 
         $user_id = $searchUser->id;
         $member = $user->member;
 
         // Check if self OR downline
-        $isAuthorized = $id_code === $user->id_code ||
-            $member->getAllDownlinesNetwork()
-            ->contains('user_id', $user_id);
 
-        if (!$isAuthorized) {
+        if (!$$member->getAllDownlinesNetwork()
+            ->contains('user_id', $user_id)) {
             return response()->json([
                 'status' => false,
-                'message' => 'You are not authorized to view this profile',
-                'data' => $isAuthorized,
-                'downlines' => $member->getAllDownlinesNetwork()
+                'message' => 'You are not authorized to view this profile'
+            ]);
+        }
+
+        if ($id_code === $user->id_code) {
+            return response()->json([
+                'status' => false,
+                'message' => 'It is your profile, you can view it from the profile tab'
             ]);
         }
 
@@ -260,7 +263,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'User not found'
-            ], 404);
+            ]);
         }
 
         $profileMember = $profileUser->member;
