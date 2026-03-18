@@ -240,7 +240,7 @@ class AuthController extends Controller
 
         // Check if self OR downline
 
-        if (!$$member->getAllDownlinesNetwork()
+        if (!$member->getAllDownlinesNetwork()
             ->contains('user_id', $user_id)) {
             return response()->json([
                 'status' => false,
