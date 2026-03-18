@@ -246,7 +246,7 @@ class AuthController extends Controller
 
         // Check if downline
         if (!$member->getAllDownlinesNetwork()
-            ->contains('user_id', $user_id)) {
+            ->contains('user_id', $user_id) && $user->id_code !== $id_code) {
 
             return response()->json([
                 'status' => false,
