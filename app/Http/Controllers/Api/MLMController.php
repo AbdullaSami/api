@@ -416,12 +416,15 @@ class MLMController extends Controller
 
         // total cv counts of left and right legs
         $totalCvCounts = $member->leftSideCvCommissions()->sum('amount') + $member->rightSideCvCommissions()->sum('amount');
+
         //get rank details
         $rank = $member->rank;
+
+        if($rank){
         $subscription = $member->subscription;
         $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
-
         $remainingDays = null;
+        }
         if ($subscription && $subscription->expiration_date) {
             // Use Carbon::parse to ensure we have a Carbon instance and avoid magic property type issues
             $remainingDays = \Illuminate\Support\Carbon::parse(now())->diffInDays($subscription->expiration_date);
