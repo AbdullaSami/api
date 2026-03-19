@@ -419,15 +419,14 @@ class MLMController extends Controller
 
         //get rank details
         $rank = $member->rank;
-
-        if($rank){
-        $subscription = $member->subscription;
-        $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
-        $remainingDays = null;
+        if ($rank) {
+            $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
+            $remainingDays = null;
         }
-        if ($subscription && $subscription->expiration_date) {
+        $memberSubscription = $member->subscription;
+        if ($memberSubscription && $memberSubscription->expiration_date) {
             // Use Carbon::parse to ensure we have a Carbon instance and avoid magic property type issues
-            $remainingDays = \Illuminate\Support\Carbon::parse(now())->diffInDays($subscription->expiration_date);
+            $remainingDays = \Illuminate\Support\Carbon::parse(now())->diffInDays($memberSubscription->expiration_date);
         }
 
         // get yearly sales in weeks
