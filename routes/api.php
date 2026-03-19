@@ -98,9 +98,9 @@ route::prefix('v1')->group(function () {
         route::get('commission-payout-batches', [CommissionPayoutBatchController::class, 'index']); //new
         route::get('commission-payout-batches/{id}', [CommissionPayoutBatchController::class, 'show']); //new
         //abdulla sami 2025-1-DEC
-        route::get('yearly-sales-in-Weeks', [WalletController::class,'dashboardReports']);
-        route::get('user-tickets', [TicketsController::class,'showUserTickets']);
-        route::post('create-ticket', [TicketsController::class,'store']);
+        route::get('yearly-sales-in-Weeks', [WalletController::class, 'dashboardReports']);
+        route::get('user-tickets', [TicketsController::class, 'showUserTickets']);
+        route::post('create-ticket', [TicketsController::class, 'store']);
         //abdulla sami 2025-2-DEC
         route::get('total-down-line', [MLMController::class, 'getDownlineCounts']);
         route::get('network-volume', [MLMController::class, 'getNetworkVolume']);
@@ -125,12 +125,10 @@ route::prefix('v1')->group(function () {
          * 2- wallet-reports #done
          * 3- current-balance #done
          * 4- token-wallet-balance #done
-        */
+         */
 
-        route::middleware('auth:sanctum')->group(function () {
         route::get('/member/dashboard', [MLMController::class, 'dashboardData']);
         route::get('/member/wallet', [WalletController::class, 'walletData']);
-        });
 
         // rank
         Route::get('rank', [RankController::class, 'myRank']);
