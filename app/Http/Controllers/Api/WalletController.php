@@ -43,7 +43,7 @@ class WalletController extends Controller
 
     /**
      * calculate total earnings from commissions
-     * abdulla sami 2024-17-NOV
+     * abdulla sami 2025-17-NOV
      */
 
     public function getTotals()
@@ -58,14 +58,14 @@ class WalletController extends Controller
         $totalReceive = $member->tokenWallet->transaction()
             ->where('transaction_type', 'receive')
             ->where('status', 'received')
-            ->where('sender_member_id', '!=',$member->id)
+            ->where('sender_member_id', '!=', $member->id)
             ->sum('amount');
 
         // 3 - Sent transfer
         $totalTransfer = $member->tokenWallet->transaction()
             ->where('transaction_type', 'send')
             ->where('status', 'sent')
-            ->where('receive_member_id', '!=',$member->id)
+            ->where('receive_member_id', '!=', $member->id)
             ->sum('amount');
 
         // 4 - Deposit
@@ -85,7 +85,7 @@ class WalletController extends Controller
 
     /**
      * Get reports data
-     * abdulla sami 2024-17-NOV
+     * abdulla sami 2025-18-NOV
      */
 
     public function getReportsData()
@@ -135,7 +135,8 @@ class WalletController extends Controller
         ]);
     }
 
-    public function dashboardReports(){
+    public function dashboardReports()
+    {
         $user = Auth::user();
         $member = $user->member;
         // $wallet = $member->wallet;
@@ -337,8 +338,9 @@ class WalletController extends Controller
 
     /**
      * Create transfer to token wallet from commission wallet
-     * abdulla sami 2024-18-NOV
+     * abdulla sami 2025-18-NOV
      */
+
 
     public function transferToTokenWallet(Request $request)
     {
@@ -524,7 +526,7 @@ class WalletController extends Controller
     }
     /**
      * Create Token Wallet
-     * abdulla sami 2024-18-NOV
+     * abdulla sami 2025-18-NOV
      */
 
     public function createTokenWallet($id)
@@ -541,6 +543,92 @@ class WalletController extends Controller
             'status' => true,
             'message' => 'Token wallet created successfully.',
             'token_wallet' => $tokenWallet
+        ]);
+    }
+
+    /**
+     * New function to get all the wallet data in one endpoint for the dashboard
+     * abdulla sami 2025-19-NOV
+     */
+
+    public function walletData()
+    {
+        $user = Auth::user();
+        $member = $user->member;
+
+        // 1 - Earnings (You must decide the correct model/table)
+        $totalEarnings = $member->commission->sum('commission_value');
+
+        // 2 - Received internal transfer
+        $totalReceive = $member->tokenWallet->transaction()
+            ->where('transaction_type', 'receive')
+            ->where('status', 'received')
+            ->where('sender_member_id', '!=', $member->id)
+            ->sum('amount');
+
+        // 3 - Sent transfer
+        $totalTransfer = $member->tokenWallet->transaction()
+            ->where('transaction_type', 'send')
+            ->where('status', 'sent')
+            ->where('receive_member_id', '!=', $member->id)
+            ->sum('amount');
+
+        // 4 - Deposit
+        $totalBounce = $member->wallet->transactions()
+            ->where('transaction_type', 'deposit')
+            ->where('status', 'accepted')
+            ->sum('amount');
+
+        $currentYear = now()->year;
+
+        // Weekly Earnings
+        $weeklyEarnings = $member->commission()
+            ->whereYear('created_at', $currentYear)
+            ->selectRaw('WEEK(created_at) as week, SUM(commission_value) as total')
+            ->groupBy('week')
+            ->orderBy('week')
+            ->get();
+
+        // Generate full 52-week report
+        $fullWeeklyEarnings = collect(range(1, 52))->map(function ($week) use ($currentYear, $weeklyEarnings) {
+            $weekData = $weeklyEarnings->firstWhere('week', $week);
+            return [
+                'week' => $week,
+                'total' => $weekData ? $weekData->total : 0,
+            ];
+        });
+
+        // Raw Monthly bounce from DB
+        $rawBounce = $member->commission()
+            ->whereYear('created_at', $currentYear)
+            ->selectRaw('MONTH(created_at) as month, SUM(commission_value) as total')
+            ->groupBy('month')
+            ->pluck('total', 'month'); // returns: [3 => 200, 7 => 500]
+
+        // Generate Full 12-Month Report with Names
+        $months = collect(range(1, 12))->map(function ($monthNumber) use ($rawBounce) {
+            return [
+                'month' => \Carbon\Carbon::create()->month($monthNumber)->format('F'),
+                'total' => $rawBounce[$monthNumber] ?? 0,
+            ];
+        });
+
+        // Commission wallet balance
+        $balance = $member->wallet->balance;
+
+        // Token wallet balance
+        $tokenWallet = $member->tokenWallet;
+        $tokenBalance = $tokenWallet->token_balance;
+        return response()->json([
+            'status' => true,
+            'total_earnings' => $totalEarnings ?? 0,
+            'total_receive' => $totalReceive ?? 0,
+            'total_transfer' => $totalTransfer ?? 0,
+            'total_bounce' => $totalBounce ?? 0,
+            'weekly_earnings' => $fullWeeklyEarnings ?? [],
+            'monthly_bounce'  => $months ?? [],
+            'balance' => $balance ?? 0,
+            'token_wallet_balance' => $tokenBalance ?? 0,
         ]);
     }
 }

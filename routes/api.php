@@ -119,10 +119,15 @@ route::prefix('v1')->group(function () {
          * 3- network-volume #done
          * 4-rank
          * 5-yearly-sales-in-Weeks
+         *
+         * Wallet data and reports
+         * 1- wallet-totals #done
+         * 2- wallet-reports #done
+         * 3- current-balance #done
+         * 4- token-wallet-balance #done
         */
-
         route::get('/member/dashboard', [MLMController::class, 'dashboardData']);
-
+        route::get('/member/wallet', [WalletController::class, 'walletData']);
 
         // rank
         Route::get('rank', [RankController::class, 'myRank']);

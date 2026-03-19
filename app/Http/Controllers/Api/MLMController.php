@@ -377,7 +377,6 @@ class MLMController extends Controller
     }
 
     // New function to get all member's dashboard data in one call (17-march-2026)
-
     public function dashboardData()
     {
         $user = auth()->user();
@@ -507,6 +506,8 @@ class MLMController extends Controller
             ],
         ], 200);
     }
+
+
     // end abdulla edits
 
     private function getLegMembers($legId)
