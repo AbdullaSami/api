@@ -421,8 +421,9 @@ class MLMController extends Controller
         $rank = $member->rank;
         if ($rank) {
             $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
+            }else {
             $remainingDays = null;
-        }
+            }
         $memberSubscription = $member->subscription;
         if ($memberSubscription && $memberSubscription->expiration_date) {
             // Use Carbon::parse to ensure we have a Carbon instance and avoid magic property type issues
@@ -490,15 +491,15 @@ class MLMController extends Controller
                     'package' => $rank->package ?? null
                 ] ?? null,
                 'next_rank' => [
-                    'name' => $nextRank->name ?? null,
-                    'image' => $nextRank->image ?? null,
-                    'left_volume' => $nextRank->left_volume ?? null,
+                    'name' => $nextRank ? $nextRank->name : null,
+                    'image' => $nextRank ? $nextRank->image : null,
+                    'left_volume' => $nextRank ? $nextRank->left_volume : null,
                     'user_left_volume' => $last30DaysCvCounts['left_cv_count'] ?? null,
-                    'right_volume' => $nextRank->right_volume ?? null,
+                    'right_volume' => $nextRank ? $nextRank->right_volume : null,
                     'user_right_volume' => $last30DaysCvCounts['right_cv_count'] ?? null,
-                    'left_referrals' => $nextRank->direct_referrals / 2 ?? null,
+                    'left_referrals' => $nextRank ? $nextRank->direct_referrals / 2 : null,
                     'user_left_referrals' => $member->leftLegCount() ?? null,
-                    'right_referrals' => $nextRank->direct_referrals / 2 ?? null,
+                    'right_referrals' => $nextRank ? $nextRank->direct_referrals / 2 : null,
                     'user_right_referrals' => $member->rightLegCount() ?? null,
                 ] ?? null,
                 'remaining_days' =>  round($remainingDays) ?? null,
