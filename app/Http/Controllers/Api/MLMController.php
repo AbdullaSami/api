@@ -423,9 +423,9 @@ class MLMController extends Controller
         if($rank){
             $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
         }else{
-            $nextRank = null;
+            $nextRank = Rank::orderBy('id')->first();
         }
-        
+
         $remainingDays = null;
         $memberSubscription = $member->subscription;
         if ($memberSubscription && $memberSubscription->expiration_date) {
