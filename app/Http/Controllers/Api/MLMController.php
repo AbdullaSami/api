@@ -419,9 +419,14 @@ class MLMController extends Controller
 
         //get rank details
         $rank = $member->rank;
-        $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
-        $remainingDays = null;
+
+        if($rank){
+            $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
+        }else{
+            $nextRank = null;
+        }
         
+        $remainingDays = null;
         $memberSubscription = $member->subscription;
         if ($memberSubscription && $memberSubscription->expiration_date) {
             // Use Carbon::parse to ensure we have a Carbon instance and avoid magic property type issues
