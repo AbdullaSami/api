@@ -126,8 +126,11 @@ route::prefix('v1')->group(function () {
          * 3- current-balance #done
          * 4- token-wallet-balance #done
         */
+
+        route::middleware('auth:sanctum')->group(function () {
         route::get('/member/dashboard', [MLMController::class, 'dashboardData']);
         route::get('/member/wallet', [WalletController::class, 'walletData']);
+        });
 
         // rank
         Route::get('rank', [RankController::class, 'myRank']);
