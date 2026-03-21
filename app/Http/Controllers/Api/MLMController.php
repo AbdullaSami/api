@@ -707,8 +707,8 @@ class MLMController extends Controller
         // Fetch only the necessary fields
         $tanks = UserTank::where('sponsor_id', $member->id)
             ->with([
-                'member.user:id,username,first_name,last_name',
-                'member.subscription.package:id,name'
+                'member.user:id,username,first_name,last_name,id_code',
+                'member.subscription.package:id,name,cv'
             ]) // Eager load the user from the member and the package from the subscription
             ->paginate(5);
 
