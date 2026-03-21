@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
+use App\Services\PinCheckService;
 
 
 class AuthController extends Controller
@@ -453,5 +454,60 @@ class AuthController extends Controller
 
         // If not successful, return an error message
         return back()->with('error', 'Failed to sync user. Please try again.');
+    }
+
+    public function resetPin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_pin' => ['required', 'digits:4'],
+            'new_pin' => ['required', 'digits:4', 'confirmed'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()
+            ], 422);
+        }
+
+        $user = auth()->user();
+        $pinCheckService = new PinCheckService();
+
+        // Verify current PIN
+        $pinCheck = $pinCheckService->check($user, $request->current_pin);
+
+        if (!$pinCheck['ok']) {
+            $message = match($pinCheck['reason']) {
+                'no_pin_set' => 'No PIN is currently set for your account',
+                'locked' => 'PIN is temporarily locked due to too many failed attempts. Please try again later.',
+                'invalid' => 'Current PIN is incorrect',
+                default => 'PIN verification failed'
+            };
+
+            return response()->json([
+                'status' => false,
+                'message' => $message
+            ], 400);
+        }
+
+        try {
+            // Update PIN hash
+            $user->pin()->update([
+                'pin_hash' => Hash::make($request->new_pin),
+                'failed_attempts' => 0,
+                'locked_until' => null,
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'PIN reset successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to reset PIN',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
