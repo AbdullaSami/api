@@ -92,6 +92,8 @@ class SubscriptionController extends Controller
 
             // Update Member Wallet Balance
             $newBalance = $this->updateMemberWallatBallnce($member, $package_price, $package->name);
+            $user->status = "active";
+            $user->save();
 
             // Create direct commission (ledger only)
             if ($member->sponsor_id) {
@@ -104,19 +106,6 @@ class SubscriptionController extends Controller
 
                 $sponsor = $member->sponsor->wallet;
                 $sponsor->increment('balance', $directCommissionValue);
-                \Log::info("Direct commission of {$directCommissionValue} added to sponsor (ID: {$member->sponsor_id}). New balance: {$sponsor->balance}");
-                // Create indirect commissions for all uplines in sponsor chain (ledger only)
-                // $upline = optional($member->sponsor)->sponsor;
-                // while ($upline) {
-                //     Commission::create([
-                //         'sponsor_id'        => $upline->id,
-                //         'referral_id'       => $member->id,
-                //         'commission_value'  => $binaryCommissionValue,
-                //         'commission_type'   => 'binary',
-                //     ]);
-                //     \Log::info("Binary commission of {$binaryCommissionValue} added to upline (ID: {$upline->id}). New balance: " . optional($upline->wallet)->balance);
-                //     $upline = $upline->sponsor;
-                // }
             }
 
 

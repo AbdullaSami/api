@@ -151,12 +151,7 @@ class MLMController extends Controller
     {
         $commissionFactor  = CommissionFactor::first();
         $binaryRate = $commissionFactor->binary_rate;
-
-        \Log::info("//////////////////////////////////////////////////////////////");
-        \Log::info("at applyPlacement function");
-
         if ($placementNode->id === $sponsor->id) {
-
             if ($placement === 'left') {
                 $sponsor->left_leg_id = $referral->id;
                 $sponsor->totla_left_volume += $packageCv;
@@ -197,13 +192,9 @@ class MLMController extends Controller
                     'commission_value'  => $commissionValue,
                     'commission_type'   => 'binary',
                 ]);
-
-                \Log::info("Binary commission created for sponsor {$sponsor->id}. Matched CV: {$matchedVolume}");
-
                 // Deduct used CV
                 $sponsor->totla_left_volume  -= $matchedVolume;
                 $sponsor->totla_right_volume -= $matchedVolume;
-                \Log::info("After binary commission deduction for sponsor {$sponsor->id} → Left: {$sponsor->totla_left_volume}, Right: {$sponsor->totla_right_volume}");
             }
 
             $sponsor->save();
@@ -249,14 +240,11 @@ class MLMController extends Controller
                 $member = $sponsor;
             }
         } catch (\Exception $e) {
-            // Log the error for debugging
-            \Log::error('Error applying indirect CV: ' . $e->getMessage());
+            return response()->json(['message' => 'Error applying indirect CV: ' . $e->getMessage()], 500);
         }
     }
     private function processUplinesCommission($uplines, $directSponsor, $packageId, $referral, $packageCv)
     {
-        \Log::info("//////////////////////////////////////////////////////////////");
-        \Log::info("at processUplinesCommission function");
 
         // Remove duplicate uplines
         $uplines = collect($uplines)->unique('id')->values();
@@ -275,16 +263,12 @@ class MLMController extends Controller
             // LEFT LEG
             if ($belongsLeft) {
 
-                \Log::info("Adding {$packageCv} CV to LEFT leg of upline ID: {$upline->id}");
-
                 CvCommission::create([
                     'member_id' => $upline->id,
                     'package_id' => $packageId,
                     'side'       => 'left',
                     'amount'     => $packageCv,
                 ]);
-
-                \Log::info("Indirect CvCommission created for upline ID: {$upline->id} on LEFT leg");
 
                 // Run binary commission logic
                 $this->processBinaryCommission(
@@ -298,16 +282,12 @@ class MLMController extends Controller
             // RIGHT LEG
             if ($belongsRight) {
 
-                \Log::info("Adding {$packageCv} CV to RIGHT leg of upline ID: {$upline->id}");
-
                 CvCommission::create([
                     'member_id' => $upline->id,
                     'package_id' => $packageId,
                     'side'       => 'right',
                     'amount'     => $packageCv,
                 ]);
-
-                \Log::info("Indirect CvCommission created for upline ID: {$upline->id} on RIGHT leg");
 
                 // Run binary commission logic
                 $this->processBinaryCommission(
@@ -338,11 +318,8 @@ class MLMController extends Controller
         }
 
         if ($member->totla_left_volume == 0 || $member->totla_right_volume == 0) {
-            \Log::info("No CV in either leg for member {$member->id}. Skipping binary commission.");
             return;
         }
-
-        \Log::info("Added {$packageCv} CV to {$leg} leg of member {$member->id}");
 
         // 2️⃣ Calculate matched volume (weaker leg)
         $left  = $member->totla_left_volume;
@@ -365,13 +342,9 @@ class MLMController extends Controller
             'commission_type'  => 'binary',
         ]);
 
-        \Log::info("Binary commission {$commissionValue} created for member {$member->id} using {$matchedVolume} CV");
-
         // 4️⃣ Deduct matched CV from both legs
         $member->totla_left_volume  -= $matchedVolume;
         $member->totla_right_volume -= $matchedVolume;
-
-        \Log::info("After deduction for {$member->id} → Left: {$member->totla_left_volume}, Right: {$member->totla_right_volume}");
 
         $member->save();
     }
@@ -420,9 +393,9 @@ class MLMController extends Controller
         //get rank details
         $rank = $member->rank;
 
-        if($rank){
+        if ($rank) {
             $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
-        }else{
+        } else {
             $nextRank = Rank::orderBy('id')->first();
         }
 
