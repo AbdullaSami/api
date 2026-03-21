@@ -45,7 +45,7 @@ route::prefix('v1')->group(function () {
         route::post('user/delete', [AuthController::class, 'deleteMyUser']);
         route::post('user/active', [AuthController::class, 'activeUser']);
         route::post('user/inactive', [AuthController::class, 'inactiveUser']);
-        route::patch('user/change-profile-image', [AuthController::class, 'changeProfileImage']);
+        route::post('user/change-profile-image', [AuthController::class, 'changeProfileImage']);
 
         // single sign-On
         Route::get('get-login-user', [AuthController::class, 'getUser']);
