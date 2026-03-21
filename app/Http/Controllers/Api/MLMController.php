@@ -715,14 +715,16 @@ class MLMController extends Controller
         // Append the member name and package to each tank
         $tanks->getCollection()->transform(function ($tank) {
             // Use optional chaining to safely access the member's user and subscription's package
-            $tank->member_username  = optional($tank->member->user)->username; // Get the member's user's name if exists
-            $tank->member_firstname = optional($tank->member->user)->first_name; // Get the member's user's name if exists
-            $tank->member_lastname = optional($tank->member->user)->last_name; // Get the member's user's name if exists
+            $tank->member_id_code = optional($tank->member->user)->id_code; // Get the member's user's id_code if exists
+            $tank->member_username  = optional($tank->member->user)->username; // Get the member's user's username if exists
+            $tank->member_firstname = optional($tank->member->user)->first_name; // Get the member's user's first_name if exists
+            $tank->member_lastname = optional($tank->member->user)->last_name; // Get the member's user's last_name if exists
             $tank->member_package = optional($tank->member->subscription)->package; // Get the member's user's name if exists
 
             // Check if member and subscription are not null
             if ($tank->member && $tank->member->subscription) {
                 $tank->member_package = $tank->member->subscription->package ? $tank->member->subscription->package->name : null; // Safely accessing package name
+                $tank->member_package_cv = $tank->member->subscription->package ? $tank->member->subscription->package->cv : null; // Safely accessing package cv
             } else {
                 $tank->member_package = null; // Default to null if subscription is not present
             }

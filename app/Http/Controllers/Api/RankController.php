@@ -84,26 +84,26 @@ class RankController extends Controller
     public function rankHistory()
     {
         try {
-        $user = auth()->user();
-        $member = $user->member;
-        $userRank = $member->rank; // the user's current rank
+            $user = auth()->user();
+            $member = $user->member;
+            $userRank = $member->rank; // the user's current rank
 
-        // Get all ranks
-        $ranks = Rank::orderBy('id')->get();
+            // Get all ranks
+            $ranks = Rank::orderBy('id')->get();
 
-        // Build response with true/false flag
-        $rankStatus = $ranks->map(function ($rank) use ($userRank) {
-            return [
-                'rank_id'   => $rank->id,
-                'rank_name' => $rank->name,
-                'rank_image'=> $rank->image,
-                'active'    => $rank->id <= $userRank->id, // true for user's rank and all before
-            ];
-        });
-        return response()->json([
-            'status' => 'success',
-            'data' => $rankStatus
-        ], 200);
+            // Build response with true/false flag
+            $rankStatus = $ranks->map(function ($rank) use ($userRank) {
+                return [
+                    'rank_id'   => $rank->id,
+                    'rank_name' => $rank->name,
+                    'rank_image' => $rank->image,
+                    'active'    => $rank->id <= $userRank->id, // true for user's rank and all before
+                ];
+            });
+            return response()->json([
+                'status' => 'success',
+                'data' => $rankStatus
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
