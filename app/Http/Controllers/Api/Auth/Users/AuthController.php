@@ -309,7 +309,7 @@ class AuthController extends Controller
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('image', 'public');
                 $user->image = URL::to(Storage::url($imagePath));
-                $user->update();
+                $user->save();
             }
             return $this->successResponse('profile image updated successfully ', 'user', $user);
         } catch (\Exception $e) {
