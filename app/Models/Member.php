@@ -117,10 +117,8 @@ class Member extends Model
             // Example requirement checks
             $leftSum = $this->leftSideCvCommissions()->sum('amount') ?? 0;        // adjust to your structure
             $rightSum = $this->rightSideCvCommissions()->sum('amount')  ?? 0;
-            // $directRefs = $this->directReferrals()->count();
             $directRefsLeft = $this->leftLegCount();
             $directRefsRight = $this->rightLegCount();
-
             $nextRankLeftVolume = $nextRank->direct_referrals / 2;
             $nextRankRightVolume = $nextRank->direct_referrals / 2;
 
