@@ -73,12 +73,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Tickets::class);
     }
-    public function image(): Attribute
-    {
-        return new Attribute(
-            get: fn($image) => env('APP_URL') . '/uploads/' . $image
-        );
-    }
 
 public function pin()
 {
