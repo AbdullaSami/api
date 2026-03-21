@@ -104,36 +104,44 @@ class Member extends Model
         $currentRank = $this->rank_id;
 
 
-        if($currentRank){
+        if ($currentRank) {
             // Get next rank
             $nextRank = Rank::where('id', '>', $currentRank)
-            ->orderBy('id')
-            ->first();
+                ->orderBy('id')
+                ->first();
 
             if (! $nextRank) {
                 return false; // Already at top rank
-                }
+            }
 
-                // Example requirement checks
-                $leftSum = $this->leftSideCvCommissions()->sum('amount') ?? 0;        // adjust to your structure
-                $rightSum = $this->rightSideCvCommissions()->sum('amount')  ?? 0;
-                $directRefs = $this->directReferrals()->count();
+            // Example requirement checks
+            $leftSum = $this->leftSideCvCommissions()->sum('amount') ?? 0;        // adjust to your structure
+            $rightSum = $this->rightSideCvCommissions()->sum('amount')  ?? 0;
+            // $directRefs = $this->directReferrals()->count();
+            $directRefsLeft = $this->leftLegCount();
+            $directRefsRight = $this->rightLegCount();
 
-                if ($leftSum >= $nextRank->left_volume && $rightSum >= $nextRank->right_volume && $directRefs >= $nextRank->direct_referrals) {
-                    $this->rank_id = $nextRank->id;
-                    $this->save();
+            $nextRankLeftVolume = $nextRank->direct_referrals / 2;
+            $nextRankRightVolume = $nextRank->direct_referrals / 2;
 
-                    return true; // Rank updated
-                    }
+            if (($leftSum >= $nextRank->left_volume && $rightSum >= $nextRank->right_volume) && ($directRefsLeft >= $nextRankLeftVolume && $directRefsRight >= $nextRankRightVolume)) {
+                $this->rank_id = $nextRank->id;
+                $this->save();
+
+                return true; // Rank updated
+            }
         } else {
             // If no current rank, assign the first rank if requirements are met
             $firstRank = Rank::orderBy('id')->first();
             if ($firstRank) {
                 $leftSum = $this->leftSideCvCommissions()->sum('amount') ?? 0;        // adjust to your structure
                 $rightSum = $this->rightSideCvCommissions()->sum('amount')  ?? 0;
-                $directRefs = $this->directReferrals()->count();
+                $directRefsLeft = $this->leftLegCount();
+                $directRefsRight = $this->rightLegCount();
+                $nextRankLeftVolume = $firstRank->direct_referrals / 2;
+                $nextRankRightVolume = $firstRank->direct_referrals / 2;
 
-                if ($leftSum >= $firstRank->left_volume && $rightSum >= $firstRank->right_volume && $directRefs >= $firstRank->direct_referrals) {
+                if (($leftSum >= $firstRank->left_volume && $rightSum >= $firstRank->right_volume) && ($directRefsLeft >= $nextRankLeftVolume && $directRefsRight >= $nextRankRightVolume)) {
                     $this->rank_id = $firstRank->id;
                     $this->save();
 
