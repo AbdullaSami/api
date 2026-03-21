@@ -302,6 +302,21 @@ class AuthController extends Controller
         }
     }
 
+    public function changeProfileImage(Request $request)
+    {
+        $user = auth()->user();
+        try {
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('image', 'public');
+                $user->image = URL::to(Storage::url($imagePath));
+                $user->save();
+            }
+            return $this->successResponse('profile image updated successfully ', 'user', $user);
+        } catch (\Exception $e) {
+            return $this->failedResponse($e);
+        }
+    }
+
     public function deleteMyUser()
     {
         $user = auth()->user();
