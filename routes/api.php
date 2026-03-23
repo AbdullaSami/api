@@ -41,11 +41,20 @@ route::prefix('v1')->group(function () {
         // user profile data
         route::get('user/data', [AuthController::class, 'userProfile']);
         route::get('user/data/{id_code}', [AuthController::class, 'profileById']); // Abdulla Sami 2025-25-NOV
-        route::put('user/edit', [AuthController::class, 'editUserProfile']);
         route::post('user/delete', [AuthController::class, 'deleteMyUser']);
         route::post('user/active', [AuthController::class, 'activeUser']);
         route::post('user/inactive', [AuthController::class, 'inactiveUser']);
         route::post('user/change-profile-image', [AuthController::class, 'changeProfileImage']);
+
+        // OTP-protected update routes (rate limited via config)
+        Route::middleware('throttle:' . config('security.otp_rate_limit', '3,1'))->group(function () {
+            Route::post('user/profile/request-update', [AuthController::class, 'requestProfileUpdate']);
+            Route::post('user/password/request-change', [AuthController::class, 'requestPasswordChange']);
+            Route::post('user/pin/request-change', [AuthController::class, 'requestPinChange']);
+        });
+
+        // OTP verification and apply update
+        Route::post('user/verify-otp-and-update', [AuthController::class, 'verifyOtpAndApplyUpdate']);
 
         // single sign-On
         Route::get('get-login-user', [AuthController::class, 'getUser']);
@@ -54,7 +63,7 @@ route::prefix('v1')->group(function () {
         Route::post('user/password/email', [ResetPasswordController::class, 'sendResetLinkEmail']);
         Route::patch('user/password/reset', [ResetPasswordController::class, 'reset']);
 
-        // user reset pin
+        // user reset pin (legacy - kept for backward compatibility)
         Route::post('user/pin/reset', [AuthController::class, 'resetPin']);
 
         //tank

@@ -79,6 +79,10 @@ public function pin()
     return $this->morphOne(\App\Models\Pin::class, 'pinable');
 }
 
+public function otps()
+{
+    return $this->hasMany(\App\Models\Otp::class);
+}
 
     public function member()
     {

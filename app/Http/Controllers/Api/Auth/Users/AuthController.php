@@ -20,6 +20,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
 use App\Services\PinCheckService;
+use App\Services\OtpService;
+use Illuminate\Support\Facades\Cache;
 
 
 class AuthController extends Controller
@@ -267,7 +269,10 @@ class AuthController extends Controller
         ]);
     }
 
-    public function editUserProfile(Request $request)
+    /**
+     * Request profile update - generates OTP and caches pending data.
+     */
+    public function requestProfileUpdate(Request $request)
     {
         $user = auth()->user();
         $validator = Validator::make($request->all(), [
@@ -289,16 +294,273 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return $this->failedResponse($validator->errors(), 422);
         }
+
+        // Check if there's actual data to update
+        $data = array_filter($validator->validated(), fn($value) => !is_null($value));
+        if (empty($data)) {
+            return $this->failedResponse('No data provided for update', 422);
+        }
+
+        // Generate unique operation ID
+        $operationId = Str::uuid()->toString();
+        $cacheKey = "pending_update_{$user->id}_{$operationId}";
+
+        // Cache the pending update data with expiration
+        Cache::put($cacheKey, [
+            'type' => 'profile',
+            'data' => $data,
+            'created_at' => now(),
+        ], now()->addMinutes(config('security.pending_update_expiration', 10)));
+
         try {
-            $request->username ? $user->username = $request->username : $user->username;
-            $request->first_name ? $user->first_name = $request->first_name : $user->first_name;
-            $request->last_name ? $user->last_name = $request->last_name : $user->last_name;
-            $request->email ? $user->email = $request->email : $user->email;
-            $request->phone ? $user->phone = $request->phone : $user->phone;
-            $user->save();
-            return $this->successResponse('user data updated successfully ', 'user', $user);
+            // Generate OTP with operation binding
+            $otpService = new OtpService();
+            $otpService->generate($user, $operationId);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'OTP sent to your email',
+                'operation_id' => $operationId,
+            ]);
         } catch (\Exception $e) {
-            return $this->failedResponse($e);
+            Cache::forget($cacheKey);
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to send OTP. Please try again.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Request password change - generates OTP and caches pending data.
+     */
+    public function requestPasswordChange(Request $request)
+    {
+        $user = auth()->user();
+        $validator = Validator::make($request->all(), [
+            'old_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->failedResponse($validator->errors(), 422);
+        }
+
+        // Verify old password
+        if (!Hash::check($request->old_password, $user->password)) {
+            return $this->failedResponse(['old_password' => ['Old password is incorrect']], 422);
+        }
+
+        // Generate unique operation ID
+        $operationId = Str::uuid()->toString();
+        $cacheKey = "pending_update_{$user->id}_{$operationId}";
+
+        // Cache the pending update data with expiration
+        Cache::put($cacheKey, [
+            'type' => 'password',
+            'data' => [
+                'password' => $request->password,
+            ],
+            'created_at' => now(),
+        ], now()->addMinutes(config('security.pending_update_expiration', 10)));
+
+        try {
+            // Generate OTP with operation binding
+            $otpService = new OtpService();
+            $otpService->generate($user, $operationId);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'OTP sent to your email',
+                'operation_id' => $operationId,
+            ]);
+        } catch (\Exception $e) {
+            Cache::forget($cacheKey);
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to send OTP. Please try again.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Request PIN change - generates OTP and caches pending data.
+     */
+    public function requestPinChange(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_pin' => ['required', 'digits:4'],
+            'new_pin' => ['required', 'digits:4', 'confirmed'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()
+            ], 422);
+        }
+
+        $user = auth()->user();
+        $pinCheckService = new PinCheckService();
+
+        // Verify current PIN
+        $pinCheck = $pinCheckService->check($user, $request->current_pin);
+
+        if (!$pinCheck['ok']) {
+            $message = match($pinCheck['reason']) {
+                'no_pin_set' => 'No PIN is currently set for your account',
+                'locked' => 'PIN is temporarily locked due to too many failed attempts. Please try again later.',
+                'invalid' => 'Current PIN is incorrect',
+                default => 'PIN verification failed'
+            };
+
+            return response()->json([
+                'status' => false,
+                'message' => $message
+            ], 400);
+        }
+
+        // Generate unique operation ID
+        $operationId = Str::uuid()->toString();
+        $cacheKey = "pending_update_{$user->id}_{$operationId}";
+
+        // Cache the pending update data with expiration
+        Cache::put($cacheKey, [
+            'type' => 'pin',
+            'data' => [
+                'new_pin' => $request->new_pin,
+            ],
+            'created_at' => now(),
+        ], now()->addMinutes(config('security.pending_update_expiration', 10)));
+
+        try {
+            // Generate OTP with operation binding
+            $otpService = new OtpService();
+            $otpService->generate($user, $operationId);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'OTP sent to your email',
+                'operation_id' => $operationId,
+            ]);
+        } catch (\Exception $e) {
+            Cache::forget($cacheKey);
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to send OTP. Please try again.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Verify OTP and apply the pending update.
+     */
+    public function verifyOtpAndApplyUpdate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'otp' => ['required', 'digits:6'],
+            'operation_id' => ['required', 'string', 'uuid'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()
+            ], 422);
+        }
+
+        $user = auth()->user();
+        $operationId = $request->operation_id;
+        $cacheKey = "pending_update_{$user->id}_{$operationId}";
+
+        // Retrieve cached data
+        $cachedData = Cache::get($cacheKey);
+
+        if (!$cachedData) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No pending update found. Please initiate the update request again.',
+            ], 400);
+        }
+
+        // Validate cache expiration
+        if (now()->diffInMinutes($cachedData['created_at']) > config('security.pending_update_expiration', 10)) {
+            Cache::forget($cacheKey);
+            return response()->json([
+                'status' => false,
+                'message' => 'Request expired. Please initiate the update request again.',
+            ], 400);
+        }
+
+        // Verify OTP with operation binding
+        $otpService = new OtpService();
+        $result = $otpService->verify($user, $request->otp, $operationId);
+
+        if (!$result['success']) {
+            return response()->json([
+                'status' => false,
+                'message' => $result['message'],
+            ], 400);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            switch ($cachedData['type']) {
+                case 'profile':
+                    // Use whitelist to prevent mass assignment
+                    $allowedFields = ['username', 'first_name', 'last_name', 'email', 'phone'];
+                    $updateData = collect($cachedData['data'])->only($allowedFields)->toArray();
+                    $user->update($updateData);
+                    break;
+
+                case 'password':
+                    $user->update([
+                        'password' => Hash::make($cachedData['data']['password']),
+                    ]);
+                    break;
+
+                case 'pin':
+                    // Safety check for PIN existence
+                    if (!$user->pin) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'PIN not found',
+                        ], 400);
+                    }
+                    $user->pin()->update([
+                        'pin_hash' => Hash::make($cachedData['data']['new_pin']),
+                        'failed_attempts' => 0,
+                        'locked_until' => null,
+                    ]);
+                    break;
+
+                default:
+                    throw new \Exception('Invalid update type');
+            }
+
+            // Clear the cached data
+            Cache::forget($cacheKey);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => ucfirst($cachedData['type']) . ' updated successfully.',
+                'data' => [
+                    'user' => $user->fresh(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to apply update',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
