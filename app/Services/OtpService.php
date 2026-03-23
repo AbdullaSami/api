@@ -164,6 +164,10 @@ class OtpService
     {
         try {
             Mail::to($user->email)->send(new SendOtpMail($plainOtp, $this->expirationMinutes));
+            Log::info('OTP email sent', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
         } catch (\Exception $e) {
             Log::error('Failed to send OTP email', [
                 'user_id' => $user->id,
