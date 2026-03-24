@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\CommissionPayoutBatchController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\Api\Admin\Commissions\AdminCommissionPayoutBatchController;
+use App\Http\Controllers\Api\AnalyticsController;
 
 route::any('login', function () {
     return response()->json('you are unauthorized', 400);
@@ -151,6 +152,9 @@ route::prefix('v1')->group(function () {
 
         //validation node => for developer only
         Route::get('/members/validate', [NodeValidationController::class, 'validateNode']);
+
+        // analytics routes
+        Route::get('/analytics/countries', [AnalyticsController::class, 'countryAnalytics']);
     });
 
 
