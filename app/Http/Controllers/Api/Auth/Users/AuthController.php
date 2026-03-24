@@ -193,7 +193,7 @@ class AuthController extends Controller
 
     public function userProfile()
     {
-        $user = (auth()->user());
+        $user = auth('sanctum')->user();
         $user->load('member');
         $member = $user->member;
         $sponsor = $member ? $member->sponsor : null;
