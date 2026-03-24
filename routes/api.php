@@ -22,6 +22,25 @@ route::any('login', function () {
     return response()->json('you are unauthorized', 400);
 })->name('login');
 
+// CORS Test Route - Returns user info with authentication methods
+Route::get('user', function () {
+    $user = auth('sanctum')->user();
+
+    if (!$user) {
+        return response()->json([
+            'message' => 'Unauthenticated',
+            'auth_method' => 'none',
+            'cors_test' => true
+        ], 401);
+    }
+
+    return response()->json([
+        'user' => $user->only(['id', 'email', 'name']),
+        'auth_method' => request()->bearerToken() ? 'bearer_token' : 'cookie',
+        'cors_test' => true,
+        'timestamp' => now()->toISOString()
+    ]);
+});
 
 route::prefix('v1')->group(function () {
 
