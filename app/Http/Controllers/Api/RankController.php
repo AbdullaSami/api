@@ -89,6 +89,8 @@ class RankController extends Controller
 
             if($member->rank){
                 $userRank = $member->rank; // the user's current rank
+            }else{
+                $userRank = (object) ['id' => 0]; // default to rank ID 0 if no rank assigned
             }
 
 
@@ -101,7 +103,7 @@ class RankController extends Controller
                     'rank_id'   => $rank->id,
                     'rank_name' => $rank->name,
                     'rank_image' => $rank->image,
-                    'active'    => $rank->id <= $userRank->id ?? false, // true for user's rank and all before
+                    'active'    => $rank->id <= $userRank->id, // true for user's rank and all before
                 ];
             });
             return response()->json([
