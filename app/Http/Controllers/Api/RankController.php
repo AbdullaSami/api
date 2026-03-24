@@ -88,11 +88,11 @@ class RankController extends Controller
             $member = $user->member;
             $userRank = $member->rank; // the user's current rank
 
-            if(!$userRank){
-                return response()->json([
-                    'message' => 'User has no rank',
-                ], 200);
-            }
+            // if(!$userRank){
+            //     return response()->json([
+            //         'message' => 'User has no rank',
+            //     ], 200);
+            // }
 
             // Get all ranks
             $ranks = Rank::orderBy('id')->get();
