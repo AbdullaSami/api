@@ -86,13 +86,11 @@ class RankController extends Controller
         try {
             $user = auth()->user();
             $member = $user->member;
-            $userRank = $member->rank; // the user's current rank
 
-            // if(!$userRank){
-            //     return response()->json([
-            //         'message' => 'User has no rank',
-            //     ], 200);
-            // }
+            if($member->rank){
+                $userRank = $member->rank; // the user's current rank
+            }
+
 
             // Get all ranks
             $ranks = Rank::orderBy('id')->get();
@@ -103,7 +101,7 @@ class RankController extends Controller
                     'rank_id'   => $rank->id,
                     'rank_name' => $rank->name,
                     'rank_image' => $rank->image,
-                    'active'    => $rank->id <= $userRank->id, // true for user's rank and all before
+                    'active'    => $rank->id <= $userRank->id ?? false, // true for user's rank and all before
                 ];
             });
             return response()->json([
