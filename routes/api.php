@@ -23,7 +23,7 @@ route::any('login', function () {
 })->name('login');
 
 // CORS Test Route - Returns user info with authentication methods
-Route::get('user', function () {
+Route::get('v1/user', function () {
     $user = auth('sanctum')->user();
 
     if (!$user) {
