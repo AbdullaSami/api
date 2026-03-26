@@ -30,35 +30,20 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => ['required', 'email', 'exists:users,email'],
-            'password' => ['required', 'string']
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' =>  $validator->errors()
-            ], 422);
-        }
+        try {
+            $request->authenticate();
 
-        $user = User::where('email', $request->email)->first();
-        if ($user && Hash::check($request->password, $user->password)) {
-
-            $oldToken = $user->tokens();
-            if ($oldToken)
-                $oldToken->delete();
+            $request->session()->regenerate();
 
             return response()->json([
-                'status' => true,
-                'message' => 'login successfully ',
-                'token' => ($user->createToken('user token'))->plainTextToken,
-                'user' => $user
+                'message' => 'Logged in successfully',
+                'user' => $request->user(),
             ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 401);
         }
-        return response()->json([
-            'status' => false,
-            'message' => 'The provided credentials are incorrect.'
-        ], 400);
     }
 
 
