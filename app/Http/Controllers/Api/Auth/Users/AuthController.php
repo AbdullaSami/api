@@ -22,13 +22,13 @@ use Illuminate\Validation\Rule;
 use App\Services\PinCheckService;
 use App\Services\OtpService;
 use Illuminate\Support\Facades\Cache;
-
+use App\Http\Requests\LoginRequest;
 
 class AuthController extends Controller
 {
     use ApiResponseTrait;
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
         try {
             $request->authenticate();
