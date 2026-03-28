@@ -10,5 +10,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-Schedule::job(new PayoutCommissionsJob)
-    ->weeklyOn(4, '08:00');
+// Schedule::job(new PayoutCommissionsJob)
+//     ->weeklyOn(4, '08:00');
