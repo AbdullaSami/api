@@ -19,7 +19,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://test.thenovagroupco.com',
+    'allowed_origins' => [
+                          'https://thenovagroupco.com',
+                          'https://test.thenovagroupco.com',
+                          'https://school.thenovagroupco.com',
                           'http://localhost:5173',
                           'http://localhost:5174',
                           'https://thenovagroupco.netlify.app'
