@@ -395,6 +395,9 @@ class MLMController extends Controller
 
         if ($rank) {
             $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
+            $nextRank_downline_requirements = $nextRank ? $nextRank->downline_requirements : null;
+            $requiredLeftDownlineRank = Rank::find($nextRank_downline_requirements['left']['rank_id'] ?? null);
+            $requiredRightDownlineRank = Rank::find($nextRank_downline_requirements['right']['rank_id'] ?? null);
         } else {
             $nextRank = Rank::orderBy('id')->first();
         }
@@ -480,14 +483,14 @@ class MLMController extends Controller
                     // Optional: show user's current progress toward downline requirements
                     'user_downline_progress' => $nextRank->downline_requirements ? [
                         'left' => [
-                            'required_rank_id' => $nextRank->downline_requirements['left']['rank_id'] ?? null,
+                            'required_rank' => $requiredLeftDownlineRank ?? null,
                             'required_count' => $nextRank->downline_requirements['left']['count'] ?? null,
                             'current_count' => isset($nextRank->downline_requirements['left'])
                                 ? ($member->getRankBasedDownlineCount($member->left_leg_id)[$nextRank->downline_requirements['left']['rank_id']] ?? 0)
                                 : null,
                         ],
                         'right' => [
-                            'required_rank_id' => $nextRank->downline_requirements['right']['rank_id'] ?? null,
+                            'required_rank' => $requiredRightDownlineRank ?? null,
                             'required_count' => $nextRank->downline_requirements['right']['count'] ?? null,
                             'current_count' => isset($nextRank->downline_requirements['right'])
                                 ? ($member->getRankBasedDownlineCount($member->right_leg_id)[$nextRank->downline_requirements['right']['rank_id']] ?? 0)
