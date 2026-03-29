@@ -53,7 +53,9 @@ route::prefix('v1')->group(function () {
 
     //ranks
     route::get('ranks', [RankController::class, 'ranks']);
-
+    // packages
+    Route::get('packages', [PackageController::class, 'index']);
+    
     route::middleware('auth:sanctum')->group(function () {
         // logout
         route::post('logout', [AuthController::class, 'logout']);
@@ -101,7 +103,6 @@ route::prefix('v1')->group(function () {
         Route::get('/members/yearly-sales', [MLMController::class, 'getYearlySales']);
 
         //packeage
-        Route::get('packages', [PackageController::class, 'index']);
         route::get('my-package', [PackageController::class, 'show']);
 
         //subscription
