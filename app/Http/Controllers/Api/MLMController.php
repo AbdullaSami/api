@@ -473,8 +473,27 @@ class MLMController extends Controller
                     'user_left_volume' => $last30DaysCvCounts['left_cv_count'] ?? null,
                     'right_volume' => $nextRank ? $nextRank->right_volume : null,
                     'user_right_volume' => $last30DaysCvCounts['right_cv_count'] ?? null,
-                    'direct_referrals' => $nextRank ? $nextRank->direct_referrals: null,
+                    'direct_referrals' => $nextRank ? $nextRank->direct_referrals : null,
                     'user_direct_referrals' => $member->directReferrals()->count() ?? null,
+                    // ✅ Downline requirements (NEW 🔥)
+                    'downline_requirements' => $nextRank->downline_requirements,
+                    // Optional: show user's current progress toward downline requirements
+                    'user_downline_progress' => $nextRank->downline_requirements ? [
+                        'left' => [
+                            'required_rank_id' => $nextRank->downline_requirements['left']['rank_id'] ?? null,
+                            'required_count' => $nextRank->downline_requirements['left']['count'] ?? null,
+                            'current_count' => isset($nextRank->downline_requirements['left'])
+                                ? ($member->getRankBasedDownlineCount($member->left_leg_id)[$nextRank->downline_requirements['left']['rank_id']] ?? 0)
+                                : null,
+                        ],
+                        'right' => [
+                            'required_rank_id' => $nextRank->downline_requirements['right']['rank_id'] ?? null,
+                            'required_count' => $nextRank->downline_requirements['right']['count'] ?? null,
+                            'current_count' => isset($nextRank->downline_requirements['right'])
+                                ? ($member->getRankBasedDownlineCount($member->right_leg_id)[$nextRank->downline_requirements['right']['rank_id']] ?? 0)
+                                : null,
+                        ],
+                    ] : null,
                 ] ?? null,
                 'remaining_days' =>  round($remainingDays) ?? null,
                 'weekly_earnings'  => $fullWeeklyEarnings ?? null,
