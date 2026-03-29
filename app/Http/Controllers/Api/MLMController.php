@@ -395,12 +395,12 @@ class MLMController extends Controller
 
         if ($rank) {
             $nextRank = Rank::where('id', '>', $rank->id)->orderBy('id')->first();
-            $nextRank_downline_requirements = $nextRank ? $nextRank->downline_requirements : null;
-            $requiredLeftDownlineRank = Rank::find($nextRank_downline_requirements['left']['rank_id'] ?? null);
-            $requiredRightDownlineRank = Rank::find($nextRank_downline_requirements['right']['rank_id'] ?? null);
         } else {
             $nextRank = Rank::orderBy('id')->first();
         }
+        $nextRank_downline_requirements = $nextRank ? $nextRank->downline_requirements : null;
+        $requiredLeftDownlineRank = Rank::find($nextRank_downline_requirements['left']['rank_id'] ?? null);
+        $requiredRightDownlineRank = Rank::find($nextRank_downline_requirements['right']['rank_id'] ?? null);
 
         $remainingDays = null;
         $memberSubscription = $member->subscription;
