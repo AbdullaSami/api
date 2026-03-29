@@ -103,54 +103,81 @@ class Member extends Model
         // Get current rank
         $currentRank = $this->rank_id;
 
+        // Get next rank or first rank
+        $nextRank = $currentRank
+            ? Rank::where('id', '>', $currentRank)->orderBy('id')->first()
+            : Rank::orderBy('id')->first();
 
-        if ($currentRank) {
-            // Get next rank
-            $nextRank = Rank::where('id', '>', $currentRank)
-                ->orderBy('id')
-                ->first();
+        if (! $nextRank) {
+            return false; // No more ranks to upgrade to
+        }
 
-            if (! $nextRank) {
-                return false; // Already at top rank
+        // =========================
+        // ✅ 1. Volume Check
+        // =========================
+        $leftSum = $this->leftSideCvCommissions()->sum('amount') ?? 0;
+        $rightSum = $this->rightSideCvCommissions()->sum('amount') ?? 0;
+
+        if (
+            $leftSum < $nextRank->left_volume ||
+            $rightSum < $nextRank->right_volume
+        ) {
+            return false;
+        }
+
+        // =========================
+        // ✅ 2. Direct Referrals Check
+        // =========================
+        $totalDirects = $this->directReferrals()->count();
+
+        if ($totalDirects < $nextRank->direct_referrals) {
+            return false;
+        }
+
+        // =========================
+        // ✅ 3. Downline Rank Requirements (🔥 main part)
+        // =========================
+        if ($nextRank->downline_requirements) {
+
+            $requirements = $nextRank->downline_requirements;
+
+            // Get rank counts per leg using your existing function
+            $leftRanks = $this->getRankBasedDownlineCount($this->left_leg_id);
+            $rightRanks = $this->getRankBasedDownlineCount($this->right_leg_id);
+
+            // LEFT LEG CHECK
+            if (isset($requirements['left'])) {
+                $requiredRankId = $requirements['left']['rank_id'];
+                $requiredCount = $requirements['left']['count'];
+
+                $actualCount = $leftRanks[$requiredRankId] ?? 0;
+
+                if ($actualCount < $requiredCount) {
+                    return false;
+                }
             }
 
-            // Example requirement checks
-            $leftSum = $this->leftSideCvCommissions()->sum('amount') ?? 0;        // adjust to your structure
-            $rightSum = $this->rightSideCvCommissions()->sum('amount')  ?? 0;
-            $directRefsLeft = $this->leftLegCount();
-            $directRefsRight = $this->rightLegCount();
-            $nextRankLeftVolume = $nextRank->direct_referrals / 2;
-            $nextRankRightVolume = $nextRank->direct_referrals / 2;
+            // RIGHT LEG CHECK
+            if (isset($requirements['right'])) {
+                $requiredRankId = $requirements['right']['rank_id'];
+                $requiredCount = $requirements['right']['count'];
 
-            if (($leftSum >= $nextRank->left_volume && $rightSum >= $nextRank->right_volume) && ($directRefsLeft >= $nextRankLeftVolume && $directRefsRight >= $nextRankRightVolume)) {
-                $this->rank_id = $nextRank->id;
-                $this->save();
+                $actualCount = $rightRanks[$requiredRankId] ?? 0;
 
-                return true; // Rank updated
-            }
-        } else {
-            // If no current rank, assign the first rank if requirements are met
-            $firstRank = Rank::orderBy('id')->first();
-            if ($firstRank) {
-                $leftSum = $this->leftSideCvCommissions()->sum('amount') ?? 0;        // adjust to your structure
-                $rightSum = $this->rightSideCvCommissions()->sum('amount')  ?? 0;
-                $directRefsLeft = $this->leftLegCount();
-                $directRefsRight = $this->rightLegCount();
-                $nextRankLeftVolume = $firstRank->direct_referrals / 2;
-                $nextRankRightVolume = $firstRank->direct_referrals / 2;
-
-                if (($leftSum >= $firstRank->left_volume && $rightSum >= $firstRank->right_volume) && ($directRefsLeft >= $nextRankLeftVolume && $directRefsRight >= $nextRankRightVolume)) {
-                    $this->rank_id = $firstRank->id;
-                    $this->save();
-
-                    return true; // Rank updated
+                if ($actualCount < $requiredCount) {
+                    return false;
                 }
             }
         }
 
-        return false; // Requirements not yet met
-    }
+        // =========================
+        // ✅ 4. Promote Rank
+        // =========================
+        $this->rank_id = $nextRank->id;
+        $this->save();
 
+        return true;
+    }
     /**
      * End of Abdulla updates
      */

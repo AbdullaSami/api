@@ -18,6 +18,7 @@ class Rank extends Model
         'direct_referrals',
         'downline_requirements',
         'image',
+        'icon',
     ];
 
     /**

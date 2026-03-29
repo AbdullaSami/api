@@ -463,20 +463,18 @@ class MLMController extends Controller
                 ] : null,
                 'rank' => [
                     'name' => $rank->name ?? null,
-                    'image' => $rank->image ?? null,
-                    'package' => $rank->package ?? null
+                    'package' => $rank->package ?? null,
+                    'icon' => $rank->icon ?? null
                 ] ?? null,
                 'next_rank' => [
                     'name' => $nextRank ? $nextRank->name : null,
-                    'image' => $nextRank ? $nextRank->image : null,
+                    'icon' => $nextRank ? $nextRank->icon : null,
                     'left_volume' => $nextRank ? $nextRank->left_volume : null,
                     'user_left_volume' => $last30DaysCvCounts['left_cv_count'] ?? null,
                     'right_volume' => $nextRank ? $nextRank->right_volume : null,
                     'user_right_volume' => $last30DaysCvCounts['right_cv_count'] ?? null,
-                    'left_referrals' => $nextRank ? $nextRank->direct_referrals / 2 : null,
-                    'user_left_referrals' => $member->leftLegCount() ?? null,
-                    'right_referrals' => $nextRank ? $nextRank->direct_referrals / 2 : null,
-                    'user_right_referrals' => $member->rightLegCount() ?? null,
+                    'direct_referrals' => $nextRank ? $nextRank->direct_referrals: null,
+                    'user_direct_referrals' => $member->directReferrals()->count() ?? null,
                 ] ?? null,
                 'remaining_days' =>  round($remainingDays) ?? null,
                 'weekly_earnings'  => $fullWeeklyEarnings ?? null,
