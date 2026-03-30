@@ -818,6 +818,8 @@ class MLMController extends Controller
                 ],
                 'user' => $profileUser,
                 'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
+                'rank' => $profileMember->rank ?? null,
+
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } elseif ($member->leftLeg && !$member->rightLeg) {
@@ -835,6 +837,8 @@ class MLMController extends Controller
                 'right_leg_member' => null,
                 'user' => $profileUser,
                 'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
+                'rank' => $profileMember->rank ?? null,
+
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } elseif (!$member->leftLeg && $member->rightLeg) {
@@ -852,6 +856,7 @@ class MLMController extends Controller
                 ],
                 'user' => $profileUser,
                 'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
+                'rank' => $profileMember->rank ?? null,
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } else {
@@ -860,6 +865,8 @@ class MLMController extends Controller
                 'right_leg_member' => null,
                 'user' => $profileUser,
                 'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
+                'rank' => $profileMember->rank ?? null,
+
             ];
             return $this->successResponse('no downlines members to this user', 'members', $data);
         }
