@@ -816,7 +816,8 @@ class MLMController extends Controller
                     'user_last_name'    => $member->rightLeg->user->last_name,
                     'user_image'        => $member->rightLeg->user->image,
                 ],
-                'user' => $profileUser
+                'user' => $profileUser,
+                'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } elseif ($member->leftLeg && !$member->rightLeg) {
@@ -832,7 +833,8 @@ class MLMController extends Controller
                     'user_image'        => $member->leftLeg->user->image,
                 ],
                 'right_leg_member' => null,
-                'user' => $profileUser
+                'user' => $profileUser,
+                'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } elseif (!$member->leftLeg && $member->rightLeg) {
@@ -848,14 +850,16 @@ class MLMController extends Controller
                     'user_last_name'    => $member->rightLeg->user->last_name,
                     'user_image'        => $member->rightLeg->user->image,
                 ],
-                'user' => $profileUser
+                'user' => $profileUser,
+                'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } else {
             $data = [
                 'left_leg_member' => null,
                 'right_leg_member' => null,
-                'user' => $profileUser
+                'user' => $profileUser,
+                'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
             ];
             return $this->successResponse('no downlines members to this user', 'members', $data);
         }
