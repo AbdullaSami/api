@@ -121,6 +121,9 @@ class AuthController extends Controller
                 'token_balance' => 0.00, // Initial balance is zero
             ]);
 
+            $user->update([
+                'status' => 'active'
+            ]);
             DB::commit();
             // Return user data with access token and member info
             $user = array_merge($user->toArray(), [
