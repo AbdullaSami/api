@@ -125,16 +125,10 @@ class AuthController extends Controller
                 'status' => 'active'
             ]);
             DB::commit();
-            // Return user data with access token and member info
-            $user = array_merge($user->toArray(), [
-                'token' => $user->createToken('user token')->plainTextToken,
-                'member' => $member,
-            ]);
 
             return response()->json([
                 'status' => true,
                 'message' => 'User registered successfully',
-                'user' => $user
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();

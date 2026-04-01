@@ -18,43 +18,18 @@ use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\Api\Admin\Commissions\AdminCommissionPayoutBatchController;
 use App\Http\Controllers\Api\AnalyticsController;
 
-route::any('login', function () {
-    return response()->json('you are unauthorized', 400);
-})->name('login');
-
-// CORS Test Route - Returns user info with authentication methods
-Route::get('v1/user', function () {
-    $user = auth('sanctum')->user();
-
-    if (!$user) {
-        return response()->json([
-            'message' => 'Unauthenticated',
-            'auth_method' => 'none',
-            'cors_test' => true
-        ], 401);
-    }
-
-    return response()->json([
-        'user' => $user->only(['id', 'email', 'name']),
-        'auth_method' => request()->bearerToken() ? 'bearer_token' : 'cookie',
-        'cors_test' => true,
-        'timestamp' => now()->toISOString()
-    ]);
-});
-
 route::prefix('v1')->group(function () {
 
     route::post('login', [AuthController::class, 'login']);
     route::post('register', [AuthController::class, 'register']);
     route::get('sponsor-data/{id}', [AuthController::class, 'sponsorData']);
 
-    // single sign-On
-    Route::post('login-token', [AuthController::class, 'generateToken']);
-
     //ranks
     route::get('ranks', [RankController::class, 'ranks']);
     // packages
     Route::get('packages', [PackageController::class, 'index']);
+
+    Route::post('user/password/email', [ResetPasswordController::class, 'sendResetLinkEmail']);
     
     route::middleware('auth:sanctum')->group(function () {
         // logout
@@ -78,11 +53,7 @@ route::prefix('v1')->group(function () {
         // OTP verification and apply update
         Route::post('user/verify-otp-and-update', [AuthController::class, 'verifyOtpAndApplyUpdate']);
 
-        // single sign-On
-        Route::get('get-login-user', [AuthController::class, 'getUser']);
-
         // user reset password
-        Route::post('user/password/email', [ResetPasswordController::class, 'sendResetLinkEmail']);
         Route::patch('user/password/reset', [ResetPasswordController::class, 'reset']);
 
         // user reset pin (legacy - kept for backward compatibility)
