@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
 use App\Services\PinCheckService;
 use App\Services\OtpService;
+use App\Services\WelcomeEmailService;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\LoginRequest;
 
@@ -124,6 +125,11 @@ class AuthController extends Controller
             $user->update([
                 'status' => 'active'
             ]);
+
+            // Send welcome email
+            $welcomeEmailService = new WelcomeEmailService();
+            $welcomeEmailService->sendWelcomeEmail($user);
+
             DB::commit();
 
             return response()->json([
