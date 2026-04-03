@@ -182,9 +182,7 @@ class OtpService
      */
     public function getUserByOperationId(string $operationId): ?User
     {
-        $otp = Otp::where('operation_id', $operationId)
-            ->where('is_used', true)
-            ->first();
+        $otp = Otp::where('operation_id', $operationId)->first();
 
         if (!$otp) {
             return null;
