@@ -176,4 +176,20 @@ class OtpService
             throw new \Exception('Failed to send OTP email. Please try again.');
         }
     }
+
+    /**
+     * Get user by operation ID
+     */
+    public function getUserByOperationId(string $operationId): ?User
+    {
+        $otp = Otp::where('operation_id', $operationId)
+            ->where('is_used', true)
+            ->first();
+
+        if (!$otp) {
+            return null;
+        }
+
+        return User::find($otp->user_id);
+    }
 }

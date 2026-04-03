@@ -23,18 +23,18 @@ route::prefix('v1')->group(function () {
     route::post('login', [AuthController::class, 'login']);
     route::post('register', [AuthController::class, 'register']);
     route::get('sponsor-data/{id}', [AuthController::class, 'sponsorData']);
-
+    // Password reset
+    Route::post('user/find-account', [ResetPasswordController::class, 'findAccount']);
+    Route::post('user/reset-password', [ResetPasswordController::class, 'resetPassword']);
     //ranks
     route::get('ranks', [RankController::class, 'ranks']);
     // packages
     Route::get('packages', [PackageController::class, 'index']);
 
-    Route::post('user/find-account', [ResetPasswordController::class, 'findAccount']);
 
     route::middleware('auth:sanctum')->group(function () {
         // logout
         route::post('logout', [AuthController::class, 'logout']);
-
         // user profile data
         route::get('user/data', [AuthController::class, 'userProfile']);
         route::get('user/data/{id_code}', [AuthController::class, 'profileById']); // Abdulla Sami 2025-25-NOV
