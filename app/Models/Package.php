@@ -13,6 +13,7 @@ class Package extends Model
         'name',
         'price',
         'pack_card',
+        'pack_icon',
         'billing_period',
         'cv',
         'features'
