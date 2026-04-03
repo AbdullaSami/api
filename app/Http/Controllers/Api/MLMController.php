@@ -739,12 +739,20 @@ class MLMController extends Controller
                     'rank' => $member->leftLeg->rank,
                     'user_name' => $member->leftLeg->user->name,
                     'user_image' => $member->leftLeg->user->image,
+                    'pack_name' => $member->leftLeg?->subscription?->package?->name,
+                    'pack_icon' => $member->leftLeg?->subscription?->package?->pack_icon,
+                    'rank_name' => $member->leftLeg?->rank?->name,
+                    'rank_icon' => $member->leftLeg?->rank?->icon,
                 ],
                 'right_leg_member' => [
                     'id' => $member->rightLeg->id,
                     'rank' => $member->rightLeg->rank,
                     'user_name' => $member->rightLeg->user->name,
                     'user_image' => $member->rightLeg->user->image,
+                    'pack_name' => $member->rightLeg?->subscription?->package?->name,
+                    'pack_icon' => $member->rightLeg?->subscription?->package?->pack_icon,
+                    'rank_name' => $member->rightLeg?->rank?->name,
+                    'rank_icon' => $member->rightLeg?->rank?->icon,
                 ]
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
@@ -755,6 +763,10 @@ class MLMController extends Controller
                     'rank' => $member->leftLeg->rank,
                     'user_name' => $member->leftLeg->user->name,
                     'user_image' => $member->leftLeg->user->image,
+                    'pack_name' => $member->leftLeg?->subscription?->package?->name,
+                    'pack_icon' => $member->leftLeg?->subscription?->package?->pack_icon,
+                    'rank_name' => $member->leftLeg?->rank?->name,
+                    'rank_icon' => $member->leftLeg?->rank?->icon,
                 ],
                 'right_leg_member' => [
                     'this leg is empty right now'
@@ -771,6 +783,10 @@ class MLMController extends Controller
                     'rank' => $member->rightLeg->rank,
                     'user_name' => $member->rightLeg->user->name,
                     'user_image' => $member->rightLeg->user->image,
+                    'pack_name' => $member->rightLeg?->subscription?->package?->name,
+                    'pack_icon' => $member->rightLeg?->subscription?->package?->pack_icon,
+                    'rank_name' => $member->rightLeg?->rank?->name,
+                    'rank_icon' => $member->rightLeg?->rank?->icon,
                 ]
 
 
@@ -824,14 +840,20 @@ class MLMController extends Controller
                     'id_code' => $member->leftLeg->user->id_code,
                     'full_name' => $member->leftLeg->user->first_name . ' ' . $member->leftLeg->user->last_name,
                     'image' => $member->leftLeg->user->image,
-                    'rank_name' => $member->leftLeg?->rank?->name
+                    'rank_name' => $member->leftLeg?->rank?->name,
+                    'rank_icon' => $member->leftLeg?->rank?->icon,
+                    'pack_name' => $member->leftLeg?->subscription?->package?->name,
+                    'pack_icon' => $member->leftLeg?->subscription?->package?->pack_icon
                 ],
                 'right_leg_member' => [
                     'id' => $member->rightLeg->id,
                     'id_code' => $member->rightLeg->user->id_code,
                     'full_name' => $member->rightLeg->user->first_name . ' ' . $member->rightLeg->user->last_name,
                     'image' => $member->rightLeg->user->image,
-                    'rank_name' => $member->rightLeg?->rank?->name
+                    'rank_name' => $member->rightLeg?->rank?->name,
+                    'rank_icon' => $member->rightLeg?->rank?->icon,
+                    'pack_name' => $member->rightLeg?->subscription?->package?->name,
+                    'pack_icon' => $member->rightLeg?->subscription?->package?->pack_icon
                 ]
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
@@ -865,7 +887,10 @@ class MLMController extends Controller
                     'id_code' => $member->leftLeg->user->id_code,
                     'full_name' => $member->leftLeg->user->first_name . ' ' . $member->leftLeg->user->last_name,
                     'image' => $member->leftLeg->user->image,
-                    'rank_name' => $member->leftLeg?->rank?->name
+                    'rank_name' => $member->leftLeg?->rank?->name,
+                    'rank_icon' => $member->leftLeg?->rank?->icon,
+                    'pack_name' => $member->leftLeg?->subscription?->package?->name,
+                    'pack_icon' => $member->leftLeg?->subscription?->package?->pack_icon
                 ],
                 'right_leg_member' => null
             ];
@@ -901,7 +926,10 @@ class MLMController extends Controller
                     'id_code' => $member->rightLeg->user->id_code,
                     'full_name' => $member->rightLeg->user->first_name . ' ' . $member->rightLeg->user->last_name,
                     'image' => $member->rightLeg->user->image,
-                    'rank_name' => $member->rightLeg?->rank?->name
+                    'rank_name' => $member->rightLeg?->rank?->name,
+                    'rank_icon' => $member->rightLeg?->rank?->rank_icon,
+                    'pack_name' => $member->rightLeg?->subscription?->package?->name,
+                    'pack_icon' => $member->rightLeg?->subscription?->package?->pack_icon
                 ]
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
