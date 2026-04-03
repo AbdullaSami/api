@@ -43,32 +43,30 @@ class ResetPasswordController extends Controller
             'operation_id' => $operationId
         ]);
     }
-
-
     // verify otp
     public function verifyOtp(Request $request)
-{
-    $request->validate([
-        'operation_id' => 'required',
-        'otp' => 'required'
-    ]);
+    {
+        $request->validate([
+            'operation_id' => 'required',
+            'otp' => 'required'
+        ]);
 
-    $otpService = new OtpService();
+        $otpService = new OtpService();
 
-    $user = $otpService->getUserByOperationId($request->operation_id);
-    if (!$user) {
-        return $this->failedResponse(['operation_id' => ['Invalid operation ID']]);
+        $user = $otpService->getUserByOperationId($request->operation_id);
+        if (!$user) {
+            return $this->failedResponse(['operation_id' => ['Invalid operation ID']]);
+        }
+        $result = $otpService->verify($user, $request->otp, $request->operation_id);
+        if (!$result['success']) {
+            return $this->failedResponse(['otp' => ['Invalid or expired OTP']]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'OTP verified'
+        ]);
     }
-    $result = $otpService->verify($user, $request->otp, $request->operation_id);
-    if (!$result['success']) {
-        return $this->failedResponse(['otp' => ['Invalid or expired OTP']]);
-    }
-
-    return response()->json([
-        'status' => true,
-        'message' => 'OTP verified'
-    ]);
-}
     // reset password
     public function resetPassword(Request $request)
     {

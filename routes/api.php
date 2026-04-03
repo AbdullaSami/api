@@ -26,6 +26,7 @@ route::prefix('v1')->group(function () {
     // Password reset
     Route::post('user/find-account', [ResetPasswordController::class, 'findAccount']);
     Route::post('user/reset-password', [ResetPasswordController::class, 'resetPassword']);
+    Route::post('user/verify-otp', [ResetPasswordController::class, 'verifyOtp']);
     //ranks
     route::get('ranks', [RankController::class, 'ranks']);
     // packages
