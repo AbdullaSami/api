@@ -11,30 +11,28 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
 
 class ResetPasswordController extends Controller
 {
     use ApiResponseTrait;
     // Send password reset link
-    public function sendResetLinkEmail(Request $request)
+    public function findAccount(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => ['required', 'email']
-        ]);
+        $user = User::where('email', $request->email)
+                      ->orWhere('phone', $request->phone)
+                      ->orWhere('username', $request->username)
+                      ->orWhere('id_code', $request->id_code)
+                      ->first();
 
-        if ($validator->fails())
-            return $this->failedResponse($validator->errors());
-
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json(['status' => __($status)]);
+        if (!$user) {
+            return $this->failedResponse(['identifier' => ['User not found']]);
         }
 
-        throw ValidationException::withMessages([
-            'email' => [trans($status)],
+        return response()->json([
+            'status'  => true,
+            'message' => 'User found.',
+            'user' => $user
         ]);
     }
 

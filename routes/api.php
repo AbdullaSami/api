@@ -29,8 +29,8 @@ route::prefix('v1')->group(function () {
     // packages
     Route::get('packages', [PackageController::class, 'index']);
 
-    Route::post('user/password/email', [ResetPasswordController::class, 'sendResetLinkEmail']);
-    
+    Route::post('user/find-account', [ResetPasswordController::class, 'findAccount']);
+
     route::middleware('auth:sanctum')->group(function () {
         // logout
         route::post('logout', [AuthController::class, 'logout']);
