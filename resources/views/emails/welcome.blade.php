@@ -47,7 +47,7 @@
                                 <tr>
                                     <td style="padding-bottom: 25px;">
                                         <h2 style="color: #2d3748; font-size: 24px; font-weight: 600; margin: 0 0 10px 0;">
-                                            Hi {{name}}! 👋
+                                            Hi {{$name}}! 👋
                                         </h2>
                                         <p style="color: #4a5568; font-size: 16px; margin: 0;">
                                             We're absolutely thrilled to have you join our community! Thank you for signing up and taking the first step towards [brief platform purpose].
@@ -120,7 +120,7 @@
                                 <!-- CTA Button -->
                                 <tr>
                                     <td style="padding-bottom: 35px; text-align: center;">
-                                        <a href="{{dashboard_url}}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.2s ease;">
+                                        <a href="https://test.thenovagroupco.com/dashboard" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.2s ease;">
                                             Get Started →
                                         </a>
                                     </td>
