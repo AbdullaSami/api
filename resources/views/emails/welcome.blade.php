@@ -174,9 +174,9 @@
                                     <td>
                                         <p style="color: #a0aec0; font-size: 12px; margin: 0;">
                                             © 2024 {{$app_name}}. All rights reserved.<br>
-                                            <a href="{{unsubscribe_url}}" style="color: #a0aec0; text-decoration: underline;">Unsubscribe</a> |
-                                            <a href="{{privacy_url}}" style="color: #a0aec0; text-decoration: underline;">Privacy Policy</a> |
-                                            <a href="{{terms_url}}" style="color: #a0aec0; text-decoration: underline;">Terms of Service</a>
+                                            <a href="#" style="color: #a0aec0; text-decoration: underline;">Unsubscribe</a> |
+                                            <a href="#" style="color: #a0aec0; text-decoration: underline;">Privacy Policy</a> |
+                                            <a href="#" style="color: #a0aec0; text-decoration: underline;">Terms of Service</a>
                                         </p>
                                     </td>
                                 </tr>
