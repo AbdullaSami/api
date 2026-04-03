@@ -796,77 +796,142 @@ class MLMController extends Controller
         if ($member->leftLeg && $member->rightLeg) {
 
             $data = [
+                'user' => [
+                    'id' => $profileUser->id,
+                    'id_code' => $profileUser->id_code,
+                    'username' => $profileUser->username,
+                    'first_name' => $profileUser->first_name,
+                    'last_name' => $profileUser->last_name,
+                    'image' => $profileUser->image,
+                    'member' => [
+                        'current_cv' => $profileMember->current_cv,
+                        'totla_left_volume' => $profileMember->totla_left_volume,
+                        'totla_right_volume' => $profileMember->totla_right_volume,
+                        'subscription' => $profileMember->subscription ? [
+                            'package' => [
+                                'name' => $profileMember->subscription->package->name,
+                                'icon' => $profileMember->subscription->package->pack_icon
+                            ]
+                        ] : null,
+                        'rank' => $profileMember->rank ? [
+                            'name' => $profileMember->rank->name,
+                            'icon' => $profileMember->rank->icon
+                        ] : null
+                    ]
+                ],
                 'left_leg_member' => [
-                    'id'                => $member->leftLeg->id,
-                    'rank_id'           => $member->leftLeg?->rank?->id,
-                    'rank_name'         => $member->leftLeg?->rank?->name,
-                    'user_name'         => $member->leftLeg->user->username,
-                    'user_id_code'      => $member->leftLeg->user->id_code,
-                    'user_first_name'   => $member->leftLeg->user->first_name,
-                    'user_last_name'    => $member->leftLeg->user->last_name,
-                    'user_image'        => $member->leftLeg->user->image,
+                    'id' => $member->leftLeg->id,
+                    'id_code' => $member->leftLeg->user->id_code,
+                    'full_name' => $member->leftLeg->user->first_name . ' ' . $member->leftLeg->user->last_name,
+                    'image' => $member->leftLeg->user->image,
+                    'rank_name' => $member->leftLeg?->rank?->name
                 ],
                 'right_leg_member' => [
-                    'id'                => $member->rightLeg->id,
-                    'rank_id'           => $member->rightLeg?->rank?->id,
-                    'rank_name'         => $member->rightLeg?->rank?->name,
-                    'user_name'         => $member->rightLeg->user->username,
-                    'user_id_code'      => $member->rightLeg->user->id_code,
-                    'user_first_name'   => $member->rightLeg->user->first_name,
-                    'user_last_name'    => $member->rightLeg->user->last_name,
-                    'user_image'        => $member->rightLeg->user->image,
-                ],
-                'user' => $profileUser,
-                'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
-                'rank' => $profileMember->rank ?? null,
-
+                    'id' => $member->rightLeg->id,
+                    'id_code' => $member->rightLeg->user->id_code,
+                    'full_name' => $member->rightLeg->user->first_name . ' ' . $member->rightLeg->user->last_name,
+                    'image' => $member->rightLeg->user->image,
+                    'rank_name' => $member->rightLeg?->rank?->name
+                ]
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } elseif ($member->leftLeg && !$member->rightLeg) {
             $data = [
-                'left_leg_member' => [
-                    'id'                => $member->leftLeg->id,
-                    'rank_id'           => $member->leftLeg?->rank?->id,
-                    'rank_name'         => $member->leftLeg?->rank?->name,
-                    'user_name'         => $member->leftLeg->user->username,
-                    'user_id_code'      => $member->leftLeg->user->id_code,
-                    'user_first_name'   => $member->leftLeg->user->first_name,
-                    'user_last_name'    => $member->leftLeg->user->last_name,
-                    'user_image'        => $member->leftLeg->user->image,
+                'user' => [
+                    'id' => $profileUser->id,
+                    'id_code' => $profileUser->id_code,
+                    'username' => $profileUser->username,
+                    'first_name' => $profileUser->first_name,
+                    'last_name' => $profileUser->last_name,
+                    'image' => $profileUser->image,
+                    'member' => [
+                        'current_cv' => $profileMember->current_cv,
+                        'totla_left_volume' => $profileMember->totla_left_volume,
+                        'totla_right_volume' => $profileMember->totla_right_volume,
+                        'subscription' => $profileMember->subscription ? [
+                            'package' => [
+                                'name' => $profileMember->subscription->package->name,
+                                'icon' => $profileMember->subscription->package->pack_icon
+                            ]
+                        ] : null,
+                        'rank' => $profileMember->rank ? [
+                            'name' => $profileMember->rank->name,
+                            'icon' => $profileMember->rank->icon
+                        ] : null
+                    ]
                 ],
-                'right_leg_member' => null,
-                'user' => $profileUser,
-                'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
-                'rank' => $profileMember->rank ?? null,
-
+                'left_leg_member' => [
+                    'id' => $member->leftLeg->id,
+                    'id_code' => $member->leftLeg->user->id_code,
+                    'full_name' => $member->leftLeg->user->first_name . ' ' . $member->leftLeg->user->last_name,
+                    'image' => $member->leftLeg->user->image,
+                    'rank_name' => $member->leftLeg?->rank?->name
+                ],
+                'right_leg_member' => null
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } elseif (!$member->leftLeg && $member->rightLeg) {
             $data = [
+                'user' => [
+                    'id' => $profileUser->id,
+                    'id_code' => $profileUser->id_code,
+                    'username' => $profileUser->username,
+                    'first_name' => $profileUser->first_name,
+                    'last_name' => $profileUser->last_name,
+                    'image' => $profileUser->image,
+                    'member' => [
+                        'current_cv' => $profileMember->current_cv,
+                        'totla_left_volume' => $profileMember->totla_left_volume,
+                        'totla_right_volume' => $profileMember->totla_right_volume,
+                        'subscription' => $profileMember->subscription ? [
+                            'package' => [
+                                'name' => $profileMember->subscription->package->name,
+                                'icon' => $profileMember->subscription->package->pack_icon
+                            ]
+                        ] : null,
+                        'rank' => $profileMember->rank ? [
+                            'name' => $profileMember->rank->name,
+                            'icon' => $profileMember->rank->icon
+                        ] : null
+                    ]
+                ],
                 'left_leg_member' => null,
                 'right_leg_member' => [
-                    'id'                => $member->rightLeg->id,
-                    'rank_id'           => $member->rightLeg?->rank?->id,
-                    'rank_name'         => $member->rightLeg?->rank?->name,
-                    'user_name'         => $member->rightLeg->user->username,
-                    'user_id_code'      => $member->rightLeg->user->id_code,
-                    'user_first_name'   => $member->rightLeg->user->first_name,
-                    'user_last_name'    => $member->rightLeg->user->last_name,
-                    'user_image'        => $member->rightLeg->user->image,
-                ],
-                'user' => $profileUser,
-                'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
-                'rank' => $profileMember->rank ?? null,
+                    'id' => $member->rightLeg->id,
+                    'id_code' => $member->rightLeg->user->id_code,
+                    'full_name' => $member->rightLeg->user->first_name . ' ' . $member->rightLeg->user->last_name,
+                    'image' => $member->rightLeg->user->image,
+                    'rank_name' => $member->rightLeg?->rank?->name
+                ]
             ];
             return $this->successResponse('all direct members get successfully', 'members', $data);
         } else {
             $data = [
+                'user' => [
+                    'id' => $profileUser->id,
+                    'id_code' => $profileUser->id_code,
+                    'username' => $profileUser->username,
+                    'first_name' => $profileUser->first_name,
+                    'last_name' => $profileUser->last_name,
+                    'image' => $profileUser->image,
+                    'member' => [
+                        'current_cv' => $profileMember->current_cv,
+                        'totla_left_volume' => $profileMember->totla_left_volume,
+                        'totla_right_volume' => $profileMember->totla_right_volume,
+                        'subscription' => $profileMember->subscription ? [
+                            'package' => [
+                                'name' => $profileMember->subscription->package->name,
+                                'icon' => $profileMember->subscription->package->pack_icon
+                            ]
+                        ] : null,
+                        'rank' => $profileMember->rank ? [
+                            'name' => $profileMember->rank->name,
+                            'icon' => $profileMember->rank->icon
+                        ] : null
+                    ]
+                ],
                 'left_leg_member' => null,
-                'right_leg_member' => null,
-                'user' => $profileUser,
-                'package' => $profileMember->subscription ? $profileMember->subscription->package : null,
-                'rank' => $profileMember->rank ?? null,
-
+                'right_leg_member' => null
             ];
             return $this->successResponse('no downlines members to this user', 'members', $data);
         }
