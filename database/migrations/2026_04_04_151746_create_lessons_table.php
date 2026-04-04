@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('section_id')->constrained()->onDelete('cascade');
             $table->string('title');
+            $table->string('slug')->unique();
+            $table->text('description')->nullable();
             $table->text('video_id')->nullable(); // from BunnyCDN
             $table->integer('duration')->nullable();
             $table->unsignedInteger('order')->default(0);

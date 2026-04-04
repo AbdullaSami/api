@@ -36,7 +36,7 @@ class CourseController extends Controller
         try{
             return response()->json([
                 'success' => true,
-                'data' => $course->load('lessons') // Eager load lessons with the course
+                'data' => $course->load('lessons', 'skills') // Eager load lessons and skills with the course
             ]);
         }catch(\Exception $e){
             return response()->json([

@@ -5,29 +5,28 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
-class Section extends Model
+class CoursesCategory extends Model
 {
+    use HasSlug;
+    protected $table = 'courses_categories';
+
     protected $fillable = [
-        'course_id',
-        'title',
+        'name',
         'slug',
         'description',
-        'order',
+        'image',
+        'status',
     ];
+
 
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-            ->generateSlugsFrom('title')
+            ->generateSlugsFrom('name')
             ->saveSlugsTo('slug');
     }
-    public function course()
+    public function courses()
     {
-        return $this->belongsTo(Course::class);
-    }
-
-    public function lessons()
-    {
-        return $this->hasMany(Lesson::class);
+        return $this->hasMany(Course::class, 'category_id');
     }
 }
