@@ -16,6 +16,7 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Annual',
                 'cv' => 0,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-1.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_1.PNG',
                 'features' => [
                     "Trade alert" => true,
                     "Beginner course" => true,
@@ -36,6 +37,8 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Monthly',
                 'cv' => 0,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-2.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_2.PNG',
+
                 'features' => [
                     "Trade alert" => true,
                     "Beginner course" => true,
@@ -56,6 +59,8 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Annual',
                 'cv' => 500,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-3.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_3.PNG',
+
                 'features' => [
                     "Loyalty program" => true,
                     "Trade alert" => true,
@@ -76,6 +81,7 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Annual',
                 'cv' => 1000,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-4.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_2.PNG',
                 'features' => [
                     "Loyalty program" => true,
                     "Trade alert" => true,
@@ -96,6 +102,7 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Annual',
                 'cv' => 3000,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-5.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_3.PNG',
                 'features' => [
                     "Loyalty program" => true,
                     "Trade alert" => true,
@@ -116,6 +123,7 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Annual',
                 'cv' => 5000,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-6.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_1.PNG',
                 'features' => [
                     "Loyalty program" => true,
                     "Trade alert" => true,
@@ -136,6 +144,7 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Annual',
                 'cv' => 10000,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-1.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_2.PNG',
                 'features' => [
                     "Loyalty program" => true,
                     "Trade alert" => true,
@@ -156,6 +165,7 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Annual',
                 'cv' => 25000,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-2.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_3.PNG',
                 'features' => [
                     "Loyalty program" => true,
                     "Trade alert" => true,
@@ -176,6 +186,7 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Annual',
                 'cv' => 590,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-3.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_1.PNG',
                 'features' => [
                     "Trade alert" => true,
                     "Beginner course" => true,
@@ -197,6 +208,7 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Annual',
                 'cv' => 1100,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-4.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_2.PNG',
                 'features' => [
                     "Trade alert" => true,
                     "Beginner course" => true,
@@ -218,6 +230,7 @@ class PackageSeeder extends Seeder
                 'billing_period' => 'Annual',
                 'cv' => 2200,
                 'pack_card' => 'https://dev.thenovagroupco.com/storage/packages/Founder Package Cards-5.png',
+                'pack_icon' => 'https://dev.thenovagroupco.com/storage/packages_icons/icon_3.PNG',
                 'features' => [
                     "Trade alert" => true,
                     "Beginner course" => true,
