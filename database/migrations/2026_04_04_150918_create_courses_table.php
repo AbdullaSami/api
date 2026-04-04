@@ -22,6 +22,9 @@ return new class extends Migration
             $table->foreignId('instructor_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('courses_categories')->onDelete('cascade');
             $table->timestamps();
+
+            $table->index(['level', 'is_published']);
+            $table->index('instructor_id');
         });
     }
 

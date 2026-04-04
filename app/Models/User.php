@@ -74,19 +74,30 @@ class User extends Authenticatable
         return $this->hasMany(Tickets::class);
     }
 
-public function pin()
-{
-    return $this->morphOne(\App\Models\Pin::class, 'pinable');
-}
+    public function pin()
+    {
+        return $this->morphOne(\App\Models\Pin::class, 'pinable');
+    }
 
-public function otps()
-{
-    return $this->hasMany(\App\Models\Otp::class);
-}
+    public function otps()
+    {
+        return $this->hasMany(\App\Models\Otp::class);
+    }
 
     public function member()
     {
         return $this->hasOne(Member::class);
     }
 
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class)
+            ->withPivot(['progress', 'enrolled_at', 'completed_at'])
+            ->withTimestamps();
+    }
+
+    public function courseEnrollments()
+    {
+        return $this->hasMany(CourseUser::class);
+    }
 }
