@@ -12,6 +12,7 @@ class Package extends Model
     protected $fillable = [
         'name',
         'price',
+        'level',
         'pack_card',
         'pack_icon',
         'billing_period',
@@ -21,6 +22,7 @@ class Package extends Model
 
     protected $casts = [
         'features' => 'array',
+        'level' => 'integer',
     ];
 
     public function cvCommissions()

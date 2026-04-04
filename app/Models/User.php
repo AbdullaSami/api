@@ -88,4 +88,5 @@ public function otps()
     {
         return $this->hasOne(Member::class);
     }
+
 }
