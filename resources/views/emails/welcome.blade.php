@@ -1,36 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to {{$app_name}}!</title>
+    <title>مرحبًا بك في {{$app_name}}!</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background-color: #f8f9fa; line-height: 1.6;">
+<body style="margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; background-color: #0d1b2a; color: #ffffff; line-height: 1.6; text-align: right;">
 
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f8f9fa;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #0d1b2a;" dir="rtl">
         <tr>
-            <td align="center" style="padding: 20px 0;">
+            <td align="center" style="padding: 40px 0;">
 
                 <!-- Main Email Container -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #1a2d42; border-radius: 24px; border: 1px solid #2a3f58; box-shadow: 0 20px 40px rgba(0,0,0,0.5); overflow: hidden; text-align: right;">
 
                     <!-- Header Section -->
                     <tr>
-                        <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+                        <td style="background: linear-gradient(135deg, #0d1b2a 0%, #1a2d42 100%); padding: 60px 40px; text-align: center; border-bottom: 1px solid #2a3f58;">
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                                 <tr>
                                     <td align="center">
-                                        <!-- Logo Placeholder -->
-                                        <div style="background-color: rgba(255,255,255,0.2); border-radius: 8px; padding: 15px; display: inline-block; margin-bottom: 20px;">
-                                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <!-- Logo Container -->
+                                        <div style="background-color: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; display: inline-block; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.1);">
+                                            <svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <rect width="40" height="40" rx="8" fill="white"/>
-                                                <path d="M20 10L25 15L20 20L15 15L20 10Z" fill="#667eea"/>
-                                                <path d="M20 20L25 25L20 30L15 25L20 20Z" fill="#764ba2"/>
+                                                <path d="M20 10L25 15L20 20L15 15L20 10Z" fill="#0d1b2a"/>
+                                                <path d="M20 20L25 25L20 30L15 25L20 20Z" fill="#2b6cb0"/>
                                             </svg>
                                         </div>
-                                        <h1 style="color: #ffffff; font-size: 28px; font-weight: 700; margin: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-                                            Welcome to {{$app_name}}!
+                                        <h1 style="color: #ffffff; font-size: 32px; font-weight: 800; margin: 0; letter-spacing: -0.03em; font-family: 'Montserrat', sans-serif;">
+                                            مرحبًا بك في {{$app_name}}!
                                         </h1>
+                                        <p style="color: #9db5cc; font-size: 16px; margin-top: 12px; font-weight: 400;">رحلتك نحو النجاح تبدأ من هنا.</p>
                                     </td>
                                 </tr>
                             </table>
@@ -39,61 +40,61 @@
 
                     <!-- Main Content -->
                     <tr>
-                        <td style="padding: 40px 30px;">
+                        <td style="padding: 50px 40px;">
 
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
 
                                 <!-- Personal Greeting -->
                                 <tr>
-                                    <td style="padding-bottom: 25px;">
-                                        <h2 style="color: #2d3748; font-size: 24px; font-weight: 600; margin: 0 0 10px 0;">
-                                            Hi {{$name}}! 👋
+                                    <td style="padding-bottom: 32px; text-align: right;">
+                                        <h2 style="color: #ffffff; font-size: 26px; font-weight: 700; margin: 0 0 16px 0; letter-spacing: -0.01em;">
+                                            مرحبًا بك، {{$name}}! 👋
                                         </h2>
-                                        <p style="color: #4a5568; font-size: 16px; margin: 0;">
-                                            We're absolutely thrilled to have you join our community! Thank you for signing up and taking the first step towards [brief platform purpose].
+                                        <p style="color: #9db5cc; font-size: 16px; margin: 0; line-height: 1.8;">
+                                            نرحّب بك في <strong>The Nova Digital Marketing Services FZC LLC</strong>. انضمامك إلينا ليس مجرد تسجيل… بل بداية خطوة حقيقية نحو التطور، الفهم، وبناء فرص أقوى.
                                         </p>
                                     </td>
                                 </tr>
 
                                 <!-- Platform Introduction -->
                                 <tr>
-                                    <td style="padding-bottom: 30px;">
-                                        <p style="color: #4a5568; font-size: 16px; margin: 0 0 20px 0;">
-                                            {{$app_name}} is designed to help you [main value proposition]. Whether you're looking to [benefit 1] or [benefit 2], we've got you covered with powerful tools and an intuitive interface.
+                                    <td style="padding-bottom: 40px; text-align: right;">
+                                        <p style="color: #ffffff; font-size: 18px; margin: 0; line-height: 1.8; font-weight: 500;">
+                                            ✨ هنا، لن تتعلم فقط… بل ستفهم كيف تتحرك الأمور فعليًا، وكيف تبني طريقك بثقة.
                                         </p>
                                     </td>
                                 </tr>
 
                                 <!-- Key Features -->
                                 <tr>
-                                    <td style="padding-bottom: 30px;">
-                                        <h3 style="color: #2d3748; font-size: 18px; font-weight: 600; margin: 0 0 15px 0;">
-                                            What you can do:
+                                    <td style="padding-bottom: 40px; text-align: right;">
+                                        <h3 style="color: #4b9be0; font-size: 18px; font-weight: 600; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 0.05em;">
+                                            🎯 ما ينتظرك:
                                         </h3>
                                         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                                             <tr>
-                                                <td style="padding-bottom: 12px;">
-                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                                <td style="padding-bottom: 16px;">
+                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" dir="rtl">
                                                         <tr>
-                                                            <td style="padding-right: 12px; vertical-align: top;">
-                                                                <span style="background-color: #e6fffa; color: #00a896; font-size: 16px; border-radius: 50%; width: 24px; height: 24px; display: inline-block; text-align: center; line-height: 24px; font-weight: bold;">✓</span>
+                                                            <td style="padding-left: 16px; vertical-align: top; width: 28px;">
+                                                                <span style="background-color: rgba(43, 108, 176, 0.2); color: #4b9be0; font-size: 16px; border-radius: 8px; width: 28px; height: 28px; display: inline-block; text-align: center; line-height: 28px; font-weight: bold; border: 1px solid rgba(43, 108, 176, 0.3);">✓</span>
                                                             </td>
                                                             <td style="vertical-align: top;">
-                                                                <span style="color: #4a5568; font-size: 15px;">Access powerful analytics and insights to track your progress</span>
+                                                                <span style="color: #9db5cc; font-size: 15px; font-weight: 500; text-align: right; display: block;">محتوى تعليمي احترافي مبني على خبرة</span>
                                                             </td>
                                                         </tr>
                                                     </table>
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td style="padding-bottom: 12px;">
-                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                                <td style="padding-bottom: 16px;">
+                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" dir="rtl">
                                                         <tr>
-                                                            <td style="padding-right: 12px; vertical-align: top;">
-                                                                <span style="background-color: #e6fffa; color: #00a896; font-size: 16px; border-radius: 50%; width: 24px; height: 24px; display: inline-block; text-align: center; line-height: 24px; font-weight: bold;">✓</span>
+                                                            <td style="padding-left: 16px; vertical-align: top; width: 28px;">
+                                                                <span style="background-color: rgba(43, 108, 176, 0.2); color: #4b9be0; font-size: 16px; border-radius: 8px; width: 28px; height: 28px; display: inline-block; text-align: center; line-height: 28px; font-weight: bold; border: 1px solid rgba(43, 108, 176, 0.3);">✓</span>
                                                             </td>
                                                             <td style="vertical-align: top;">
-                                                                <span style="color: #4a5568; font-size: 15px;">Collaborate seamlessly with your team members</span>
+                                                                <span style="color: #9db5cc; font-size: 15px; font-weight: 500; text-align: right; display: block;">تحليل واضح للسوق بطريقة عملية</span>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -101,13 +102,13 @@
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" dir="rtl">
                                                         <tr>
-                                                            <td style="padding-right: 12px; vertical-align: top;">
-                                                                <span style="background-color: #e6fffa; color: #00a896; font-size: 16px; border-radius: 50%; width: 24px; height: 24px; display: inline-block; text-align: center; line-height: 24px; font-weight: bold;">✓</span>
+                                                            <td style="padding-left: 16px; vertical-align: top; width: 28px;">
+                                                                <span style="background-color: rgba(43, 108, 176, 0.2); color: #4b9be0; font-size: 16px; border-radius: 8px; width: 28px; height: 28px; display: inline-block; text-align: center; line-height: 28px; font-weight: bold; border: 1px solid rgba(43, 108, 176, 0.3);">✓</span>
                                                             </td>
                                                             <td style="vertical-align: top;">
-                                                                <span style="color: #4a5568; font-size: 15px;">Customize your workspace to match your unique workflow</span>
+                                                                <span style="color: #9db5cc; font-size: 15px; font-weight: 500; text-align: right; display: block;">نظام متكامل يساعدك تتطور خطوة بخطوة</span>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -119,38 +120,61 @@
 
                                 <!-- CTA Button -->
                                 <tr>
-                                    <td style="padding-bottom: 35px; text-align: center;">
-                                        <a href="https://test.thenovagroupco.com/dashboard" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.2s ease;">
-                                            Get Started →
+                                    <td style="padding-bottom: 40px; text-align: center;">
+                                        <a href="https://test.thenovagroupco.com/dashboard" style="background: #4882be; color: #ffffff; text-decoration: none; font-size: 18px; font-weight: 700; padding: 16px 50px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 15px rgba(72, 130, 190, 0.4); border: 1px solid #4b9be0; letter-spacing: 0.05em;">
+                                            ابدأ الآن
                                         </a>
                                     </td>
                                 </tr>
 
-                                <!-- Quick Tips -->
+                                <!-- Important Reminder -->
                                 <tr>
-                                    <td style="padding-bottom: 30px;">
-                                        <div style="background-color: #f7fafc; border-left: 4px solid #667eea; padding: 20px; border-radius: 0 8px 8px 0;">
-                                            <h4 style="color: #2d3748; font-size: 16px; font-weight: 600; margin: 0 0 10px 0;">
-                                                💡 Quick Tips to Get Started
+                                    <td style="padding-bottom: 30px; text-align: right;">
+                                        <div style="background-color: rgba(43, 108, 176, 0.05); border: 1px solid #2a3f58; border-right: 4px solid #2b6cb0; padding: 24px; border-radius: 12px;"    >
+                                            <h4 style="color: #ffffff; font-size: 16px; font-weight: 700; margin: 0 0 10px 0;">
+                                                ⚠️ تذكير مهم:
                                             </h4>
-                                            <ul style="color: #4a5568; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.6;">
-                                                <li>Complete your profile to personalize your experience</li>
-                                                <li>Explore our tutorial videos in the help center</li>
-                                                <li>Join our community forum to connect with other users</li>
+                                            <p style="color: #9db5cc; font-size: 14px; margin: 0; line-height: 1.6;">
+                                                كل ما نقدمه هو لأغراض تعليمية فقط، والنتائج تعتمد بشكل كامل على قراراتك والتزامك.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Quick Start -->
+                                <tr>
+                                    <td style="padding-bottom: 40px; text-align: right;">
+                                        <div style="background-color: rgba(43, 108, 176, 0.05); border: 1px solid #2a3f58; border-right: 4px solid #2b6cb0; padding: 24px; border-radius: 12px;">
+                                            <h4 style="color: #ffffff; font-size: 16px; font-weight: 700; margin: 0 0 12px 0;">
+                                                🚀 ابدأ الآن:
+                                            </h4>
+                                            <ul style="color: #9db5cc; font-size: 14px; margin: 0; padding-right: 20px; line-height: 1.8;">
+                                                <li>ادخل إلى حسابك</li>
+                                                <li>استكشف الباقة الخاصة بك</li>
+                                                <li>وابدأ رحلتك بثقة</li>
                                             </ul>
                                         </div>
                                     </td>
                                 </tr>
 
-                                <!-- Friendly Closing -->
+                                <!-- Support Section -->
                                 <tr>
-                                    <td>
-                                        <p style="color: #4a5568; font-size: 16px; margin: 0 0 20px 0;">
-                                            We're here to help you succeed every step of the way. If you have any questions or need assistance, don't hesitate to reach out to our support team.
+                                    <td style="padding-bottom: 40px; text-align: right;">
+                                        <p style="color: #ffffff; font-size: 16px; margin: 0; line-height: 1.8;">
+                                            💬 <strong>فريقنا دائمًا معك:</strong> أي وقت تحتاج دعم أو توجيه… ستجدنا بجانبك.
                                         </p>
-                                        <p style="color: #2d3748; font-size: 16px; margin: 0;">
-                                            Welcome aboard!<br>
-                                            <strong style="color: #667eea;">The {{$app_name}} Team</strong>
+                                    </td>
+                                </tr>
+
+                                <!-- Final Closing -->
+                                <tr>
+                                    <td style="text-align: right;">
+                                        <p style="color: #9db5cc; font-size: 18px; margin: 0 0 24px 0; line-height: 1.8; font-weight: 500;">
+                                            أنت الآن في المكان الصحيح… ابدأها صح، وكملها للأعلى 🚀
+                                        </p>
+                                        <p style="color: #ffffff; font-size: 16px; margin: 0;">
+                                            مع تحيات،<br>
+                                            <strong style="color: #4b9be0;">فريق {{$app_name}}</strong>
                                         </p>
                                     </td>
                                 </tr>
@@ -161,22 +185,22 @@
 
                     <!-- Footer -->
                     <tr>
-                        <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+                        <td style="background-color: #0d1b2a; padding: 40px; text-align: center; border-top: 1px solid #2a3f58;">
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                                 <tr>
-                                    <td style="padding-bottom: 15px;">
-                                        <p style="color: #718096; font-size: 13px; margin: 0;">
-                                            Need help? Contact us at <a href="mailto:support@{{$app_name_lower}}" style="color: #667eea; text-decoration: none;">support@{{$app_name_lower}}</a>
+                                    <td style="padding-bottom: 20px;">
+                                        <p style="color: #5c7a96; font-size: 13px; margin: 0;">
+                                            هل لديك أسئلة؟ تواصل معنا عبر <a href="mailto:support@{{$app_name_lower}}" style="color: #2b6cb0; text-decoration: none; font-weight: 600;">support@{{$app_name_lower}}</a>
                                         </p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <p style="color: #a0aec0; font-size: 12px; margin: 0;">
-                                            © 2024 {{$app_name}}. All rights reserved.<br>
-                                            <a href="#" style="color: #a0aec0; text-decoration: underline;">Unsubscribe</a> |
-                                            <a href="#" style="color: #a0aec0; text-decoration: underline;">Privacy Policy</a> |
-                                            <a href="#" style="color: #a0aec0; text-decoration: underline;">Terms of Service</a>
+                                        <p style="color: #5c7a96; font-size: 12px; margin: 0; line-height: 1.6;">
+                                            &copy; {{ date('Y') }} {{$app_name}}. جميع الحقوق محفوظة.<br>
+                                            <a href="#" style="color: #5c7a96; text-decoration: underline;">إلغاء الاشتراك</a> &bull;
+                                            <a href="#" style="color: #5c7a96; text-decoration: underline;">سياسة الخصوصية</a> &bull;
+                                            <a href="#" style="color: #5c7a96; text-decoration: underline;">شروط الخدمة</a>
                                         </p>
                                     </td>
                                 </tr>
