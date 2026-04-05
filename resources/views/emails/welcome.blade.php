@@ -190,7 +190,7 @@
                                 <tr>
                                     <td style="padding-bottom: 20px;">
                                         <p style="color: #5c7a96; font-size: 13px; margin: 0;">
-                                            هل لديك أسئلة؟ تواصل معنا عبر <a href="mailto:support@{{$app_name_lower}}" style="color: #2b6cb0; text-decoration: none; font-weight: 600;">support@{{$app_name_lower}}</a>
+                                            هل لديك أسئلة؟ تواصل معنا عبر <a href="mailto:support@thenovagroupco.com" style="color: #2b6cb0; text-decoration: none; font-weight: 600;">support@thenovagroupco.com</a>
                                         </p>
                                     </td>
                                 </tr>
