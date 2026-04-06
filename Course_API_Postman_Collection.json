@@ -1,0 +1,253 @@
+{
+	"info": {
+		"_postman_id": "c1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
+		"name": "Course API Collection",
+		"description": "Collection for testing Course APIs including index, show, and filter data endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Courses",
+			"item": [
+				{
+					"name": "Get All Courses",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has success field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});",
+									"",
+									"pm.test(\"Response has data field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/courses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							]
+						},
+						"description": "Get all courses with optional filtering and pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Courses with Filters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has filters_applied field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('filters_applied');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/courses?category_id=1&skills=1,2&package_level=2&duration_min=5&duration_max=20&level=1,2&is_published=true&sort_by=title&sort_order=asc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"courses"
+							],
+							"query": [
+								{
+									"key": "category_id",
+									"value": "1",
+									"description": "Filter by category ID"
+								},
+								{
+									"key": "skills",
+									"value": "1,2",
+									"description": "Filter by skills (comma-separated or array)"
+								},
+								{
+									"key": "package_level",
+									"value": "2",
+									"description": "Filter by package level (courses accessible to specific package level)"
+								},
+								{
+									"key": "duration_min",
+									"value": "5",
+									"description": "Filter by minimum duration"
+								},
+								{
+									"key": "duration_max",
+									"value": "20",
+									"description": "Filter by maximum duration"
+								},
+								{
+									"key": "level",
+									"value": "1,2",
+									"description": "Filter by course level(s) - can be comma-separated or array"
+								},
+								{
+									"key": "is_published",
+									"value": "true",
+									"description": "Filter by published status (true/false)"
+								},
+								{
+									"key": "sort_by",
+									"value": "title",
+									"description": "Sort by field (title, duration, level, created_at)"
+								},
+								{
+									"key": "sort_order",
+									"value": "asc",
+									"description": "Sort order (asc, desc)"
+								}
+							]
+						},
+						"description": "Get courses with all available filters applied"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Course",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has course data\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('title');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/courses/{{course_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"{{course_id}}"
+							]
+						},
+						"description": "Get a single course by ID with related data (category, instructor, sections, skills)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Filter Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has categories and skills\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('categories');",
+									"    pm.expect(jsonData.data).to.have.property('skills');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/courses/filters/data",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"filters",
+								"data"
+							]
+						},
+						"description": "Get filter data including all categories and skills for dropdown/filter options"
+					},
+					"response": []
+				}
+			],
+			"description": "Course management endpoints"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "course_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

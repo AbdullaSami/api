@@ -18,6 +18,9 @@ use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\Api\Admin\Commissions\AdminCommissionPayoutBatchController;
 use App\Http\Controllers\Api\AnalyticsController;
 
+// Course Controller
+use App\Http\Controllers\Api\Courses\CourseController;
+
 route::prefix('v1')->group(function () {
 
     route::post('login', [AuthController::class, 'login']);
@@ -175,5 +178,12 @@ route::prefix('v1')->group(function () {
             route::get('/members/{memberId}/generate-downline-report', [AdminUserController::class, 'generateDownlineReport']);
             // route::get('/members/{memberId}/all-downline-report' , [AdminUserController::class , 'allDownlineReport']);
         });
+    });
+
+    // Courses routes
+    route::prefix('courses')->group(function () {
+        route::get('/', [CourseController::class, 'index']);
+        route::get('/{course}', [CourseController::class, 'show']);
+        route::get('/filters/data', [CourseController::class, 'getFilterData']);
     });
 });

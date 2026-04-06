@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\CourseAccessService;
 use App\Models\Course;
+use App\Models\CoursesCategory;
+use App\Models\Skill;
 class CourseController extends Controller
 {
     protected $courseAccessService;
@@ -75,7 +77,7 @@ class CourseController extends Controller
                 $query->orderBy($sortBy, $sortOrder);
             }
 
-            $courses = $query->get();
+            $courses = $query->paginate(10);
 
             return response()->json([
                 'success' => true,
@@ -112,6 +114,27 @@ class CourseController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve course: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getFilterData()
+    {
+        try{
+            $categories = CoursesCategory::all();
+            $skills = Skill::all();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'categories' => $categories,
+                    'skills' => $skills
+                ]
+            ]);
+        }catch(\Exception $e){
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve filter data: ' . $e->getMessage()
             ], 500);
         }
     }
