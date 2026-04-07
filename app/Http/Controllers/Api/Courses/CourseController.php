@@ -110,7 +110,7 @@ class CourseController extends Controller
                 $course = Course::with(['category', 'instructor', 'sections.lessons', 'skills'])->where('slug', $course)->first();
             return response()->json([
                 'success' => true,
-                'data' => $course->load('category', 'instructor', 'sections', 'skills') // Eager load lessons and skills with the course
+                'data' => $course->load('category', 'instructor', 'sections', 'sections.lessons', 'skills') // Eager load lessons and skills with the course
             ]);
         }catch(\Exception $e){
             return response()->json([
