@@ -16,7 +16,7 @@ class CoursesSeeder extends Seeder
     public function run(): void
     {
         $categories = CoursesCategory::all();
-        $levels = ['beginner', 'intermediate', 'advanced'];
+        $levels = [1, 2, 3];
 
         $courseTemplates = [
             'Web Development' => [
