@@ -7,6 +7,7 @@ use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 class Section extends Model
 {
+    use HasSlug;
     protected $fillable = [
         'course_id',
         'title',
