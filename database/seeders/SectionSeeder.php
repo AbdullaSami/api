@@ -15,7 +15,7 @@ class SectionSeeder extends Seeder
     public function run(): void
     {
         $courses = Course::all();
-        
+
         $sectionTemplates = [
             'Web Development' => [
                 'Introduction & Setup',
@@ -132,22 +132,23 @@ class SectionSeeder extends Seeder
         foreach ($courses as $course) {
             $categoryName = $course->category->name;
             $sections = $sectionTemplates[$categoryName] ?? [];
-            
+
             // Randomly select 12-20 sections
             $sectionCount = rand(12, 20);
             $selectedSections = array_rand($sections, $sectionCount);
-            
+
             if (!is_array($selectedSections)) {
                 $selectedSections = [$selectedSections];
             }
-            
+
             foreach ($selectedSections as $index => $sectionKey) {
-                Section::create([
+                $section = new Section([
                     'course_id' => $course->id,
                     'title' => $sections[$sectionKey],
                     'description' => "Learn about {$sections[$sectionKey]} in this comprehensive section.",
                     'order' => $index + 1
                 ]);
+                $section->save(); // This will trigger the slug generation
             }
         }
     }

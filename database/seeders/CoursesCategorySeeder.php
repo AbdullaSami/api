@@ -47,6 +47,9 @@ class CoursesCategorySeeder extends Seeder
             ],
         ];
 
+        // Debug: Print the first category to verify status value
+        $this->command->info('First category status: ' . var_export($categories[0]['status'], true));
+
         foreach ($categories as $category) {
             CoursesCategory::create($category);
         }

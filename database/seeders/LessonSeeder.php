@@ -15,7 +15,7 @@ class LessonSeeder extends Seeder
     public function run(): void
     {
         $sections = Section::all();
-        
+
         $lessonTypes = [
             'Introduction',
             'Theory & Concepts',
@@ -34,11 +34,11 @@ class LessonSeeder extends Seeder
         foreach ($sections as $section) {
             // Randomly select 3-12 lessons for each section
             $lessonCount = rand(3, 12);
-            
+
             for ($i = 0; $i < $lessonCount; $i++) {
                 $lessonType = $lessonTypes[array_rand($lessonTypes)];
-                
-                Lesson::create([
+
+                $lesson = new Lesson([
                     'section_id' => $section->id,
                     'title' => "{$lessonType}: {$section->title}",
                     'description' => "Detailed {$lessonType} covering {$section->title} with practical examples and exercises.",
@@ -47,6 +47,7 @@ class LessonSeeder extends Seeder
                     'order' => $i + 1,
                     'is_preview' => $i === 0 // Make first lesson of each section a preview
                 ]);
+                $lesson->save(); // This will trigger the slug generation
             }
         }
     }
