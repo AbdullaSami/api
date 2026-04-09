@@ -9,6 +9,7 @@ use App\Models\Course;
 use App\Models\CoursesCategory;
 use App\Models\Skill;
 use App\Models\Package;
+use App\Models\User;
 
 class CourseController extends Controller
 {
@@ -168,9 +169,10 @@ class CourseController extends Controller
     {
         try {
             $course = Course::where('slug', $slug)->firstOrFail();
+            $user = User::findOrFail($userId);
 
             // Check if the user has access to the course
-            if (!$this->courseAccessService->canAccessCourse(auth()->user(), $course)) {
+            if (!$this->courseAccessService->canAccessCourse($user, $course)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'You do not have access to enroll in this course.'
@@ -179,7 +181,7 @@ class CourseController extends Controller
 
             // Enroll the user in the course (this is a placeholder, implement your enrollment logic here)
             // For example, you might create a record in a pivot table like course_user
-            auth()->user()->courses()->attach($course->id);
+            $user->courses()->attach($course->id);
 
             return response()->json([
                 'success' => true,
