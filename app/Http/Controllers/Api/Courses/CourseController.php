@@ -169,7 +169,7 @@ class CourseController extends Controller
     {
         try {
             $course = Course::where('slug', $request->slug)->first();
-            $user = User::findOrFail($request->user_id);
+            $user = User::where('id', $request->user_id)->first();
 
             // Check if the user has access to the course
             if (!$this->courseAccessService->canAccessCourse($user, $course)) {
