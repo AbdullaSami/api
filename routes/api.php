@@ -17,6 +17,7 @@ use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\Api\Admin\Commissions\AdminCommissionPayoutBatchController;
 use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\Courses\EnrolledLessonsController;
 
 // Course Controller
 use App\Http\Controllers\Api\Courses\CourseController;
@@ -186,10 +187,14 @@ route::prefix('v1')->group(function () {
         route::get('/', [CourseController::class, 'index']);
         route::get('/{course}', [CourseController::class, 'show']);
         route::get('/filters/data', [CourseController::class, 'getFilterData']);
-        
+
         route::middleware('auth:sanctum')->group(function () {
             route::post('/user/enroll/course/{slug}', [CourseController::class, 'enroll']);
             route::get('/user/enrollments', [CourseController::class, 'myEnrollments']);
+
+            route::get('/{course}/enrolled/lessons', [EnrolledLessonsController::class, 'index']);
+            route::get('/{course}/enrolled/lessons/{lesson}', [EnrolledLessonsController::class, 'show']);
+            route::post('/{course}/enrolled/lessons/{lesson}/progress', [EnrolledLessonsController::class, 'updateProgress']);
         });
     });
 });

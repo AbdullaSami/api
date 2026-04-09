@@ -24,7 +24,7 @@ class CourseTrackingService
         }
         $user->courses()->syncWithoutDetaching([
             $course->id => [
-                'started_at' => now()
+                'enrolled_at' => now()
             ]
         ]);
 
@@ -63,7 +63,7 @@ class CourseTrackingService
     {
         // Check if user has access to the course containing this lesson
         $course = $lesson->section->course;
-        if (!$this->courseAccessService->canAccessCourse($user, $course)) {
+        if (!$this->courseAccessService->canAccessCourse($user, $course->level)) {
             throw new AccessDeniedHttpException('User cannot access this course');
         }
 

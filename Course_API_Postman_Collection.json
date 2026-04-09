@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "c1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6",
 		"name": "Course API Collection",
-		"description": "Collection for testing Course APIs including index, show, and filter data endpoints",
+		"description": "Collection for testing Course APIs including index, show, filter data, enrolled courses, lessons, and progress tracking endpoints",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -216,6 +216,267 @@
 				}
 			],
 			"description": "Course management endpoints"
+		},
+		{
+			"name": "Enrolled Courses",
+			"item": [
+				{
+					"name": "Enroll in Course",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 409\", function () {",
+									"    pm.expect([200, 409]).to.include(pm.response.code);",
+									"});",
+									"",
+									"pm.test(\"Response has success field\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/courses/user/enroll/course/{{course_slug}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"user",
+								"enroll",
+								"course",
+								"{{course_slug}}"
+							]
+						},
+						"description": "Enroll the authenticated user in a course by course slug. Returns 409 if already enrolled."
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Enrollments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has enrollments array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('enrollments');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/courses/user/enrollments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"user",
+								"enrollments"
+							]
+						},
+						"description": "Get all courses the authenticated user is enrolled in with progress information"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Enrolled Course Lessons",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 403\", function () {",
+									"    pm.expect([200, 403]).to.include(pm.response.code);",
+									"});",
+									"",
+									"pm.test(\"Response has sections with lessons\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    if (pm.response.code === 200) {",
+									"        pm.expect(jsonData.data).to.have.property('sections');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/courses/{{course_slug}}/enrolled/lessons",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"{{course_slug}}",
+								"enrolled",
+								"lessons"
+							]
+						},
+						"description": "Get all lessons for an enrolled course with user progress per lesson. Returns 403 if not enrolled."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Enrolled Lesson",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 403\", function () {",
+									"    pm.expect([200, 403]).to.include(pm.response.code);",
+									"});",
+									"",
+									"pm.test(\"Response has lesson data\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    if (pm.response.code === 200) {",
+									"        pm.expect(jsonData.data).to.have.property('lesson');",
+									"        pm.expect(jsonData.data).to.have.property('progress');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/courses/{{course_slug}}/enrolled/lessons/{{lesson_slug}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"{{course_slug}}",
+								"enrolled",
+								"lessons",
+								"{{lesson_slug}}"
+							]
+						},
+						"description": "Get a specific lesson with progress. Returns 403 if not enrolled in the course."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Lesson Progress",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 403\", function () {",
+									"    pm.expect([200, 403]).to.include(pm.response.code);",
+									"});",
+									"",
+									"pm.test(\"Response has progress data\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    if (pm.response.code === 200) {",
+									"        pm.expect(jsonData.data).to.have.property('lesson_progress');",
+									"        pm.expect(jsonData.data).to.have.property('course_progress');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"watched_seconds\": 120,\n  \"is_completed\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/courses/{{course_slug}}/enrolled/lessons/{{lesson_slug}}/progress",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"courses",
+								"{{course_slug}}",
+								"enrolled",
+								"lessons",
+								"{{lesson_slug}}",
+								"progress"
+							]
+						},
+						"description": "Update lesson progress (watched_seconds required, is_completed optional). Triggers course progress recalculation. Returns 403 if not enrolled."
+					},
+					"response": []
+				}
+			],
+			"description": "Enrolled user endpoints for lessons and progress tracking (requires auth:sanctum)"
 		}
 	],
 	"event": [
@@ -248,6 +509,24 @@
 			"key": "course_id",
 			"value": "1",
 			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "your-sanctum-token-here",
+			"type": "string",
+			"description": "Laravel Sanctum authentication token"
+		},
+		{
+			"key": "course_slug",
+			"value": "example-course-slug",
+			"type": "string",
+			"description": "Course slug for enrolled endpoints"
+		},
+		{
+			"key": "lesson_slug",
+			"value": "example-lesson-slug",
+			"type": "string",
+			"description": "Lesson slug for enrolled lesson endpoints"
 		}
 	]
 }

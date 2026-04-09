@@ -18,7 +18,7 @@ class CourseAccessService
         return $subscription?->package->level ?? 0;
     }
 
-    public function canAccessCourse(User $user, Course $courseLevel): bool
+    public function canAccessCourse(User $user, int $courseLevel): bool
     {
         $userLevel = $this->getUserLevel($user);
         return $userLevel >= $courseLevel;
