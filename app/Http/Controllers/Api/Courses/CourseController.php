@@ -166,6 +166,85 @@ class CourseController extends Controller
         }
     }
 
+    public function myEnrollments(Request $request)
+    {
+        try {
+            // Get authenticated user
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Please login to view your enrollments.'
+                ], 401);
+            }
+
+            // Get user's enrollments with course details
+            $enrollments = $user->courses()
+                ->with(['category', 'instructor', 'sections'])
+                ->orderByPivot('enrolled_at', 'desc')
+                ->get()
+                ->map(function ($course) use ($user) {
+                    $pivot = $course->pivot;
+                    return [
+                        'id' => $course->id,
+                        'title' => $course->title,
+                        'slug' => $course->slug,
+                        'description' => $course->description,
+                        'thumbnail' => $course->thumbnail,
+                        'level' => $course->level,
+                        'duration' => $course->duration,
+                        'category' => [
+                            'id' => $course->category->id,
+                            'name' => $course->category->name,
+                            'slug' => $course->category->slug
+                        ],
+                        'instructor' => $course->instructor ? [
+                            'id' => $course->instructor->id,
+                            'name' => $course->instructor->name,
+                            'email' => $course->instructor->email
+                        ] : null,
+                        'enrollment' => [
+                            'enrolled_at' => $pivot->enrolled_at,
+                            'completed_at' => $pivot->completed_at,
+                            'progress' => $pivot->progress ?? 0,
+                            'is_completed' => !is_null($pivot->completed_at)
+                        ],
+                        'sections_count' => $course->sections_count ?? $course->sections->count(),
+                        'progress_percentage' => $pivot->progress ?? 0
+                    ];
+                });
+
+            // Get enrollment statistics
+            $stats = [
+                'total_enrollments' => $enrollments->count(),
+                'completed_courses' => $enrollments->where('enrollment.is_completed', true)->count(),
+                'in_progress_courses' => $enrollments->where('enrollment.is_completed', false)->count(),
+                'average_progress' => $enrollments->avg('progress_percentage')
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User enrollments retrieved successfully.',
+                'data' => [
+                    'enrollments' => $enrollments,
+                    'statistics' => $stats
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to retrieve user enrollments: ' . $e->getMessage(), [
+                'user_id' => $request->user()?->id,
+                'exception' => $e
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve enrollments. Please try again later.'
+            ], 500);
+        }
+    }
+
     public function enroll(Request $request, $slug)
     {
         try {
