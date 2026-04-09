@@ -27,8 +27,10 @@ class CourseController extends Controller
             $query = Course::with(['category', 'skills', 'instructor']);
 
             // Filter by category
-            if ($request->has('category_id')) {
-                $query->where('category_id', $request->category_id);
+            if ($request->has('category_slug')) {
+                $query->whereHas('category', function ($q) use ($request) {
+                    $q->where('slug', $request->category_slug);
+                });
             }
 
             // Filter by skills (multiple skills can be selected)
