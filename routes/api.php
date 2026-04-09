@@ -183,9 +183,9 @@ route::prefix('v1')->group(function () {
     // Courses routes
     route::prefix('courses')->group(function () {
         route::get('/', [CourseController::class, 'index']);
-        route::get('/show-course/{course}', [CourseController::class, 'show']);
+        route::get('/{course}', [CourseController::class, 'show']);
         route::get('/filters/data', [CourseController::class, 'getFilterData']);
 
-        route::post('/enroll', [CourseController::class, 'enroll']);
+        route::post('/user/enroll', [CourseController::class, 'enroll']);
     });
 });
