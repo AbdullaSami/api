@@ -165,7 +165,7 @@ class CourseController extends Controller
         }
     }
 
-    public function enroll($userId, $slug)
+    public function enroll($slug, $userId)
     {
         try {
             $course = Course::where('slug', $slug)->firstOrFail();
