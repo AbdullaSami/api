@@ -172,7 +172,7 @@ class CourseController extends Controller
             $user = User::where('id', $request->user_id)->first();
 
             // Check if the user has access to the course
-            if (!$this->courseAccessService->canAccessCourse($user, $course)) {
+            if (!$this->courseAccessService->canAccessCourse($user->id, $course->id)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'You do not have access to enroll in this course.'
