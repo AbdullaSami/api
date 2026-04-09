@@ -186,6 +186,10 @@ route::prefix('v1')->group(function () {
         route::get('/', [CourseController::class, 'index']);
         route::get('/{course}', [CourseController::class, 'show']);
         route::get('/filters/data', [CourseController::class, 'getFilterData']);
-        route::post('/user/enroll/course/{slug}', [CourseController::class, 'enroll']);
+        
+        route::middleware('auth:sanctum')->group(function () {
+            route::post('/user/enroll/course/{slug}', [CourseController::class, 'enroll']);
+            route::get('/user/enrollments', [CourseController::class, 'myEnrollments']);
+        });
     });
 });
