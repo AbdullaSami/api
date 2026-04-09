@@ -186,6 +186,6 @@ route::prefix('v1')->group(function () {
         route::get('/{course}', [CourseController::class, 'show']);
         route::get('/filters/data', [CourseController::class, 'getFilterData']);
 
-        route::post('/user/enroll', [CourseController::class, 'enroll']);
+        route::post('/user/test-get-in-course', [CourseController::class, 'enroll']);
     });
 });
