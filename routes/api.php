@@ -181,11 +181,11 @@ route::prefix('v1')->group(function () {
     });
 
     // Courses routes
-    route::get('/user/test-get-in-course', [CourseController::class, 'enroll']);
 
     route::prefix('courses')->group(function () {
         route::get('/', [CourseController::class, 'index']);
         route::get('/{course}', [CourseController::class, 'show']);
         route::get('/filters/data', [CourseController::class, 'getFilterData']);
+        route::post('/user/test-get-in-course', [CourseController::class, 'enroll']);
     });
 });
