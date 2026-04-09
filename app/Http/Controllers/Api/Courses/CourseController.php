@@ -8,6 +8,8 @@ use App\Services\CourseAccessService;
 use App\Models\Course;
 use App\Models\CoursesCategory;
 use App\Models\Skill;
+use App\Models\Package;
+
 class CourseController extends Controller
 {
     protected $courseAccessService;
@@ -19,7 +21,7 @@ class CourseController extends Controller
 
     public function index(Request $request)
     {
-        try{
+        try {
             $query = Course::with(['category', 'skills', 'instructor']);
 
             // Filter by category
@@ -30,7 +32,7 @@ class CourseController extends Controller
             // Filter by skills (multiple skills can be selected)
             if ($request->has('skills') && !empty($request->skills)) {
                 $skillIds = is_array($request->skills) ? $request->skills : explode(',', $request->skills);
-                $query->whereHas('skills', function($q) use ($skillIds) {
+                $query->whereHas('skills', function ($q) use ($skillIds) {
                     $q->whereIn('skills.id', $skillIds);
                 });
             }
@@ -77,7 +79,12 @@ class CourseController extends Controller
                 $query->orderBy($sortBy, $sortOrder);
             }
 
-            $courses = $query->paginate(10);
+
+            $courses = $query
+                ->when($request->filled('title'), function ($q) use ($request) {
+                    $q->where('title', 'like', '%' . $request->title . '%');
+                })
+                ->paginate(10);
 
             return response()->json([
                 'success' => true,
@@ -95,24 +102,24 @@ class CourseController extends Controller
                     'sort_order' => $sortOrder
                 ]
             ]);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve courses: ' . $e->getMessage()
             ], 500);
-            }
+        }
     }
 
     public function show($course)
     {
-        try{
+        try {
 
-                $course = Course::with(['category', 'instructor', 'sections.lessons', 'skills'])->where('slug', $course)->first();
+            $course = Course::with(['category', 'instructor', 'sections.lessons', 'skills'])->where('slug', $course)->first();
             return response()->json([
                 'success' => true,
                 'data' => $course->load('category', 'instructor', 'sections', 'sections.lessons', 'skills') // Eager load lessons and skills with the course
             ]);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve course: ' . $e->getMessage()
@@ -122,21 +129,66 @@ class CourseController extends Controller
 
     public function getFilterData()
     {
-        try{
+        try {
             $categories = CoursesCategory::all();
             $skills = Skill::all();
+            $levels = Course::select('level')
+                ->distinct()
+                ->pluck('level')
+                ->map(fn($level) => [
+                    'value' => $level,
+                    'label' => match ($level) {
+                        1 => 'Beginner',
+                        2 => 'Intermediate',
+                        3 => 'Pro',
+                        4 => 'Advanced',
+                        default => 'Unknown',
+                    }
+                ]);
+            $packages = Package::all();
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'categories' => $categories,
-                    'skills' => $skills
+                    'skills' => $skills,
+                    'levels' => $levels,
+                    'packages' => $packages
                 ]
             ]);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve filter data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function enroll($userId, $slug)
+    {
+        try {
+            $course = Course::where('slug', $slug)->firstOrFail();
+
+            // Check if the user has access to the course
+            if (!$this->courseAccessService->canAccessCourse(auth()->user(), $course)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have access to enroll in this course.'
+                ], 403);
+            }
+
+            // Enroll the user in the course (this is a placeholder, implement your enrollment logic here)
+            // For example, you might create a record in a pivot table like course_user
+            auth()->user()->courses()->attach($course->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Successfully enrolled in the course.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to enroll in course: ' . $e->getMessage()
             ], 500);
         }
     }
