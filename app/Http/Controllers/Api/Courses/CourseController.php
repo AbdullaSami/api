@@ -168,7 +168,7 @@ class CourseController extends Controller
     public function enroll(Request $request)
     {
         try {
-            $course = Course::where('slug', $request->slug)->firstOrFail();
+            $course = Course::where('slug', $request->slug)->first();
             $user = User::findOrFail($request->user_id);
 
             // Check if the user has access to the course
