@@ -166,24 +166,32 @@ class CourseController extends Controller
         }
     }
 
-    public function enroll(Request $request)
+    public function enroll(Request $request, $slug)
     {
         try {
-            // Validate request
-            $validated = $request->validate([
-                'slug' => 'required|string|exists:courses,slug',
-                'user_id' => 'required|integer|exists:users,id'
+            // Authenticate user - get authenticated user
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Please login to enroll in courses.'
+                ], 401);
+            }
+
+            // Validate that slug exists in courses table
+            $request->validate([
+                'slug' => 'required|string|exists:courses,slug'
             ]);
 
-            // Find course and user with proper error handling
-            $course = Course::where('slug', $validated['slug'])->firstOrFail();
-            $user = User::findOrFail($validated['user_id']);
+            // Find course with proper error handling
+            $course = Course::where('slug', $slug)->firstOrFail();
 
             // Check if user is already enrolled
             if ($user->courses()->where('course_id', $course->id)->exists()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User is already enrolled in this course.'
+                    'message' => 'You are already enrolled in this course.'
                 ], 409); // Conflict status code
             }
 
@@ -195,7 +203,7 @@ class CourseController extends Controller
                 ], 403);
             }
 
-            // Check if the user has access to the course
+            // Check if user has access to course
             if (!$this->courseAccessService->canAccessCourse($user, $course->level)) {
                 return response()->json([
                     'success' => false,
@@ -203,7 +211,7 @@ class CourseController extends Controller
                 ], 403);
             }
 
-            // Enroll the user in the course using the pivot table
+            // Enroll user in course using pivot table
             $user->courses()->attach($course->id, [
                 'enrolled_at' => now(),
                 'progress' => 0
@@ -218,7 +226,8 @@ class CourseController extends Controller
                 'data' => [
                     'course_id' => $course->id,
                     'course_title' => $course->title,
-                    'enrolled_at' => now()->toISOString()
+                    'enrolled_at' => now()->toISOString(),
+                    'user_id' => $user->id
                 ]
             ]);
 
@@ -231,12 +240,12 @@ class CourseController extends Controller
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Course or user not found.'
+                'message' => 'Course not found.'
             ], 404);
         } catch (\Exception $e) {
             Log::error('Course enrollment failed: ' . $e->getMessage(), [
-                'slug' => $request->slug,
-                'user_id' => $request->user_id,
+                'slug' => $slug,
+                'user_id' => $request->user()?->id,
                 'exception' => $e
             ]);
 
