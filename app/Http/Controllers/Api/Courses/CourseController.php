@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Courses;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Services\CourseAccessService;
 use App\Models\Course;
 use App\Models\CoursesCategory;
@@ -168,29 +169,80 @@ class CourseController extends Controller
     public function enroll(Request $request)
     {
         try {
-            $course = Course::where('slug', $request->slug)->first();
-            $user = User::where('id', $request->user_id)->first();
+            // Validate request
+            $validated = $request->validate([
+                'slug' => 'required|string|exists:courses,slug',
+                'user_id' => 'required|integer|exists:users,id'
+            ]);
 
-            // Check if the user has access to the course
-            if (!$this->courseAccessService->canAccessCourse($user->id, $course->id)) {
+            // Find course and user with proper error handling
+            $course = Course::where('slug', $validated['slug'])->firstOrFail();
+            $user = User::findOrFail($validated['user_id']);
+
+            // Check if user is already enrolled
+            if ($user->courses()->where('course_id', $course->id)->exists()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You do not have access to enroll in this course.'
+                    'message' => 'User is already enrolled in this course.'
+                ], 409); // Conflict status code
+            }
+
+            // Check if course is published
+            if (!$course->is_published) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This course is not available for enrollment.'
                 ], 403);
             }
 
-            // Enroll the user in the course (this is a placeholder, implement your enrollment logic here)
-            // For example, you might create a record in a pivot table like course_user
-            $user->courses()->attach($course->id);
+            // Check if the user has access to the course
+            if (!$this->courseAccessService->canAccessCourse($user, $course->level)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have access to enroll in this course. Please upgrade your package.'
+                ], 403);
+            }
+
+            // Enroll the user in the course using the pivot table
+            $user->courses()->attach($course->id, [
+                'enrolled_at' => now(),
+                'progress' => 0
+            ]);
+
+            // Clear cache for user's available courses
+            cache()->forget("available_courses_{$user->id}_{$this->courseAccessService->getUserLevel($user)}");
 
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully enrolled in the course.'
+                'message' => 'Successfully enrolled in the course.',
+                'data' => [
+                    'course_id' => $course->id,
+                    'course_title' => $course->title,
+                    'enrolled_at' => now()->toISOString()
+                ]
             ]);
-        } catch (\Exception $e) {
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to enroll in course: ' . $e->getMessage()
+                'message' => 'Validation failed.',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Course or user not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Course enrollment failed: ' . $e->getMessage(), [
+                'slug' => $request->slug,
+                'user_id' => $request->user_id,
+                'exception' => $e
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to enroll in course. Please try again later.'
             ], 500);
         }
     }
