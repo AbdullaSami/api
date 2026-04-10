@@ -16,7 +16,7 @@ class UserProfileController extends Controller
 
         try {
             $user = auth()->user()->load('member.subscription.package');
-            $subscriptionLevel = $user->member?->subscription?->package?->level ?? 1;
+            $subscriptionLevel = $user->member?->subscription?->package?->level ?? 0;
             $completedPercentage = 100;
             //Total courses available for the user's subscription level
             $totalCourses = Course::where('level', '<=', $subscriptionLevel)->count();
