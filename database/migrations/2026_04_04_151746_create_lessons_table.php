@@ -17,8 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
-            $table->string('bunny_video_id')->nullable(); // from BunnyCDN
-            $table->string('video_status')->default('pending'); // from BunnyCDN
+            $table->text('video_id')->nullable(); // from BunnyCDN
             $table->integer('duration')->nullable();
             $table->unsignedInteger('order')->default(0);
             $table->boolean('is_preview')->default(false);
