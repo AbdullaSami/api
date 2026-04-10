@@ -47,7 +47,8 @@ class LessonController extends Controller
         $user = auth()->user();
 
         // Check if user is enrolled in the course
-        $isEnrolled = $this->courseAccessService->canAccessCourse($user, $lesson->course->level);
+        $courseLevel = $lesson?->section?->course?->level;
+        $isEnrolled = $this->courseAccessService->canAccessCourse($user, $courseLevel);
 
         if (!$isEnrolled) {
             return response()->json(['message' => 'Not enrolled in this course'], 403);
