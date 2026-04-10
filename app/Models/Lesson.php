@@ -14,6 +14,7 @@ class Lesson extends Model
         'slug',
         'description',
         'video_id',
+        'video_status',
         'duration',
         'order',
         'is_preview',
