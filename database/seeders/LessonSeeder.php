@@ -42,7 +42,7 @@ class LessonSeeder extends Seeder
                     'section_id' => $section->id,
                     'title' => "{$lessonType}: {$section->title}",
                     'description' => "Detailed {$lessonType} covering {$section->title} with practical examples and exercises.",
-                    'video_id' => 'vid_' . uniqid(),
+                    'video_id' => '45c391ab-0dee-4aa9-90a3-18f6367dbf95', // Placeholder video ID
                     'duration' => rand(5, 45), // Duration in minutes
                     'order' => $i + 1,
                     'is_preview' => $i === 0 // Make first lesson of each section a preview
