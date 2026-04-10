@@ -17,12 +17,14 @@ class Package extends Model
         'pack_icon',
         'billing_period',
         'cv',
-        'features'
+        'features',
+        'is_published',
     ];
 
     protected $casts = [
         'features' => 'array',
         'level' => 'integer',
+        'is_published' => 'boolean',
     ];
 
     public function cvCommissions()

@@ -12,7 +12,7 @@ class PackageController extends Controller
     use ApiResponseTrait;
     public function index(): JsonResponse
     {
-        $packages = Package::all();
+        $packages = Package::where('is_published', true)->get();
         return response()->json($packages);
     }
 
