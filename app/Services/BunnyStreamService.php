@@ -47,14 +47,15 @@ class BunnyStreamService
     // -- step 3: generate a signed URL for streaming the video
     public function getSignedStreamUrl(string $videoId, int $expiresInSeconds = 7200): string
     {
-        $expires = time() + $expiresInSeconds;
+    $expires = time() + $expiresInSeconds;
 
-        // Raw binary SHA256 → base64url
-        $hash = hash('sha256', $this->securityKey . $videoId . $expires, true);
-        $token = rtrim(strtr(base64_encode($hash), '+/', '-_'), '=');
+    // ✅ Correct formula for Embed View Token Authentication
+    // SHA256_HEX( securityKey + videoId + expires )
+    // hash() returns hex by default — no base64, no raw binary
+    $token = hash('sha256', $this->securityKey . $videoId . $expires);
 
-        return "https://iframe.mediadelivery.net/embed/{$this->libraryId}/{$videoId}"
-            . "?token={$token}&expires={$expires}";
+    return "https://iframe.mediadelivery.net/embed/{$this->libraryId}/{$videoId}"
+         . "?token={$token}&expires={$expires}";
     }
 
     // ── Optional: Delete a video ──

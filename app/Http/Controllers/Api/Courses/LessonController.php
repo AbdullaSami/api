@@ -59,7 +59,8 @@ class LessonController extends Controller
         }
 
         // Generate token valid for 2 hours
-        $signedUrl = $this->bunny->getSignedStreamUrl($lesson->video_id, 7200);
+        $videoId = $lesson?->video_id;
+        $signedUrl = $this->bunny->getSignedStreamUrl($videoId, 7200);
 
         return response()->json(['stream_url' => $signedUrl]);
     }
