@@ -26,22 +26,29 @@ class CourseController extends Controller
         try {
             $query = Course::with(['category', 'skills', 'instructor']);
 
-            // Filter by category
+            // Filter by category (single or multiple slugs)
             if ($request->has('category_slug')) {
-                $query->whereHas('category', function ($q) use ($request) {
-                    $q->where('slug', $request->category_slug);
+                $slugs = is_array($request->category_slug)
+                    ? $request->category_slug
+                    : explode(',', $request->category_slug);
+
+                $query->whereHas('category', function ($q) use ($slugs) {
+                    $q->whereIn('slug', $slugs);
                 });
             }
 
             // Filter by skills (multiple skills can be selected)
             if ($request->has('skills') && !empty($request->skills)) {
-                $skillIds = is_array($request->skills) ? $request->skills : explode(',', $request->skills);
+                $skillIds = is_array($request->skills)
+                    ? $request->skills
+                    : explode(',', $request->skills);
+
                 $query->whereHas('skills', function ($q) use ($skillIds) {
                     $q->whereIn('skills.id', $skillIds);
                 });
             }
 
-            // Filter by package level (courses accessible to specific package level)
+            // Filter by package level
             if ($request->has('package_level')) {
                 $query->where('level', '<=', $request->package_level);
             }
@@ -59,13 +66,13 @@ class CourseController extends Controller
                 $query->where('duration', $request->duration);
             }
 
-            // Filter by course level
+            // Filter by course level (single or multiple levels)
             if ($request->has('level')) {
-                if (is_array($request->level)) {
-                    $query->whereIn('level', $request->level);
-                } else {
-                    $query->where('level', $request->level);
-                }
+                $levels = is_array($request->level)
+                    ? $request->level
+                    : explode(',', $request->level);
+
+                $query->whereIn('level', $levels);
             }
 
             // Filter by published status (default to only published courses)
@@ -80,9 +87,8 @@ class CourseController extends Controller
             $sortOrder = $request->get('sort_order', 'desc');
 
             if (in_array($sortBy, ['title', 'duration', 'level', 'created_at'])) {
-                $query->orderBy($sortBy, $sortOrder);
+                $query->orderBy($sortBy, in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'desc');
             }
-
 
             $courses = $query
                 ->when($request->filled('title'), function ($q) use ($request) {
@@ -94,16 +100,16 @@ class CourseController extends Controller
                 'success' => true,
                 'data' => $courses,
                 'filters_applied' => [
-                    'category_id' => $request->get('category_id'),
-                    'skills' => $request->get('skills'),
+                    'category_slug' => $request->get('category_slug'),   // fixed: was category_id
+                    'skills'        => $request->get('skills'),
                     'package_level' => $request->get('package_level'),
-                    'duration_min' => $request->get('duration_min'),
-                    'duration_max' => $request->get('duration_max'),
-                    'duration' => $request->get('duration'),
-                    'level' => $request->get('level'),
-                    'is_published' => $request->get('is_published', true),
-                    'sort_by' => $sortBy,
-                    'sort_order' => $sortOrder
+                    'duration_min'  => $request->get('duration_min'),
+                    'duration_max'  => $request->get('duration_max'),
+                    'duration'      => $request->get('duration'),
+                    'level'         => $request->get('level'),
+                    'is_published'  => $request->get('is_published', true),
+                    'sort_by'       => $sortBy,
+                    'sort_order'    => $sortOrder,
                 ]
             ]);
         } catch (\Exception $e) {
@@ -233,7 +239,6 @@ class CourseController extends Controller
                     'statistics' => $stats
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('Failed to retrieve user enrollments: ' . $e->getMessage(), [
                 'user_id' => $request->user()?->id,
@@ -311,7 +316,6 @@ class CourseController extends Controller
                     'user_id' => $user->id
                 ]
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
