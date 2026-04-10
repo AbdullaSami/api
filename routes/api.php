@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\Courses\EnrolledLessonsController;
 
 // Course Controller
 use App\Http\Controllers\Api\Courses\CourseController;
+use App\Http\Controllers\Api\Courses\UserProfileController;
 
 route::prefix('v1')->group(function () {
 
@@ -191,10 +192,10 @@ route::prefix('v1')->group(function () {
         route::middleware('auth:sanctum')->group(function () {
             route::post('/user/enroll/course/{slug}', [CourseController::class, 'enroll']);
             route::get('/user/enrollments', [CourseController::class, 'myEnrollments']);
-
             route::get('/{course}/enrolled/lessons', [EnrolledLessonsController::class, 'index']);
             route::get('/{course}/enrolled/lessons/{lesson}', [EnrolledLessonsController::class, 'show']);
             route::post('/{course}/enrolled/lessons/{lesson}/progress', [EnrolledLessonsController::class, 'updateProgress']);
-        });
+            route::get('user/profile', [UserProfileController::class, 'userProfile']);
+            });
     });
 });
