@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('packages', function (Blueprint $table) {
-            $table->boolean('is_published')->default(false)->after('description');
+            $table->boolean('is_published')->default(false)->after('pack_icon');
         });
     }
 
