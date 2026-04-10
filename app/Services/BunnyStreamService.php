@@ -49,16 +49,15 @@ class BunnyStreamService
     {
         $expires = time() + $expiresInSeconds;
 
-        // ✅ Correct: raw binary hash → base64url (NOT hex2bin of a hex string)
-        $token = base64_encode(
-            hash('sha256', $this->securityKey . $videoId . $expires, true) // true = raw binary
-        );
+        // Bunny.net signed URL format: HMAC-SHA256 of the path + expires timestamp, using the security key
+        $hashableBase = $this->securityKey . $videoId . $expires;
+        $token = hash('sha256', $hashableBase);
 
-        // base64url encode (replace +, /, strip =)
+        // Base64url encode (replace +/ and strip =)
+        $token = base64_encode($token);
         $token = str_replace(['+', '/', '='], ['-', '_', ''], $token);
 
-        return "https://{$this->cdnHostname}/embed/{$this->libraryId}/{$videoId}"
-            . "?token={$token}&expires={$expires}";
+        return "https://iframe.mediadelivery.net/embed/{$this->libraryId}/{$videoId}?token={$token}&expires={$expires}";
     }
 
     // ── Optional: Delete a video ──
