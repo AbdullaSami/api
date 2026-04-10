@@ -15,24 +15,24 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'api/v1/courses/lessons/*/stream'],
 
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-                          'https://thenovagroupco.com',
-                          'https://test.thenovagroupco.com',
-                          'https://school.thenovagroupco.com',
-                          'http://localhost:5173',
-                          'http://localhost:5174',
-                          'https://thenovagroupco.netlify.app'
-                          ],
+        'https://thenovagroupco.com',
+        'https://test.thenovagroupco.com',
+        'https://school.thenovagroupco.com',
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'https://thenovagroupco.netlify.app'
+    ],
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+    'exposed_headers' => ['Content-Range', 'Accept-Ranges', 'Content-Length'],
 
     'max_age' => 0,
 
