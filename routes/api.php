@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Api\MLMController;
 use App\Http\Controllers\Api\RankController;
 use App\Http\Controllers\Api\PackageController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\TicketsController;
 use App\Http\Controllers\Api\Admin\Commissions\AdminCommissionPayoutBatchController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\Courses\EnrolledLessonsController;
+use App\Http\Controllers\Api\Courses\LessonController;
 
 // Course Controller
 use App\Http\Controllers\Api\Courses\CourseController;
@@ -196,6 +198,24 @@ route::prefix('v1')->group(function () {
             route::get('/{course}/enrolled/lessons/{lesson}', [EnrolledLessonsController::class, 'show']);
             route::post('/{course}/enrolled/lessons/{lesson}/progress', [EnrolledLessonsController::class, 'updateProgress']);
             route::get('user/profile', [UserProfileController::class, 'userProfile']);
-            });
+
+            // Lessons streaming route
+            route::post('/lessons/{lesson}/upload', [LessonController::class, 'upload']);
+            route::get('/lessons/{lesson}/stream', [LessonController::class, 'stream']);
+        });
     });
-});
+
+    });
+    // routes/api.php
+    Route::post('/webhooks/bunny', function (Request $request) {
+        // Validate it's really from Bunny (check their signature header)
+        $videoId = $request->input('VideoGuid');
+        $status  = $request->input('Status'); // 3 = encoded & ready
+
+        if ($status === 3) {
+            \App\Models\Lesson::where('video_id', $videoId)
+                ->update(['video_status' => 'ready']);
+        }
+
+        return response()->noContent();
+    });
