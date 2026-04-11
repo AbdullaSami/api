@@ -17,6 +17,7 @@ class CourseEnrollmentResource extends JsonResource
         return [
             'id' => $this->course->id,
             'title' => $this->course->title,
+            'slug' => $this->course->slug,
             'level' => $this->course->level,
             'duration' => $this->course->duration,
             'progress' => $this->progress ?? 0,
