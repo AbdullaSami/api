@@ -14,9 +14,11 @@ class CourseContentSeeder extends Seeder
     {
         $this->call([
             CoursesCategorySeeder::class,
+            CourseSubcategorySeeder::class,
             CoursesSeeder::class,
             SectionSeeder::class,
             LessonSeeder::class,
+            SkillsSeeder::class,
         ]);
     }
 }
