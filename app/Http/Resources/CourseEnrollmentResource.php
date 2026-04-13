@@ -23,6 +23,16 @@ class CourseEnrollmentResource extends JsonResource
             'progress' => $this->progress ?? 0,
             'thumbnail' => $this->course->thumbnail,
             'instructor' => $this->course->instructor?->name,
+            'subcategory' => $this->course->subcategory ? [
+                'id' => $this->course->subcategory->id,
+                'name' => $this->course->subcategory->name,
+                'slug' => $this->course->subcategory->slug,
+            ] : null,
+            'category' => $this->course->category ? [
+                'id' => $this->course->category->id,
+                'name' => $this->course->category->name,
+                'slug' => $this->course->category->slug,
+            ] : null,
             'status' => $this->getStatus(),
             'created_at' => $this->created_at->toDateTimeString(),
             'last_accessed_at' => $this->updated_at?->diffForHumans(),

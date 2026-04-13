@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\CourseAccessService;
 use App\Models\Course;
 use App\Models\CoursesCategory;
+use App\Models\CourseSubcategory;
 use App\Models\Skill;
 use App\Models\Package;
 use App\Models\User;
@@ -24,7 +25,7 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Course::with(['category', 'skills', 'instructor']);
+            $query = Course::with(['subcategory.category', 'skills', 'instructor']);
 
             // Filter by category (single or multiple slugs)
             if ($request->has('category_slug')) {
@@ -33,6 +34,17 @@ class CourseController extends Controller
                     : explode(',', $request->category_slug);
 
                 $query->whereHas('category', function ($q) use ($slugs) {
+                    $q->whereIn('slug', $slugs);
+                });
+            }
+
+            // Filter by subcategory (single or multiple slugs)
+            if ($request->has('subcategory_slug')) {
+                $slugs = is_array($request->subcategory_slug)
+                    ? $request->subcategory_slug
+                    : explode(',', $request->subcategory_slug);
+
+                $query->whereHas('subcategory', function ($q) use ($slugs) {
                     $q->whereIn('slug', $slugs);
                 });
             }
@@ -100,16 +112,17 @@ class CourseController extends Controller
                 'success' => true,
                 'data' => $courses,
                 'filters_applied' => [
-                    'category_slug' => $request->get('category_slug'),   // fixed: was category_id
-                    'skills'        => $request->get('skills'),
-                    'package_level' => $request->get('package_level'),
-                    'duration_min'  => $request->get('duration_min'),
-                    'duration_max'  => $request->get('duration_max'),
-                    'duration'      => $request->get('duration'),
-                    'level'         => $request->get('level'),
-                    'is_published'  => $request->get('is_published', true),
-                    'sort_by'       => $sortBy,
-                    'sort_order'    => $sortOrder,
+                    'category_slug'    => $request->get('category_slug'),
+                    'subcategory_slug' => $request->get('subcategory_slug'),
+                    'skills'           => $request->get('skills'),
+                    'package_level'    => $request->get('package_level'),
+                    'duration_min'     => $request->get('duration_min'),
+                    'duration_max'     => $request->get('duration_max'),
+                    'duration'         => $request->get('duration'),
+                    'level'            => $request->get('level'),
+                    'is_published'     => $request->get('is_published', true),
+                    'sort_by'          => $sortBy,
+                    'sort_order'       => $sortOrder,
                 ]
             ]);
         } catch (\Exception $e) {
@@ -124,10 +137,10 @@ class CourseController extends Controller
     {
         try {
 
-            $course = Course::with(['category', 'instructor', 'sections.lessons', 'skills'])->where('slug', $course)->first();
+            $course = Course::with(['subcategory.category', 'instructor', 'sections.lessons', 'skills'])->where('slug', $course)->first();
             return response()->json([
                 'success' => true,
-                'data' => $course->load('category', 'instructor', 'sections', 'sections.lessons', 'skills') // Eager load lessons and skills with the course
+                'data' => $course->load('subcategory.category', 'instructor', 'sections', 'sections.lessons', 'skills') // Eager load lessons and skills with the course
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -140,7 +153,8 @@ class CourseController extends Controller
     public function getFilterData()
     {
         try {
-            $categories = CoursesCategory::all();
+            $categories = CoursesCategory::with('subcategories')->get();
+            $subcategories = CourseSubcategory::all();
             $skills = Skill::all();
             $levels = Course::select('level')
                 ->distinct()
@@ -161,6 +175,7 @@ class CourseController extends Controller
                 'success' => true,
                 'data' => [
                     'categories' => $categories,
+                    'subcategories' => $subcategories,
                     'skills' => $skills,
                     'levels' => $levels,
                     'packages' => $packages
@@ -189,7 +204,7 @@ class CourseController extends Controller
 
             // Get user's enrollments with course details
             $enrollments = $user->courses()
-                ->with(['category', 'instructor', 'sections'])
+                ->with(['subcategory.category', 'instructor', 'sections'])
                 ->orderByPivot('enrolled_at', 'desc')
                 ->get()
                 ->map(function ($course) use ($user) {
@@ -202,11 +217,16 @@ class CourseController extends Controller
                         'thumbnail' => $course->thumbnail,
                         'level' => $course->level,
                         'duration' => $course->duration,
-                        'category' => [
-                            'id' => $course->category->id,
-                            'name' => $course->category->name,
-                            'slug' => $course->category->slug
-                        ],
+                        'subcategory' => $course->subcategory ? [
+                            'id' => $course->subcategory->id,
+                            'name' => $course->subcategory->name,
+                            'slug' => $course->subcategory->slug,
+                            'category' => $course->subcategory->category ? [
+                                'id' => $course->subcategory->category->id,
+                                'name' => $course->subcategory->category->name,
+                                'slug' => $course->subcategory->category->slug
+                            ] : null
+                        ] : null,
                         'instructor' => $course->instructor ? [
                             'id' => $course->instructor->id,
                             'name' => $course->instructor->name,

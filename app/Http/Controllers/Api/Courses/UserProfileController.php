@@ -52,13 +52,13 @@ class UserProfileController extends Controller
             ];
             //Recent Courses User subscribed to
             $recentCourses = $user->courseEnrollments()
-                ->with('course')
+                ->with('course.subcategory.category')
                 ->latest()
                 ->take(5)
                 ->get();
             //Completed Courses
             $completedCourses = $user->courseEnrollments()
-                ->with('course')
+                ->with('course.subcategory.category')
                 ->where('progress', $completedPercentage)
                 ->limit(10)
                 ->get();

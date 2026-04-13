@@ -12,7 +12,7 @@ class Course extends Model
     protected $fillable = [
         'title',
         'slug',
-        'category_id',
+        'sub_category_id',
         'description',
         'thumbnail',
         'level',
@@ -44,9 +44,14 @@ class Course extends Model
         return $this->enrolledUsers()->count();
     }
 
+    public function subcategory()
+    {
+        return $this->belongsTo(CourseSubcategory::class, 'sub_category_id');
+    }
+
     public function category()
     {
-        return $this->belongsTo(CoursesCategory::class, 'category_id');
+        return $this->hasOneThrough(CoursesCategory::class, CourseSubcategory::class, 'id', 'id', 'sub_category_id', 'category_id');
     }
     public function instructor()
     {

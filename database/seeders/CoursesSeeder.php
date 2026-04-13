@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Course;
-use App\Models\CoursesCategory;
+use App\Models\CourseSubcategory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -15,81 +15,126 @@ class CoursesSeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = CoursesCategory::all();
+        $subcategories = CourseSubcategory::all();
         $levels = [1, 2, 3];
 
         $courseTemplates = [
-            'Web Development' => [
+            'Frontend Development' => [
                 'Complete HTML & CSS Bootcamp',
                 'JavaScript Fundamentals Masterclass',
                 'React.js Complete Guide',
                 'Vue.js from Scratch',
                 'Angular Full Course',
+            ],
+            'Backend Development' => [
                 'Node.js Backend Development',
                 'PHP & Laravel Mastery',
                 'Python Django Development',
-                'Full Stack JavaScript',
-                'Modern Web Development Tools'
+                'Express.js Framework',
+                'REST API Development',
             ],
-            'Mobile Development' => [
+            'Full Stack Development' => [
+                'Full Stack JavaScript',
+                'Modern Web Development Tools',
+                'MERN Stack Complete',
+                'MEAN Stack Mastery',
+                'Python Full Stack',
+            ],
+            'iOS Development' => [
                 'iOS Development with Swift',
+                'SwiftUI Fundamentals',
+                'iOS Advanced Topics',
+                'iOS App Architecture',
+                'Core Data & Persistence',
+            ],
+            'Android Development' => [
                 'Android Development with Kotlin',
+                'Android Performance Optimization',
+                'Jetpack Compose',
+                'Android Architecture',
+                'Kotlin Coroutines',
+            ],
+            'Cross-Platform Development' => [
                 'React Native Complete Course',
                 'Flutter Mobile Development',
                 'Cross-Platform App Development',
                 'Mobile App UI Design',
-                'iOS Advanced Topics',
-                'Android Performance Optimization',
-                'Mobile Game Development',
-                'App Store Optimization'
+                'App Store Optimization',
             ],
-            'Data Science' => [
+            'Machine Learning' => [
                 'Python for Data Science',
                 'Machine Learning Fundamentals',
-                'Data Analysis with Pandas',
                 'Deep Learning with TensorFlow',
+                'Neural Networks',
+                'ML Model Deployment',
+            ],
+            'Data Analysis' => [
+                'Data Analysis with Pandas',
                 'Statistical Analysis Masterclass',
                 'Data Visualization Techniques',
+                'Excel for Data Analysis',
+                'SQL for Data Analysis',
+            ],
+            'Deep Learning' => [
                 'Big Data with Hadoop',
                 'Natural Language Processing',
                 'Computer Vision Basics',
-                'Data Engineering Pipeline'
+                'Data Engineering Pipeline',
+                'AI Ethics & Governance',
             ],
-            'DevOps & Cloud' => [
+            'Cloud Computing' => [
                 'AWS Cloud Practitioner',
+                'Cloud Security Fundamentals',
+                'Serverless Architecture',
+                'Multi-Cloud Strategies',
+                'Cloud Cost Management',
+            ],
+            'DevOps Tools' => [
                 'Docker Containerization',
                 'Kubernetes Orchestration',
                 'CI/CD Pipeline Design',
-                'Infrastructure as Code',
-                'Cloud Security Fundamentals',
                 'DevOps Culture & Practices',
                 'Monitoring & Observability',
-                'Serverless Architecture',
-                'Multi-Cloud Strategies'
             ],
-            'UI/UX Design' => [
+            'Infrastructure as Code' => [
+                'Infrastructure as Code',
+                'Terraform Fundamentals',
+                'Ansible Automation',
+                'Configuration Management',
+                'GitOps Workflow',
+            ],
+            'UI Design' => [
                 'Figma Complete Mastery',
-                'User Research Methods',
                 'Interaction Design Principles',
-                'Design Thinking Workshop',
                 'Prototyping Techniques',
                 'Visual Design Fundamentals',
                 'Mobile UI Design',
+            ],
+            'UX Research' => [
+                'User Research Methods',
+                'Design Thinking Workshop',
                 'Web UX Best Practices',
+                'Usability Testing Guide',
+                'User Journey Mapping',
+            ],
+            'Design Systems' => [
                 'Design Systems Creation',
-                'Usability Testing Guide'
-            ]
+                'Component Libraries',
+                'Design Tokens',
+                'Pattern Libraries',
+                'Design Documentation',
+            ],
         ];
 
-        foreach ($categories as $category) {
-            $courses = $courseTemplates[$category->name] ?? [];
+        foreach ($subcategories as $subcategory) {
+            $courses = $courseTemplates[$subcategory->name] ?? [];
 
             foreach ($courses as $index => $courseTitle) {
                 Course::create([
                     'title' => $courseTitle,
-                    'category_id' => $category->id,
+                    'sub_category_id' => $subcategory->id,
                     'description' => "Comprehensive course on {$courseTitle}. Learn from industry experts with hands-on projects and real-world applications.",
-                    'thumbnail' => "courses/{$category->slug}-" . ($index + 1) . ".jpg",
+                    'thumbnail' => "courses/{$subcategory->slug}-" . ($index + 1) . ".jpg",
                     'level' => $levels[array_rand($levels)],
                     'is_published' => true,
                     'instructor_id' => 1, // Assuming instructor with ID 1 exists

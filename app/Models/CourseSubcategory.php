@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
-class CoursesCategory extends Model
+
+class CourseSubcategory extends Model
 {
     use HasSlug;
-    protected $table = 'courses_categories';
+    protected $table = 'course_subcategories';
 
     protected $fillable = [
         'name',
@@ -16,8 +17,8 @@ class CoursesCategory extends Model
         'description',
         'image',
         'status',
+        'category_id',
     ];
-
 
     public function getSlugOptions(): SlugOptions
     {
@@ -26,13 +27,13 @@ class CoursesCategory extends Model
             ->saveSlugsTo('slug');
     }
 
-    public function subcategories()
+    public function category()
     {
-        return $this->hasMany(CourseSubcategory::class, 'category_id');
+        return $this->belongsTo(CoursesCategory::class, 'category_id');
     }
 
     public function courses()
     {
-        return $this->hasManyThrough(Course::class, CourseSubcategory::class, 'category_id', 'sub_category_id', 'id', 'id');
+        return $this->hasMany(Course::class, 'sub_category_id');
     }
 }
