@@ -20,6 +20,7 @@ class CourseSubcategory extends Model
         'category_id',
     ];
 
+    protected $appends = ['total_courses'];
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
@@ -35,5 +36,10 @@ class CourseSubcategory extends Model
     public function courses()
     {
         return $this->hasMany(Course::class, 'sub_category_id');
+    }
+
+    public function getTotalCoursesAttribute()
+    {
+        return $this->courses()->where('is_published', true)->count();
     }
 }
