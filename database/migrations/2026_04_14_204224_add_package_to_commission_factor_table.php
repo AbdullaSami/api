@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('commission_factor', function (Blueprint $table) {
+        Schema::table('commission_factors', function (Blueprint $table) {
             $table->foreignId('package_id')->nullable()->constrained('packages')->onDelete('cascade');
         });
     }
