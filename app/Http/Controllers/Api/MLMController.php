@@ -149,7 +149,7 @@ class MLMController extends Controller
     }
     private function applyPlacement($sponsor, $packageId, $placementNode, $referral, $placement, $packageCv)
     {
-        $commissionFactor  = CommissionFactor::first();
+        $commissionFactor  = CommissionFactor::where('package_id', $packageId)->first();
         $binaryRate = $commissionFactor->binary_rate;
         if ($placementNode->id === $sponsor->id) {
             if ($placement === 'left') {
@@ -274,6 +274,7 @@ class MLMController extends Controller
                 $this->processBinaryCommission(
                     $upline,
                     $packageCv,
+                    $packageId,
                     'left',
                     $referralId
                 );
@@ -293,6 +294,7 @@ class MLMController extends Controller
                 $this->processBinaryCommission(
                     $upline,
                     $packageCv,
+                    $packageId,
                     'right',
                     $referralId
                 );
@@ -305,9 +307,9 @@ class MLMController extends Controller
     }
 
     //8-march-2026
-    private function processBinaryCommission($member, $packageCv, $leg, $referralId)
+    private function processBinaryCommission($member, $packageCv, $packageId, $leg, $referralId)
     {
-        $commissionFactor = CommissionFactor::first();
+        $commissionFactor = CommissionFactor::where('package_id', $packageId)->first();
         $binaryRate = $commissionFactor->binary_rate;
 
         // 1️⃣ Add CV to the correct leg

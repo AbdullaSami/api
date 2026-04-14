@@ -68,7 +68,7 @@ class SubscriptionController extends Controller
         }
 
         // Commission Factors
-        $commissionFactor = CommissionFactor::first();
+        $commissionFactor = CommissionFactor::where('package_id', $package->id)->first();
         if (!$commissionFactor) {
             return $this->failedResponse('There is no commission calculation plan.');
         }

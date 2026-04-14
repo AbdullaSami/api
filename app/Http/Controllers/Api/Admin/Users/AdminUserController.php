@@ -129,14 +129,14 @@ class AdminUserController extends Controller
 
         // Calculate totals for direct referrals
         $directTotalCV = $directReferrals->sum('current_cv');
-        $rate = (CommissionFactor::first())->direct_rate;
+        $rate = (CommissionFactor::where('package_id', $member->subscription->package_id)->first())->direct_rate;
         $totalDirectCommissionCv = ($directTotalCV * $rate) / 100;
         $directCount = $directReferrals->count();
         $highestDirectCV = $directReferrals->max('current_cv');
 
         // Calculate totals for indirect referrals
         $indirectTotalCV = $indirectReferrals->sum('current_cv');
-        $rate = (CommissionFactor::first())->binary_rate;
+        $rate = (CommissionFactor::where('package_id', $member->subscription->package_id)->first())->binary_rate;
         $totalINdirectCommissionCv = ($indirectTotalCV * $rate) / 100;
         $indirectCount = $indirectReferrals->count();
         $highestIndirectCV = $indirectReferrals->max('current_cv');
@@ -150,7 +150,7 @@ class AdminUserController extends Controller
                 'total_commissions_cv' => $totalDirectCommissionCv,
                 'highest_cv' => $highestDirectCV,
             ],
-            'indirect_referrals' => [ 
+            'indirect_referrals' => [
                 'count' => $indirectCount,
                 'total_referrals _cv' => $indirectTotalCV,
                 'total_commissions_cv' => $totalINdirectCommissionCv,
