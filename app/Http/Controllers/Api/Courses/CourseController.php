@@ -33,7 +33,7 @@ class CourseController extends Controller
                     ? $request->category_slug
                     : explode(',', $request->category_slug);
 
-                $query->whereHas('category', function ($q) use ($slugs) {
+                $query->whereHas('subcategory.category', function ($q) use ($slugs) {
                     $q->whereIn('slug', $slugs);
                 });
             }
