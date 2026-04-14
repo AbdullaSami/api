@@ -27,6 +27,11 @@ class Package extends Model
         'is_published' => 'boolean',
     ];
 
+    public function commissionFactors()
+    {
+        return $this->hasMany(CommissionFactor::class);
+    }
+    
     public function cvCommissions()
     {
         return $this->hasMany(CvCommission::class);
