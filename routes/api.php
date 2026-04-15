@@ -29,7 +29,7 @@ route::prefix('v1')->group(function () {
 
     route::post('login', [AuthController::class, 'login']);
     route::post('register', [AuthController::class, 'register']);
-    route::get('sponsor-data/{id}', [AuthController::class, 'sponsorData']);
+    route::get('sponsor-data/{id_code}', [AuthController::class, 'sponsorData']);
     // Password reset
     Route::post('user/find-account', [ResetPasswordController::class, 'findAccount']);
     Route::post('user/reset-password', [ResetPasswordController::class, 'resetPassword']);

@@ -160,23 +160,21 @@ class AuthController extends Controller
     }
 
 
-    public function sponsorData($id)
+    public function sponsorData($id_code)
     {
-        $validator = Validator::make(['sponsor_id' => $id], [
-            'sponsor_id' => ['required', 'exists:users,id_code'],
-        ], [
-            'sponsor_id.exists' => 'incorrect sponsor id'
+        $validate = Validator::make(['id_code' => $id_code], [
+            'id_code' => ['required', 'string', 'exists:users,id_code'],
         ]);
-        if ($validator->fails())
-            return $this->failedResponse($validator->errors(), 422);
+        if ($validate->fails()){
+            return $this->failedResponse($validate->errors(), 422);
+        }
 
-        $sponser = User::where('id_code', $id)->whereHas('member')->pluck('id')->first();
-        if (empty($sponser)) {
+        $sponsor = User::where('id_code', $id_code)->first();
+        if (empty($sponsor)) {
             return $this->failedResponse('Sponsor information is incorrect, or this user does not have a membership', 422);
         }
-        $sponser = Member::where('user_id', $sponser)->first();
-        $sponser_name = $sponser->user->username;
-        return $this->successResponse('sponsor data get successfully', 'sponsor name', $sponser_name);
+        $sponsor_name = $sponsor->username;
+        return $this->successResponse('sponsor data get successfully', 'sponsor name', $sponsor_name);
     }
 
 
