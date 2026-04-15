@@ -74,7 +74,7 @@ class Course extends Model
         return cache()->remember(
             "course_packages_{$this->level}",
             3600,
-            fn() => Package::where('level', $this->level)->orderBy('level')->pluck('name')
+            fn() => Package::where('level', $this->level)->orderBy('level', 'asc')->pluck('name')
         );
     }
 }
