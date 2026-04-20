@@ -183,6 +183,7 @@ class AuthController extends Controller
         $user = auth('sanctum')->user();
         $user->load('member');
         $member = $user->member;
+        $member->upgradeRank();
         $sponsor = $member ? $member->sponsor : null;
         $sponsorUser = $sponsor ? $sponsor->user : null;
         return response()->json([

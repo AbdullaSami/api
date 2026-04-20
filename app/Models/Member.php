@@ -108,7 +108,7 @@ class Member extends Model
             ? Rank::where('id', '>', $currentRank)->orderBy('id')->first()
             : Rank::orderBy('id')->first();
 
-        if (! $nextRank) {
+        if (!$nextRank) {
             return false; // No more ranks to upgrade to
         }
 
