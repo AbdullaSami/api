@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Contracts\PinCheckerInterface;
 use App\Models\User;
 use App\Models\Member;
+use App\Models\Subscription;
 use App\Models\CreditCodes;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponseTrait;
@@ -613,6 +614,28 @@ class WalletController extends Controller
             ];
         });
 
+        // Personal purchases (total spent on packages/subscriptions)
+        $personalPurchases = Subscription::where('member_id', $member->id)
+            ->with('package')
+            ->get()
+            ->sum(function ($subscription) {
+                return $subscription->package ? $subscription->package->price : 0;
+            });
+
+        // Total payout (sum of wallet transactions linked to payout batches)
+        $totalPayout = $member->wallet->transactions()
+            ->whereNotNull('payout_batch_id')
+            ->where('transaction_type', 'withdraw')
+            ->where('status', 'accepted')
+            ->sum('amount');
+
+        // Profit gained (Amount earned vs Amount spent)
+        // Amount earned = total earnings + total receive
+        // Amount spent = personal purchases + total transfer
+        $amountEarned = $totalEarnings + $totalReceive;
+        $amountSpent = $personalPurchases + $totalTransfer;
+        $profitGained = $amountEarned - $amountSpent;
+
         // Commission wallet balance
         $balance = $member->wallet->balance;
 
@@ -627,6 +650,9 @@ class WalletController extends Controller
             'total_bounce' => $totalBounce ?? 0,
             'weekly_earnings' => $fullWeeklyEarnings ?? [],
             'monthly_bounce'  => $months ?? [],
+            'personal_purchases' => $personalPurchases ?? 0,
+            'total_payout' => $totalPayout ?? 0,
+            'profit_gained' => $profitGained ?? 0,
             'balance' => $balance ?? 0,
             'token_wallet_balance' => $tokenBalance ?? 0,
         ]);
