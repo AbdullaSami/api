@@ -447,7 +447,7 @@ class MLMController extends Controller
         });
 
         // member subscription package details
-        $packageDetails = $member->subscription()->with('package:id,name,pack_card')->first();
+        $packageDetails = $member->subscription()->with('package:id,name,pack_card,pack_icon')->first();
         // total commissions earned
         $totalEarnings = $member->commission->sum('commission_value');
         return response()->json([
