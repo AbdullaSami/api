@@ -68,11 +68,6 @@ class Member extends Model
         return $this->hasMany(Commission::class, 'sponsor_id', 'id');
     }
 
-    public function calculateTotalCommission()
-    {
-        $this->total_commision = $this->commission()->sum('amount');
-        $this->save();
-    }
     // Members that this member has referred
     public function directReferrals(): HasMany
     {
