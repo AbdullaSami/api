@@ -192,6 +192,8 @@ class MLMController extends Controller
                     'commission_value'  => $commissionValue,
                     'commission_type'   => 'binary',
                 ]);
+                $sponsor->total_commision += $commissionValue;
+                $sponsor->save();
                 // Deduct used CV
                 $sponsor->totla_left_volume  -= $matchedVolume;
                 $sponsor->totla_right_volume -= $matchedVolume;
@@ -344,6 +346,8 @@ class MLMController extends Controller
             'commission_type'  => 'binary',
         ]);
 
+        $member->total_commision += $commissionValue;
+        $member->save();
         // 4️⃣ Deduct matched CV from both legs
         $member->totla_left_volume  -= $matchedVolume;
         $member->totla_right_volume -= $matchedVolume;

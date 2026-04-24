@@ -106,6 +106,8 @@ class SubscriptionController extends Controller
 
                 $sponsor = $member->sponsor->wallet;
                 $sponsor->increment('balance', $directCommissionValue);
+                $member->total_commision += $directCommissionValue;
+                $member->save();
             }
 
 
