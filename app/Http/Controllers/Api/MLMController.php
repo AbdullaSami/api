@@ -465,6 +465,7 @@ class MLMController extends Controller
                 'user_package' => $packageDetails ? [
                     'name' => $packageDetails->package->name,
                     'pack_card' => $packageDetails->package->pack_card,
+                    'pack_icon' => $packageDetails->package->pack_icon,
                 ] : null,
                 'rank' => [
                     'name' => $rank->name ?? null,
