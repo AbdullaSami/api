@@ -634,7 +634,7 @@ class WalletController extends Controller
         // Amount spent = personal purchases + total transfer
         $amountEarned = $totalEarnings + $totalReceive;
         $amountSpent = $personalPurchases + $totalTransfer;
-        $profitGained = $amountEarned - $amountSpent;
+        $profitGained = ($amountEarned / $amountSpent) * 100;
 
         // Commission wallet balance
         $balance = $member->wallet->balance;
