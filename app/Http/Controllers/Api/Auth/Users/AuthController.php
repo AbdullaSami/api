@@ -184,6 +184,7 @@ class AuthController extends Controller
         $user->load('member');
         $member = $user->member;
         $member->upgradeRank();
+        $member->calculateTotalCommission();
         $sponsor = $member ? $member->sponsor : null;
         $sponsorUser = $sponsor ? $sponsor->user : null;
         return response()->json([

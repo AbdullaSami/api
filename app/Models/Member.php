@@ -68,6 +68,11 @@ class Member extends Model
         return $this->hasMany(Commission::class, 'sponsor_id', 'id');
     }
 
+    public function calculateTotalCommission()
+    {
+        $this->total_commision = $this->commission()->sum('amount');
+        $this->save();
+    }
     // Members that this member has referred
     public function directReferrals(): HasMany
     {
@@ -424,13 +429,13 @@ class Member extends Model
         $allDownlines = $leftMembers->merge($rightMembers);
 
         // Sort by total commission (highest first)
-        $topEarners = $allDownlines->sortByDesc('total_commission')
+        $topEarners = $allDownlines->sortByDesc('total_commision')
             ->take($limit)
             ->map(function ($member) {
                 return [
                     'id' => $member->id,
                     'name' => $member->user->username ?? 'Unknown',
-                    'total_commission' => $member->total_commission ?? 0,
+                    'total_commission' => $member->total_commision ?? 0,
                     'rank' => $member->rank->name ?? 'No Rank',
                 ];
             });
