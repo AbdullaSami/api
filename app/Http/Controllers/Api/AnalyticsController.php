@@ -268,7 +268,7 @@ class AnalyticsController extends Controller
         // Get date filter parameters
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
-        $days = $request->get('days', 30);  
+        $days = $request->get('days', 30);
 
         // get top earners based on commission
         $topEarners = $member->getTopEarners();

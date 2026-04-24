@@ -424,13 +424,13 @@ class Member extends Model
         $allDownlines = $leftMembers->merge($rightMembers);
 
         // Sort by total commission (highest first)
-        $topEarners = $allDownlines->sortByDesc('total_commision')
+        $topEarners = $allDownlines->sortByDesc('total_commission')
             ->take($limit)
             ->map(function ($member) {
                 return [
                     'id' => $member->id,
-                    'name' => $member->user->name ?? 'Unknown',
-                    'total_commission' => $member->total_commision ?? 0,
+                    'name' => $member->user->username ?? 'Unknown',
+                    'total_commission' => $member->total_commission ?? 0,
                     'rank' => $member->rank->name ?? 'No Rank',
                 ];
             });
