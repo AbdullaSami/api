@@ -634,7 +634,11 @@ class WalletController extends Controller
         // Amount spent = personal purchases + total transfer
         $amountEarned = $totalEarnings + $totalReceive;
         $amountSpent = $personalPurchases + $totalTransfer;
-        $profitGained = ($amountEarned / $amountSpent) * 100;
+        $profitPercentage = 0;
+
+        if ($amountSpent > 0) {
+            $profitPercentage = (($amountEarned - $amountSpent) / $amountSpent) * 100;
+        }
 
         // Commission wallet balance
         $balance = $member->wallet->balance;
@@ -652,7 +656,7 @@ class WalletController extends Controller
             'monthly_bounce'  => $months ?? [],
             'personal_purchases' => $personalPurchases ?? 0,
             'total_payout' => $totalPayout ?? 0,
-            'profit_gained' => $profitGained ?? 0,
+            'profit_gained' => $profitPercentage,
             'balance' => $balance ?? 0,
             'token_wallet_balance' => $tokenBalance ?? 0,
         ]);
