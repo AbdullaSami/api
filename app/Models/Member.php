@@ -428,7 +428,7 @@ class Member extends Model
             ->take($limit)
             ->map(function ($member) {
                 return [
-                    'id' => $member->id,
+                    'id_code' => $member->user->id_code,
                     'name' => $member->user->username ?? 'Unknown',
                     'total_commission' => $member->total_commision ?? 0,
                     'rank' => $member->rank->name ?? 'No Rank',
