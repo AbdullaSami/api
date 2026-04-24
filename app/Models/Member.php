@@ -563,7 +563,7 @@ class Member extends Model
         return $newMembers->map(function ($member) {
             return [
                 'id' => $member->id,
-                'name' => $member->user->name ?? 'Unknown',
+                'name' => $member->user->username ?? 'Unknown',
                 'joined_at' => $member->created_at->toISOString(),
                 'rank' => $member->rank->name ?? 'No Rank',
                 'package' => $member->subscription ? $member->subscription->package->name ?? 'No Package' : 'No Package',
