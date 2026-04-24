@@ -552,36 +552,10 @@ class WalletController extends Controller
      * abdulla sami 2025-19-NOV
      */
 
-    public function walletData(Request $request)
+    public function walletData()
     {
         $user = Auth::user();
         $member = $user->member;
-
-        // Get date filter
-        $filter = $request->get('filter', 'now'); // now, last_7_days, last_month, last_year
-
-        // Determine date range based on filter
-        $startDate = null;
-        $endDate = now();
-
-        switch ($filter) {
-            case 'last_7_days':
-                $startDate = now()->subDays(7);
-                break;
-            case 'last_month':
-                $startDate = now()->subMonth()->startOfMonth();
-                $endDate = now()->subMonth()->endOfMonth();
-                break;
-            case 'last_year':
-                $startDate = now()->subYear()->startOfYear();
-                $endDate = now()->subYear()->endOfYear();
-                break;
-            case 'now':
-            default:
-                $startDate = null; // All time
-                $endDate = now();
-                break;
-        }
 
         // 1 - Earnings (You must decide the correct model/table)
         $totalEarnings = $member->commission->sum('commission_value');
@@ -641,25 +615,19 @@ class WalletController extends Controller
         });
 
         // Personal purchases (total spent on packages/subscriptions)
-        $purchasesQuery = Subscription::where('member_id', $member->id)
-            ->with('package');
-        if ($startDate) {
-            $purchasesQuery->whereBetween('subscribed_at', [$startDate, $endDate]);
-        }
-        $personalPurchases = $purchasesQuery->get()
+        $personalPurchases = Subscription::where('member_id', $member->id)
+            ->with('package')
+            ->get()
             ->sum(function ($subscription) {
                 return $subscription->package ? $subscription->package->price : 0;
             });
 
         // Total payout (sum of wallet transactions linked to payout batches)
-        $payoutQuery = $member->wallet->transactions()
+        $totalPayout = $member->wallet->transactions()
             ->whereNotNull('payout_batch_id')
             ->where('transaction_type', 'withdraw')
-            ->where('status', 'accepted');
-        if ($startDate) {
-            $payoutQuery->whereBetween('created_at', [$startDate, $endDate]);
-        }
-        $totalPayout = $payoutQuery->sum('amount');
+            ->where('status', 'accepted')
+            ->sum('amount');
 
         // Profit gained (Amount earned vs Amount spent)
         // Amount earned = total earnings + total receive
@@ -691,11 +659,6 @@ class WalletController extends Controller
             'profit_gained' => $profitPercentage,
             'balance' => $balance ?? 0,
             'token_wallet_balance' => $tokenBalance ?? 0,
-            'filter' => [
-                'type' => $filter,
-                'start_date' => $startDate ? $startDate->toIso8601String() : null,
-                'end_date' => $endDate->toIso8601String(),
-            ]
         ]);
     }
 }
