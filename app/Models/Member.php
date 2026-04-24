@@ -487,35 +487,56 @@ class Member extends Model
      */
     public function getPackageOverview()
     {
-        // Get all downline members
+        // Get all downline members for each leg
         $leftMembers = $this->getAllMembersInLeg($this->left_leg_id);
         $rightMembers = $this->getAllMembersInLeg($this->right_leg_id);
-        $allDownlines = $leftMembers->merge($rightMembers);
 
-        // Group by package through subscription relationship
-        $packageCounts = $allDownlines->map(function ($member) {
+        // Group by package for left leg
+        $leftPackageCounts = $leftMembers->map(function ($member) {
             return $member->subscription ? $member->subscription->package_id : null;
         })->filter()->groupBy(function ($packageId) {
             return $packageId;
         })->map(function ($group) {
             return $group->count();
-        });
+        })->toArray();
 
-        // Get package details
-        $packages = \App\Models\Package::whereIn('id', $packageCounts->keys())->get();
+        // Group by package for right leg
+        $rightPackageCounts = $rightMembers->map(function ($member) {
+            return $member->subscription ? $member->subscription->package_id : null;
+        })->filter()->groupBy(function ($packageId) {
+            return $packageId;
+        })->map(function ($group) {
+            return $group->count();
+        })->toArray();
+
+        // Get all available packages
+        $packages = \App\Models\Package::all();
 
         $data = [];
+        $totalLeft = 0;
+        $totalRight = 0;
+
         foreach ($packages as $package) {
+            $leftCount = $leftPackageCounts[$package->id] ?? 0;
+            $rightCount = $rightPackageCounts[$package->id] ?? 0;
+
             $data[] = [
                 'package' => $package->name,
-                'count' => $packageCounts[$package->id] ?? 0,
+                'left' => $leftCount,
+                'right' => $rightCount,
             ];
+
+            // Add to totals
+            $totalLeft += $leftCount;
+            $totalRight += $rightCount;
         }
 
-        // Sort by count (highest first)
-        usort($data, function ($a, $b) {
-            return $b['count'] <=> $a['count'];
-        });
+        // Add totals row
+        $data[] = [
+            'package' => 'Total',
+            'left' => $totalLeft,
+            'right' => $totalRight,
+        ];
 
         return $data;
     }
