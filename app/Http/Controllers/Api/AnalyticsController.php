@@ -250,4 +250,48 @@ class AnalyticsController extends Controller
         // Return mapped code if exists, otherwise generate from country name
         return $countryMapping[$country] ?? strtoupper(substr($country, 0, 3));
     }
+
+
+    /**
+     * Team performance analytics with date filter
+     * team performance:
+     * - top earners
+     * - rank overview
+     * - package overview
+     * - new members
+     */
+    public function teamPerformance(Request $request)
+    {
+        $user = Auth::user();
+        $member = $user->member;
+
+        // Get date filter parameters
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $days = $request->get('days', 30);  
+
+        // get top earners based on commission
+        $topEarners = $member->getTopEarners();
+
+        // get downline members by rank
+        $rankOverview = $member->getDownlineDetailsByRank();
+
+        // get package overview
+        $packageOverview = $member->getPackageOverview();
+
+        // get new members with date filter
+        $newMembers = $member->getNewMembers($days);
+
+        return response()->json([
+            'top_earners' => $topEarners,
+            'rank_overview' => $rankOverview,
+            'package_overview' => $packageOverview,
+            'new_members' => $newMembers,
+            'filters' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'days' => $days,
+            ]
+        ]);
+    }
 }

@@ -154,6 +154,15 @@ route::prefix('v1')->group(function () {
 
         // analytics routes
         Route::get('/analytics/countries', [AnalyticsController::class, 'countryAnalytics']);
+
+        /**
+         * team performance:
+         * - top earners
+         * - rank overview
+         * - package overview
+         * - new members
+         */
+        Route::get('/team-performance', [AnalyticsController::class, 'teamPerformance']);
     });
 
 

@@ -411,6 +411,34 @@ class Member extends Model
 
 
     /**
+     * Get top earners from downline based on commission.
+     *
+     * @param int $limit Number of top earners to return
+     * @return array
+     */
+    public function getTopEarners($limit = 10)
+    {
+        // Get all downline members
+        $leftMembers = $this->getAllMembersInLeg($this->left_leg_id);
+        $rightMembers = $this->getAllMembersInLeg($this->right_leg_id);
+        $allDownlines = $leftMembers->merge($rightMembers);
+
+        // Sort by total commission (highest first)
+        $topEarners = $allDownlines->sortByDesc('total_commision')
+            ->take($limit)
+            ->map(function ($member) {
+                return [
+                    'id' => $member->id,
+                    'name' => $member->user->name ?? 'Unknown',
+                    'total_commission' => $member->total_commision ?? 0,
+                    'rank' => $member->rank->name ?? 'No Rank',
+                ];
+            });
+
+        return $topEarners->values()->toArray();
+    }
+
+    /**
      * Get rank-based downline counts for both legs (left and right).
      *
      * @return array
@@ -452,6 +480,76 @@ class Member extends Model
         return $data;
     }
 
+    /**
+     * Get package overview for downline members.
+     *
+     * @return array
+     */
+    public function getPackageOverview()
+    {
+        // Get all downline members
+        $leftMembers = $this->getAllMembersInLeg($this->left_leg_id);
+        $rightMembers = $this->getAllMembersInLeg($this->right_leg_id);
+        $allDownlines = $leftMembers->merge($rightMembers);
+
+        // Group by package through subscription relationship
+        $packageCounts = $allDownlines->map(function ($member) {
+            return $member->subscription ? $member->subscription->package_id : null;
+        })->filter()->groupBy(function ($packageId) {
+            return $packageId;
+        })->map(function ($group) {
+            return $group->count();
+        });
+
+        // Get package details
+        $packages = \App\Models\Package::whereIn('id', $packageCounts->keys())->get();
+
+        $data = [];
+        foreach ($packages as $package) {
+            $data[] = [
+                'package' => $package->name,
+                'count' => $packageCounts[$package->id] ?? 0,
+            ];
+        }
+
+        // Sort by count (highest first)
+        usort($data, function ($a, $b) {
+            return $b['count'] <=> $a['count'];
+        });
+
+        return $data;
+    }
+
+    /**
+     * Get new members joined in the downline.
+     *
+     * @param int $days Number of days to look back
+     * @return array
+     */
+    public function getNewMembers($days = 30)
+    {
+        // Get all downline members
+        $leftMembers = $this->getAllMembersInLeg($this->left_leg_id);
+        $rightMembers = $this->getAllMembersInLeg($this->right_leg_id);
+        $allDownlines = $leftMembers->merge($rightMembers);
+
+        // Filter by date
+        $cutoffDate = now()->subDays($days);
+        $newMembers = $allDownlines->filter(function ($member) use ($cutoffDate) {
+            return $member->created_at >= $cutoffDate;
+        });
+
+        return $newMembers->map(function ($member) {
+            return [
+                'id' => $member->id,
+                'name' => $member->user->name ?? 'Unknown',
+                'joined_at' => $member->created_at->toISOString(),
+                'rank' => $member->rank->name ?? 'No Rank',
+                'package' => $member->subscription ? $member->subscription->package->name ?? 'No Package' : 'No Package',
+            ];
+        })->sortByDesc('joined_at')->values()->toArray();
+    }
+
 
 
     /**
@@ -481,7 +579,7 @@ class Member extends Model
     {
         $members = collect();
 
-        $member = self::find($legId);
+        $member = self::with(['user', 'rank', 'subscription.package'])->find($legId);
 
         // Check if the member has already been visited
         if ($member && !in_array($member->id, $visited)) {
