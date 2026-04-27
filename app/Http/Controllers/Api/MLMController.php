@@ -470,7 +470,11 @@ class MLMController extends Controller
                     'name' => $packageDetails->package->name,
                     'pack_card' => $packageDetails->package->pack_card,
                     'pack_icon' => $packageDetails->package->pack_icon,
-                ] : null,
+                ] : [
+                    'name' => 'Member',
+                    'pack_card' => 'No Package',
+                    'pack_icon' => 'https://production.thenovagroupco.com/storage/packages_icons/none-subscribed_icon.png',
+                ],
                 'rank' => [
                     'name' => $rank->name ?? null,
                     'package' => $rank->package ?? null,
