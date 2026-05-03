@@ -63,7 +63,7 @@ class RollbackCommissionPayoutSeeder extends Seeder
 
             // Update batch status
             $batch->update([
-                'status' => 'cancelled',
+                'status' => 'failed',
                 'finished_at' => now(),
                 'meta' => array_merge($batch->meta ?? [], [
                     'cancelled_at' => now()->toDateTimeString(),
@@ -71,7 +71,7 @@ class RollbackCommissionPayoutSeeder extends Seeder
                 ]),
             ]);
 
-            $this->command->info("Updated batch {$batch->id} status to cancelled");
+            $this->command->info("Updated batch {$batch->id} status to failed");
         });
 
         $this->command->info("Rollback completed for batch {$batchId}.");
