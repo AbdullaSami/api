@@ -106,19 +106,16 @@ class RollbackAllWalletTransactionsOnDateSeeder extends Seeder
                 ->where('commission_type', 'direct')
                 ->sum('commission_value');
 
-            // Calculate total transfers received
-            $totalTransfersReceived = WalletTransaction::where('receive_member_id', $memberId)
-                ->where('transaction_type', 'receive_internal_transfer')
-                ->where('status', 'accepted')
-                ->sum('amount');
-
-            // Calculate total transfers sent - to subtract
+            // Calculate total internal transfers sent - to subtract
             $totalTransfersSent = WalletTransaction::where('sender_member_id', $memberId)
                 ->where('transaction_type', 'send_internal_transfer')
                 ->where('status', 'accepted')
                 ->sum('amount');
 
-            // Calculate total deposits
+            // Calculate net internal transfers (received - sent)
+            $netInternalTransfers = $totalTransfersSent;
+
+            // Calculate other transactions
             $totalDeposits = WalletTransaction::whereHas('wallet', function($query) use ($memberId) {
                     $query->where('member_id', $memberId);
                 })
@@ -126,7 +123,6 @@ class RollbackAllWalletTransactionsOnDateSeeder extends Seeder
                 ->where('status', 'accepted')
                 ->sum('amount');
 
-            // Calculate total withdrawals - to subtract
             $totalWithdrawals = WalletTransaction::whereHas('wallet', function($query) use ($memberId) {
                     $query->where('member_id', $memberId);
                 })
@@ -134,7 +130,6 @@ class RollbackAllWalletTransactionsOnDateSeeder extends Seeder
                 ->where('status', 'accepted')
                 ->sum('amount');
 
-            // Calculate total package purchases - to subtract
             $totalPackagePurchases = WalletTransaction::whereHas('wallet', function($query) use ($memberId) {
                     $query->where('member_id', $memberId);
                 })
@@ -142,19 +137,18 @@ class RollbackAllWalletTransactionsOnDateSeeder extends Seeder
                 ->where('status', 'accepted')
                 ->sum('amount');
 
-            // Calculate new balance
-            $newBalance = $totalDirectCommissions
-                + $totalTransfersReceived
-                + $totalDeposits
-                - $totalTransfersSent
-                - $totalWithdrawals
-                - $totalPackagePurchases;
+            // Calculate new balance: Start with direct commissions, then apply internal transfers, then other transactions
+            $newBalance = $totalDirectCommissions + $netInternalTransfers + $totalDeposits - $totalWithdrawals - $totalPackagePurchases;
 
             // Update wallet balance
             $oldBalance = $wallet->balance;
             $wallet->update(['balance' => $newBalance]);
 
             $this->command->info("Member {$memberId}: Regular wallet balance updated from {$oldBalance} to {$newBalance}");
+            $this->command->info("  - Direct commissions: {$totalDirectCommissions}");
+            $this->command->info("  - Net internal transfers: {$netInternalTransfers} (sent: -{$totalTransfersSent})");
+            $this->command->info("  - Other transactions: " . ($totalDeposits - $totalWithdrawals - $totalPackagePurchases));
+            $this->command->info("  ------------------------");
         }
     }
 
