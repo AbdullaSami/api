@@ -12,3 +12,8 @@ Artisan::command('inspire', function () {
 
 // Schedule::job(new PayoutCommissionsJob)
 //     ->weeklyOn(4, '08:00');
+
+Artisan::command('payout:commissions', function () {
+    PayoutCommissionsJob::dispatch();
+    $this->info('Commission payout job dispatched!');
+})->purpose('Dispatch commission payout job');
