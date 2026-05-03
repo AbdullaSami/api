@@ -34,14 +34,14 @@ class RollbackTokenTransactionsBeforeDateSeeder extends Seeder
             foreach ($transactions as $transaction) {
                 // Get the token wallet associated with this transaction
                 $tokenWallet = TokenWallet::find($transaction->token_wallet_id);
-                
+
                 if (!$tokenWallet) {
                     $this->command->error("Token wallet not found for transaction ID: {$transaction->id}");
                     continue;
                 }
 
                 // Reverse the token balance based on transaction type
-                if ($transaction->transaction_type === 'send') {
+                if ($transaction->transaction_type === 'sent') {
                     // For sent transactions, add back the tokens
                     $tokenWallet->increment('token_balance', $transaction->amount);
                     $this->command->info("Restored {$transaction->amount} tokens to wallet {$tokenWallet->id} (member {$tokenWallet->member_id}) for sent transaction");
