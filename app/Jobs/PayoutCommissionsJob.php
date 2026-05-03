@@ -21,8 +21,8 @@ class PayoutCommissionsJob implements ShouldQueue
 
     public function handle(): void
     {
-        $windowStart = now()->subDays(14);
-        $windowEnd = now();
+        $windowStart = now()->subDays(90);
+        $windowEnd = now()->subDays(14);
 
         $batch = CommissionPayoutBatch::create([
             'window_start' => $windowStart,
