@@ -27,11 +27,6 @@ class RollbackCommissionPayoutSeeder extends Seeder
             return;
         }
 
-        if ($batch->status === 'cancelled') {
-            $this->command->warn("Batch {$batchId} is already cancelled.");
-            return;
-        }
-
         $this->command->info("Starting rollback for batch {$batchId}...");
 
         DB::transaction(function () use ($batch) {
