@@ -18,7 +18,7 @@ class RollbackCommissionPayoutSeeder extends Seeder
      */
     public function run(): void
     {
-        $batchId = 2; // Change this to the batch_id you want to rollback
+        $batchId = 1; // Change this to the batch_id you want to rollback
 
         $batch = CommissionPayoutBatch::find($batchId);
 
