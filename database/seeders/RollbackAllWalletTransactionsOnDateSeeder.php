@@ -28,7 +28,7 @@ class RollbackAllWalletTransactionsOnDateSeeder extends Seeder
             // === REGULAR WALLET TRANSACTIONS ROLLBACK ===
 
             // Get all wallet transactions created on the target date
-            $walletTransactions = WalletTransaction::where('created_at','<', $targetDate)->get();
+            $walletTransactions = WalletTransaction::whereDate('created_at', $targetDate)->get();
 
             if ($walletTransactions->isNotEmpty()) {
                 $this->command->info("Found {$walletTransactions->count()} regular wallet transactions to rollback");
@@ -42,31 +42,9 @@ class RollbackAllWalletTransactionsOnDateSeeder extends Seeder
                         continue;
                     }
 
-                    // Reverse the wallet balance based on transaction type
-                    switch ($transaction->transaction_type) {
-                        case 'withdrawal':
-                        case 'send_internal_transfer':
-                        case 'buy_package':
-                            // For these transactions, add back the amount
-                            $wallet->increment('balance', $transaction->amount);
-                            $this->command->info("Restored {$transaction->amount} to wallet {$wallet->id} (member {$wallet->member_id}) for {$transaction->transaction_type}");
-                            break;
-
-                        case 'deposit':
-                        case 'receive_internal_transfer':
-                        case 'direct_credit':
-                            // For these transactions, subtract the amount
-                            $wallet->decrement('balance', $transaction->amount);
-                            $this->command->info("Deducted {$transaction->amount} from wallet {$wallet->id} (member {$wallet->member_id}) for {$transaction->transaction_type}");
-                            break;
-                    }
-
-                    // Update transaction status to rejected
-                    $transaction->update([
-                        'status' => 'rejected',
-                    ]);
-
-                    $this->command->info("Updated wallet transaction ID {$transaction->id} status to rejected");
+                    // Delete the transaction completely
+                    $transaction->delete();
+                    $this->command->info("Deleted wallet transaction ID {$transaction->id} ({$transaction->transaction_type}) for member {$wallet->member_id}");
                 }
             } else {
                 $this->command->info("No regular wallet transactions found for date: {$targetDate}");
@@ -75,7 +53,7 @@ class RollbackAllWalletTransactionsOnDateSeeder extends Seeder
             // === TOKEN WALLET TRANSACTIONS ROLLBACK ===
 
             // Get all token transactions created on the target date
-            $tokenTransactions = TokenTransaction::where('created_at', '<', $targetDate)->get();
+            $tokenTransactions = TokenTransaction::whereDate('created_at', $targetDate)->get();
 
             if ($tokenTransactions->isNotEmpty()) {
                 $this->command->info("Found {$tokenTransactions->count()} token transactions to rollback");
@@ -89,23 +67,9 @@ class RollbackAllWalletTransactionsOnDateSeeder extends Seeder
                         continue;
                     }
 
-                    // Reverse the token balance based on transaction type
-                    if ($transaction->transaction_type === 'send') {
-                        // For sent transactions, add back the tokens
-                        $tokenWallet->increment('token_balance', $transaction->amount);
-                        $this->command->info("Restored {$transaction->amount} tokens to token wallet {$tokenWallet->id} (member {$tokenWallet->member_id}) for sent transaction");
-                    } elseif ($transaction->transaction_type === 'receive') {
-                        // For received transactions, subtract the tokens
-                        $tokenWallet->decrement('token_balance', $transaction->amount);
-                        $this->command->info("Deducted {$transaction->amount} tokens from token wallet {$tokenWallet->id} (member {$tokenWallet->member_id}) for received transaction");
-                    }
-
-                    // Update transaction status to failed
-                    $transaction->update([
-                        'status' => 'failed',
-                    ]);
-
-                    $this->command->info("Updated token transaction ID {$transaction->id} status to failed");
+                    // Delete the token transaction completely
+                    $transaction->delete();
+                    $this->command->info("Deleted token transaction ID {$transaction->id} ({$transaction->transaction_type}) for member {$tokenWallet->member_id}");
                 }
             } else {
                 $this->command->info("No token transactions found for date: {$targetDate}");
