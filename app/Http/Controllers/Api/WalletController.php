@@ -643,6 +643,11 @@ class WalletController extends Controller
         // Commission wallet balance
         $balance = $member->wallet->balance;
 
+        // Calculate total pending earnings (binary commissions not withdrawn)
+        $pendingEarnings = $member->commissions()
+            ->where('withdrawn', false)
+            ->sum('commission_value');
+
         // Token wallet balance
         $tokenWallet = $member->tokenWallet;
         $tokenBalance = $tokenWallet->token_balance;
@@ -658,6 +663,7 @@ class WalletController extends Controller
             'total_payout' => $totalPayout ?? 0,
             'profit_gained' => $profitPercentage,
             'balance' => $balance ?? 0,
+            'pending_earnings' => $pendingEarnings ?? 0,
             'token_wallet_balance' => $tokenBalance ?? 0,
         ]);
     }
