@@ -14,6 +14,6 @@ Artisan::command('inspire', function () {
 //     ->weeklyOn(4, '08:00');
 
 Artisan::command('payout:commissions', function () {
-    PayoutCommissionsJob::dispatch();
+    PayoutCommissionsJob::dispatch7DayWindow();
     $this->info('Commission payout job dispatched!');
 })->purpose('Dispatch commission payout job');
