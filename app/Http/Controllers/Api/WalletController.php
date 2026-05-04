@@ -644,7 +644,7 @@ class WalletController extends Controller
         $balance = $member->wallet->balance;
 
         // Calculate total pending earnings (binary commissions not withdrawn)
-        $pendingEarnings = $member->commissions()
+        $pendingEarnings = $member->commission()
             ->where('withdrawn', false)
             ->sum('commission_value');
 
