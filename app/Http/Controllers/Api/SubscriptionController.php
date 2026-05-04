@@ -97,7 +97,7 @@ class SubscriptionController extends Controller
 
             // Create direct commission (ledger only)
             if ($member->sponsor_id) {
-                Commission::create([
+                $commission = Commission::create([
                     'sponsor_id'        => $member->sponsor_id,
                     'referral_id'       => $member->id,
                     'commission_value'  => $directCommissionValue,
@@ -108,6 +108,11 @@ class SubscriptionController extends Controller
                 $sponsor->increment('balance', $directCommissionValue);
                 $member->total_commision += $directCommissionValue;
                 $member->save();
+
+                $commission->update([
+                    'withdrawn' => true,
+                    'withdrawn_at' => now(),
+                ]);
             }
 
 
