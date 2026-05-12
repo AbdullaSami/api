@@ -26,8 +26,8 @@ return new class extends Migration
             $table->boolean('important')->default(false);
             $table->boolean('muted')->default(false);
             $table->timestamps();
-            $table->index(['recipient_id', 'is_read']);
-            $table->index(['recipient_id', 'deleted_by_recipient']);
+            $table->index(['recipient_id', 'is_read'], 'msg_recipients_read_idx');
+            $table->index(['recipient_id', 'deleted_by_recipient'], 'msg_recipients_deleted_idx');
         });
     }
 
