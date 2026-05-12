@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\Admin\Commissions\AdminCommissionPayoutBatchControl
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\Courses\EnrolledLessonsController;
 use App\Http\Controllers\Api\Courses\LessonController;
+use App\Http\Controllers\Api\MailBox\MemberMessageController;
 
 // Course Controller
 use App\Http\Controllers\Api\Courses\CourseController;
@@ -132,15 +133,16 @@ route::prefix('v1')->group(function () {
          * 3- network-volume #done
          * 4-rank
          * 5-yearly-sales-in-Weeks
-         *
+         */
+        route::get('/member/dashboard', [MLMController::class, 'dashboardData']);
+
+        /**
          * Wallet data and reports
          * 1- wallet-totals #done
          * 2- wallet-reports #done
          * 3- current-balance #done
          * 4- token-wallet-balance #done
          */
-
-        route::get('/member/dashboard', [MLMController::class, 'dashboardData']);
         route::get('/member/wallet', [WalletController::class, 'walletData']);
 
         // rank
@@ -213,18 +215,39 @@ route::prefix('v1')->group(function () {
             route::get('/lessons/{lesson}/stream', [LessonController::class, 'stream']);
         });
     });
+});
+// routes/api.php
+Route::post('/webhooks/bunny', function (Request $request) {
+    // Validate it's really from Bunny (check their signature header)
+    $videoId = $request->input('VideoGuid');
+    $status  = $request->input('Status'); // 3 = encoded & ready
 
-    });
-    // routes/api.php
-    Route::post('/webhooks/bunny', function (Request $request) {
-        // Validate it's really from Bunny (check their signature header)
-        $videoId = $request->input('VideoGuid');
-        $status  = $request->input('Status'); // 3 = encoded & ready
+    if ($status === 3) {
+        \App\Models\Lesson::where('video_id', $videoId)
+            ->update(['video_status' => 'ready']);
+    }
 
-        if ($status === 3) {
-            \App\Models\Lesson::where('video_id', $videoId)
-                ->update(['video_status' => 'ready']);
-        }
+    return response()->noContent();
+});
 
-        return response()->noContent();
-    });
+
+// Mail box routes --Abdulla-- 2026-05-8
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/messages/inbox', [MemberMessageController::class, 'inbox']);
+
+    Route::get('/messages/sent', [MemberMessageController::class, 'sent']);
+
+    Route::get('/messages/trash', [MemberMessageController::class, 'trash']);
+
+    Route::get('/messages/{id}', [MemberMessageController::class, 'show']);
+
+    Route::post('/messages/compose', [MemberMessageController::class, 'compose']);
+
+    Route::post('/messages/{id}/read', [MemberMessageController::class, 'markAsRead']);
+
+    Route::post('/messages/{id}/trash', [MemberMessageController::class, 'moveToTrash']);
+
+    Route::post('/messages/{id}/restore', [MemberMessageController::class, 'restore']);
+});
+
