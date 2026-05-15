@@ -137,7 +137,9 @@ class CourseController extends Controller
     {
         try {
 
-            $course = Course::with(['subcategory.category', 'instructor', 'sections.lessons', 'skills'])->where('slug',$course)->first();
+            $course = Course::with(['subcategory.category', 'instructor', 'sections.lessons' => function($query) {
+                $query->orderBy('order');
+            }, 'skills'])->where('slug',$course)->first();
             return response()->json([
                 'success' => true,
                 'data' => $course // Eager load lessons and skills with the course
