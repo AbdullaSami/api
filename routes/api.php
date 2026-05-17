@@ -220,6 +220,8 @@ route::prefix('v1')->group(function () {
     // Mail box routes --Abdulla-- 2026-05-8
     Route::middleware('auth:sanctum')->group(function () {
 
+        Route::get('/messages/search-members', [MemberMessageController::class, 'searchMembers']);
+        
         Route::get('/messages/inbox', [MemberMessageController::class, 'inbox']);
 
         Route::get('/messages/sent', [MemberMessageController::class, 'sent']);

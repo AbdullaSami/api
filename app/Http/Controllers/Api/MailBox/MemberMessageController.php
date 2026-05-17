@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\MailBox;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\TreeService;
 use App\Models\MemberMessage;
 use App\Models\MemberMessageRecipient;
@@ -15,6 +16,19 @@ class MemberMessageController extends Controller
     public function __construct(TreeService $treeService)
     {
         $this->treeService = $treeService;
+    }
+
+    public function searchMembers(Request $request)
+    {
+        $members = User::query()
+            ->where('id', '!=', auth()->id())
+            ->where('username', 'like', '%' . $request->search . '%')
+            ->get(['id', 'id_code', 'username', 'email']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $members,
+        ]);
     }
 
     public function inbox(Request $request)
