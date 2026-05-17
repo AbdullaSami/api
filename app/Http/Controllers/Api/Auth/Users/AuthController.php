@@ -24,6 +24,7 @@ use App\Services\OtpService;
 use App\Services\WelcomeEmailService;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\LoginRequest;
+use App\Models\MemberMessageRecipient;
 
 class AuthController extends Controller
 {
@@ -186,12 +187,14 @@ class AuthController extends Controller
         $member->upgradeRank();
         $sponsor = $member ? $member->sponsor : null;
         $sponsorUser = $sponsor ? $sponsor->user : null;
+        $messagesCount = MemberMessageRecipient::where('recipient_id', $user->id)->where('is_read', false)->count();
         return response()->json([
             'status' => true,
             'message' => 'user data get successfully',
             'user data' => $user,
             'subscription' => $user->member?->subscription?->package?->name ?? 'no subscription',
             'sponsor' => $user->member->sponsor,
+            'messages_count' => $messagesCount,
             'profile' => [
                 'user_first_name'     => $user->first_name,
                 'user_last_name'      => $user->last_name,
