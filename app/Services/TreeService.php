@@ -2,59 +2,84 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use App\Models\Member;
 
 class TreeService
 {
-    public function getDownlines($userId, $side = 'both')
+    public function getDownlines($memberId, $side = 'both')
     {
         $result = collect();
 
-        $this->loadDownlines($userId, $result, $side);
+        $this->loadDownlines($memberId, $result, $side);
 
         return $result->unique();
     }
 
-    protected function loadDownlines($userId, &$result, $side)
+    protected function loadDownlines($memberId, &$result, $side)
     {
-        $query = User::where('placement_parent_id', $userId);
+        $member = Member::find($memberId);
 
-        if ($side !== 'both') {
-            $query->where('placement_position', $side);
+        if (!$member) {
+            return;
         }
 
-        $children = $query->get();
+        $children = collect();
+
+        if ($side === 'both' || $side === 'left') {
+            if ($member->left_leg_id) {
+                $leftChild = Member::find($member->left_leg_id);
+                if ($leftChild) {
+                    $children->push($leftChild);
+                }
+            }
+        }
+
+        if ($side === 'both' || $side === 'right') {
+            if ($member->right_leg_id) {
+                $rightChild = Member::find($member->right_leg_id);
+                if ($rightChild) {
+                    $children->push($rightChild);
+                }
+            }
+        }
 
         foreach ($children as $child) {
-
             $result->push($child->id);
-
             $this->loadDownlines($child->id, $result, 'both');
         }
     }
 
-    public function getUplines($userId, $side = 'both')
+    public function getUplines($memberId, $side = 'both')
     {
         $result = collect();
 
-        $user = User::find($userId);
+        $member = Member::find($memberId);
 
-        while ($user && $user->placement_parent_id) {
+        while ($member) {
+            $parent = null;
 
-            $parent = User::find($user->placement_parent_id);
+            // Find which parent has this member as a child
+            if ($side === 'both' || $side === 'left') {
+                $leftParent = Member::where('left_leg_id', $member->id)->first();
+                if ($leftParent) {
+                    $parent = $leftParent;
+                    $result->push($parent->id);
+                }
+            }
+
+            if (!$parent && ($side === 'both' || $side === 'right')) {
+                $rightParent = Member::where('right_leg_id', $member->id)->first();
+                if ($rightParent) {
+                    $parent = $rightParent;
+                    $result->push($parent->id);
+                }
+            }
 
             if (!$parent) {
                 break;
             }
 
-            if (
-                $side === 'both' ||
-                $user->placement_position === $side
-            ) {
-                $result->push($parent->id);
-            }
-
-            $user = $parent;
+            $member = $parent;
         }
 
         return $result->unique();
