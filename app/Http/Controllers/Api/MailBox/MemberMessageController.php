@@ -26,7 +26,7 @@ class MemberMessageController extends Controller
             ->where('deleted_by_recipient', false)
 
             ->with([
-                'message.sender:id,name,email',
+                'message.sender:id,username,email',
             ])
 
             ->latest()
