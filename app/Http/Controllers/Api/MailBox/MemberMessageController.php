@@ -101,8 +101,7 @@ class MemberMessageController extends Controller
     {
         $messageRecipient = MemberMessageRecipient::query()
 
-        ->where('message_id', $id)
-            ->orWhere('recipient_id', auth()->id())
+            ->where('recipient_id', auth()->user()->id)
 
             ->with([
                 'message.sender:id,id_code,username,email',
