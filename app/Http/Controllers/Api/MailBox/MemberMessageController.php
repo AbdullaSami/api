@@ -21,7 +21,7 @@ class MemberMessageController extends Controller
     public function searchMembers(Request $request)
     {
         $members = User::query()
-            ->where('id', '!=', auth()->id())
+            ->where('id', '!=', auth()->user()->id)
             ->where('username', 'like', '%' . $request->search . '%')
             ->get(['id', 'id_code', 'username', 'email', 'image']);
 
