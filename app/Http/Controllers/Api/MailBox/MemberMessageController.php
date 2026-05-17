@@ -87,6 +87,7 @@ class MemberMessageController extends Controller
     {
         $messageRecipient = MemberMessageRecipient::query()
 
+            ->where('recipient_id', auth()->id())
             ->where('message_id', $id)
 
             ->with([
