@@ -215,6 +215,27 @@ route::prefix('v1')->group(function () {
             route::get('/lessons/{lesson}/stream', [LessonController::class, 'stream']);
         });
     });
+
+
+    // Mail box routes --Abdulla-- 2026-05-8
+    Route::middleware('auth:sanctum')->group(function () {
+
+        Route::get('/messages/inbox', [MemberMessageController::class, 'inbox']);
+
+        Route::get('/messages/sent', [MemberMessageController::class, 'sent']);
+
+        Route::get('/messages/trash', [MemberMessageController::class, 'trash']);
+
+        Route::get('/messages/{id}', [MemberMessageController::class, 'show']);
+
+        Route::post('/messages/compose', [MemberMessageController::class, 'compose']);
+
+        Route::post('/messages/{id}/read', [MemberMessageController::class, 'markAsRead']);
+
+        Route::post('/messages/{id}/trash', [MemberMessageController::class, 'moveToTrash']);
+
+        Route::post('/messages/{id}/restore', [MemberMessageController::class, 'restore']);
+    });
 });
 // routes/api.php
 Route::post('/webhooks/bunny', function (Request $request) {
@@ -231,23 +252,4 @@ Route::post('/webhooks/bunny', function (Request $request) {
 });
 
 
-// Mail box routes --Abdulla-- 2026-05-8
-Route::middleware('auth:sanctum')->group(function () {
-
-    Route::get('/messages/inbox', [MemberMessageController::class, 'inbox']);
-
-    Route::get('/messages/sent', [MemberMessageController::class, 'sent']);
-
-    Route::get('/messages/trash', [MemberMessageController::class, 'trash']);
-
-    Route::get('/messages/{id}', [MemberMessageController::class, 'show']);
-
-    Route::post('/messages/compose', [MemberMessageController::class, 'compose']);
-
-    Route::post('/messages/{id}/read', [MemberMessageController::class, 'markAsRead']);
-
-    Route::post('/messages/{id}/trash', [MemberMessageController::class, 'moveToTrash']);
-
-    Route::post('/messages/{id}/restore', [MemberMessageController::class, 'restore']);
-});
 
