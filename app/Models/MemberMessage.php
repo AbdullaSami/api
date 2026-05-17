@@ -34,7 +34,7 @@ class MemberMessage extends Model
 
     public function recipients()
     {
-        return $this->belongsToMany(MemberMessageRecipient::class, 'message_id');
+        return $this->hasMany(MemberMessageRecipient::class, 'message_id');
     }
 
     public function attachments()
