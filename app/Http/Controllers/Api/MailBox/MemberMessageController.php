@@ -70,7 +70,7 @@ class MemberMessageController extends Controller
             ->where('deleted_by_recipient', true)
 
             ->with([
-                'message.sender:id,name,email',
+                'message.sender:id,username,email',
             ])
 
             ->latest()
@@ -92,7 +92,7 @@ class MemberMessageController extends Controller
             ->where('message_id', $id)
 
             ->with([
-                'message.sender:id,name,email',
+                'message.sender:id,username,email',
                 'message.attachments',
             ])
 
