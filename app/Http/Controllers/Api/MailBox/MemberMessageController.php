@@ -23,7 +23,7 @@ class MemberMessageController extends Controller
         $members = User::query()
             ->where('id', '!=', auth()->id())
             ->where('username', 'like', '%' . $request->search . '%')
-            ->get(['id', 'id_code', 'username', 'email']);
+            ->get(['id', 'id_code', 'username', 'email', 'image']);
 
         return response()->json([
             'success' => true,
