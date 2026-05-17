@@ -46,7 +46,7 @@ class MemberMessageController extends Controller
             ->where('sender_id', auth()->id())
 
             ->with([
-                'recipients.recipient:id,name,email',
+                'recipients.recipient:id,username,email',
             ])
 
             ->withCount('recipients')
