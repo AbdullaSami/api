@@ -42,8 +42,8 @@ class PayoutCommissionsJob implements ShouldQueue
     public static function dispatch7DayWindow(): void
     {
         static::dispatch(
-            windowStart: "2026-04-27",
-            windowEnd:   "2026-05-11",
+            windowStart: now()->subDays(21)->startOfDay(),
+            windowEnd: now()->subDays(9)->startOfDay(),
         );
     }
 
@@ -85,7 +85,6 @@ class PayoutCommissionsJob implements ShouldQueue
                 'total_count'  => $totals->total_count,
                 'total_amount' => $totals->total_amount,
             ]);
-
         } catch (Throwable $e) {
             $batch->update([
                 'status'      => 'failed',
