@@ -484,9 +484,9 @@ class MLMController extends Controller
                     'name' => $nextRank ? $nextRank->name : null,
                     'icon' => $nextRank ? $nextRank->icon : null,
                     'left_volume' => $nextRank ? $nextRank->left_volume : null,
-                    'user_left_volume' => $last30DaysCvCounts['left_cv_count'] ?? null,
+                    'user_left_volume' => $nowCvCounts['left_cv_count'] ?? null,
                     'right_volume' => $nextRank ? $nextRank->right_volume : null,
-                    'user_right_volume' => $last30DaysCvCounts['right_cv_count'] ?? null,
+                    'user_right_volume' => $nowCvCounts['right_cv_count'] ?? null,
                     'direct_referrals' => $nextRank ? $nextRank->direct_referrals : null,
                     'user_direct_referrals' => $member->directReferrals()->count() ?? null,
                     // Optional: show user's current progress toward downline requirements
