@@ -43,7 +43,7 @@ class PayoutCommissionsJob implements ShouldQueue
     {
         static::dispatch(
             windowStart: now()->subDays(21)->startOfDay(),
-            windowEnd: now()->subDays(9)->startOfDay(),
+            windowEnd: now()->subDays(9)->endOfDay(),
         );
     }
 
