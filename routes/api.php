@@ -21,7 +21,7 @@ use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\Courses\EnrolledLessonsController;
 use App\Http\Controllers\Api\Courses\LessonController;
 use App\Http\Controllers\Api\MailBox\MemberMessageController;
-
+use App\Http\Controllers\PromotionalToolController;
 // Course Controller
 use App\Http\Controllers\Api\Courses\CourseController;
 use App\Http\Controllers\Api\Courses\UserProfileController;
@@ -145,6 +145,7 @@ route::prefix('v1')->group(function () {
          */
         route::get('/member/wallet', [WalletController::class, 'walletData']);
 
+        Route::get('/promotional-tools', [PromotionalToolController::class, 'index']);
         // rank
         Route::get('rank', [RankController::class, 'myRank']);
         Route::get('/rank/evaluate', [RankController::class, 'evaluateRank']);
@@ -221,7 +222,7 @@ route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/messages/search-members', [MemberMessageController::class, 'searchMembers']);
-        
+
         Route::get('/messages/inbox', [MemberMessageController::class, 'inbox']);
 
         Route::get('/messages/sent', [MemberMessageController::class, 'sent']);
@@ -238,6 +239,8 @@ route::prefix('v1')->group(function () {
 
         Route::post('/messages/{id}/restore', [MemberMessageController::class, 'restore']);
     });
+
+
 });
 // routes/api.php
 Route::post('/webhooks/bunny', function (Request $request) {
