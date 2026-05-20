@@ -88,6 +88,8 @@ class SubscriptionController extends Controller
                 'package_id'      => $package->id,
                 'subscribed_at'   => now(),
                 'expiration_date' => $expiration_date,
+                'subscription_price' => $package_price,
+                'payment_method' => 'Token Wallet',
             ]);
 
             // Update Member Wallet Balance
@@ -178,5 +180,34 @@ class SubscriptionController extends Controller
         }
 
         return $members;
+    }
+
+    public function mySubscription()
+    {
+        $user = Auth::user();
+        $member = $user->member;
+
+        if (!$member) {
+            return $this->failedResponse("Member not found.");
+        }
+
+        $subscription = $member->subscription()->with('package')->first();
+
+        if (!$subscription) {
+            return $this->failedResponse("You do not have an active subscription.");
+        }
+
+        return $this->successResponse(
+            'Your current subscription details.',
+            'subscription',
+            [
+                ...$subscription->toArray(),
+                'package_name' => $subscription->package->name,
+                'billing_period' => $subscription->expiration_date,
+                'price' => $subscription->subscription_price ?? $subscription->package->price,
+                'cv' => $subscription->package->cv,
+                'payment_method' => $subscription->payment_method ?? 'Token Wallet',
+            ]
+        );
     }
 }

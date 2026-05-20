@@ -13,7 +13,9 @@ class Subscription extends Model
         'member_id',
         'package_id',
         'subscribed_at',
-        'expiration_date'
+        'expiration_date',
+        'subscription_price',
+        'payment_method',
     ];
 
     public function user()

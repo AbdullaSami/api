@@ -166,6 +166,11 @@ route::prefix('v1')->group(function () {
          * - new members
          */
         Route::get('/team-performance', [AnalyticsController::class, 'teamPerformance']);
+
+        // billing and subscription management
+        Route::get('/billing/subscription', [SubscriptionController::class, 'mySubscription']);
+        Route::get('/payment-history', [SubscriptionController::class, 'paymentHistory']);
+        
     });
 
 
