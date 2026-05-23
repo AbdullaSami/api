@@ -201,7 +201,6 @@ class SubscriptionController extends Controller
             'Your current subscription details.',
             'subscription',
             [
-                ...$subscription->toArray(),
                 'package_name' => $subscription->package->name,
                 'billing_period' => $subscription->expiration_date,
                 'price' => $subscription->subscription_price ?? $subscription->package->price,
