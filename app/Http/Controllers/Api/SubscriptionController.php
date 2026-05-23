@@ -191,9 +191,9 @@ class SubscriptionController extends Controller
             return $this->failedResponse("Member not found.");
         }
 
-        $subscription = $member->subscription()->with('package')->first();
+        $subscriptions = $member->subscription()->with('package')->first();
 
-        if (!$subscription) {
+        if (!$subscriptions) {
             return $this->failedResponse("You do not have an active subscription.");
         }
 
@@ -201,11 +201,11 @@ class SubscriptionController extends Controller
             'Your current subscription details.',
             'subscription',
             [
-                'package_name' => $subscription->package->name,
-                'billing_period' => $subscription->expiration_date,
-                'price' => $subscription->subscription_price ?? $subscription->package->price,
-                'cv' => $subscription->package->cv,
-                'payment_method' => $subscription->payment_method ?? 'Token Wallet',
+                'package_name' => $subscriptions->package->name,
+                'billing_period' => $subscriptions->expiration_date,
+                'price' => $subscriptions->subscription_price ?? $subscriptions->package->price,
+                'cv' => $subscriptions->package->cv,
+                'payment_method' => $subscriptions->payment_method ?? 'Token Wallet',
             ]
         );
     }
