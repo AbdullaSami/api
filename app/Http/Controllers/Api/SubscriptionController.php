@@ -182,7 +182,7 @@ class SubscriptionController extends Controller
         return $members;
     }
 
-    public function mySubscription()
+    public function mySubscriptions()
     {
         $user = Auth::user();
         $member = $user->member;
@@ -191,22 +191,28 @@ class SubscriptionController extends Controller
             return $this->failedResponse("Member not found.");
         }
 
-        $subscriptions = $member->subscription()->with('package')->first();
+        $subscriptions = $member->subscription()->with('package')->get();
 
-        if (!$subscriptions) {
-            return $this->failedResponse("You do not have an active subscription.");
+        if ($subscriptions->isEmpty()) {
+            return $this->failedResponse("You do not have any active subscriptions.");
         }
 
+        $mySubscription = [];
+
+        foreach ($subscriptions as $subscription) {
+            $mySubscription[] = [
+                'package_name' => $subscription->package->name,
+                'billing_period' => $subscription->expiration_date,
+                'price' => $subscription->subscription_price ?? $subscription->package->price,
+                'cv' => $subscription->package->cv,
+                'payment_method' => $subscription->payment_method ?? 'Token Wallet',
+            ];
+        }
         return $this->successResponse(
             'Your current subscription details.',
             'subscription',
-            [
-                'package_name' => $subscriptions->package->name,
-                'billing_period' => $subscriptions->expiration_date,
-                'price' => $subscriptions->subscription_price ?? $subscriptions->package->price,
-                'cv' => $subscriptions->package->cv,
-                'payment_method' => $subscriptions->payment_method ?? 'Token Wallet',
-            ]
+            $mySubscription
         );
     }
 }
+

@@ -168,9 +168,9 @@ route::prefix('v1')->group(function () {
         Route::get('/team-performance', [AnalyticsController::class, 'teamPerformance']);
 
         // billing and subscription management
-        Route::get('/billing/subscription', [SubscriptionController::class, 'mySubscription']);
+        Route::get('/billing/subscription', [SubscriptionController::class, 'mySubscriptions']);
         Route::get('/payment-history', [SubscriptionController::class, 'paymentHistory']);
-        
+
     });
 
 
