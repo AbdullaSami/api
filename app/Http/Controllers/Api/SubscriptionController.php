@@ -203,6 +203,7 @@ class SubscriptionController extends Controller
             $mySubscription[] = [
                 'package_name' => $subscription->package->name,
                 'billing_period' => $subscription->expiration_date,
+                'subscribed_at' => $subscription->subscribed_at->toDateTimeString(),
                 'price' => $subscription->subscription_price == 0 ? $subscription->package->price : $subscription->subscription_price,
                 'cv' => $subscription->package->cv,
                 'payment_method' => $subscription->payment_method ?? 'Token Wallet',
