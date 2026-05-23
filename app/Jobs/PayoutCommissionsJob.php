@@ -42,8 +42,8 @@ class PayoutCommissionsJob implements ShouldQueue
     public static function dispatch7DayWindow(): void
     {
         static::dispatch(
-            windowStart: now()->subDays(21)->startOfDay(),
-            windowEnd: now()->subDays(10)->endOfDay(),
+            windowStart: now()->subDays(24)->startOfDay(),
+            windowEnd: now()->subDays(8)->endOfDay(),
         );
     }
 
