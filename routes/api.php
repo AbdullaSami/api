@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\Courses\EnrolledLessonsController;
 use App\Http\Controllers\Api\Courses\LessonController;
 use App\Http\Controllers\Api\MailBox\MemberMessageController;
 use App\Http\Controllers\PromotionalToolController;
+use App\Http\Controllers\Api\Payment\PaymentController;
 // Course Controller
 use App\Http\Controllers\Api\Courses\CourseController;
 use App\Http\Controllers\Api\Courses\UserProfileController;
@@ -245,6 +246,10 @@ route::prefix('v1')->group(function () {
         Route::post('/messages/{id}/restore', [MemberMessageController::class, 'restore']);
     });
 
+    // payments
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/payment-history', [PaymentController::class, 'getPaymentHistory']);
+    });
 
 });
 // routes/api.php
