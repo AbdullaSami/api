@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('subscription', function (Blueprint $table) {
+        Schema::table('subscriptions', function (Blueprint $table) {
             $table->string('code')->unique()->after('payment_method');
         });
     }
