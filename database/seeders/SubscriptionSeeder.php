@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Subscription;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 class SubscriptionSeeder extends Seeder
 {
     /**
@@ -15,7 +16,7 @@ class SubscriptionSeeder extends Seeder
     {
         Subscription::whereNull('code')->orWhere('code', '')->each(function (Subscription $subscription) {
             $date = $subscription->subscribed_at
-                ? $subscription->subscribed_at->format('Y-m-d')
+                ? Carbon::parse($subscription->subscribed_at)->format('Y-m-d')
                 : now()->format('Y-m-d');
 
             do {
