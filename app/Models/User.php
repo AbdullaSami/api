@@ -69,6 +69,10 @@ class User extends Authenticatable
         });
     }
 
+    public function paymentHistories()
+    {
+        return $this->hasMany(PaymentHistory::class);
+    }
     public function tickets()
     {
         return $this->hasMany(Tickets::class);

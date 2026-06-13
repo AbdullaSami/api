@@ -7,8 +7,10 @@ use App\Models\Package;
 use App\Models\Commission;
 use App\Models\Subscription;
 use App\Models\CommissionFactor;
+use App\Models\PaymentHistory;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreSubscriptionRequest;
@@ -19,7 +21,28 @@ class SubscriptionController extends Controller
     use ApiResponseTrait;
 
 
+    private function generateSubscriptionCode(): string
+    {
+        $prefix = 'SUB-' . now()->format('Y-m-d') . '-';
 
+        do {
+            $code = $prefix . strtoupper(Str::random(4));
+        } while (Subscription::where('code', $code)->exists());
+
+        return $code;
+    }
+
+    private function generatePaymentCode(string $type): string
+    {
+        $type = strtoupper($type) === 'STRIPE' || strtoupper($type) === 'STRIP' ? 'STRIP' : 'TOKEN';
+        $prefix = $type . '-' . now()->format('Y-m-d') . '-';
+
+        do {
+            $code = $prefix . strtoupper(Str::random(4));
+        } while (PaymentHistory::where('payment_code', $code)->exists());
+
+        return $code;
+    }
     /*
     *
     *'Monthly','Annual','Quarterly','Biannual','Lifelong'
@@ -90,6 +113,7 @@ class SubscriptionController extends Controller
                 'expiration_date' => $expiration_date,
                 'subscription_price' => $package_price,
                 'payment_method' => 'Token Wallet',
+                'code' => $this->generateSubscriptionCode(),
             ]);
 
             // Update Member Wallet Balance
@@ -114,6 +138,14 @@ class SubscriptionController extends Controller
                 $commission->update([
                     'withdrawn' => true,
                     'withdrawn_at' => now(),
+                ]);
+
+                $user->paymentHistories()->create([
+                    'subscription_code' => $subscription->code,
+                    'payment_code' => $this->generatePaymentCode('TOKEN'),
+                    'payment_method' => "Token Wallet",
+                    'amount' => $package_price,
+                    'payment_date' => now(),
                 ]);
             }
 
@@ -216,4 +248,3 @@ class SubscriptionController extends Controller
         );
     }
 }
-
