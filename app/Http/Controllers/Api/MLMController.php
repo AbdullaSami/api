@@ -809,10 +809,14 @@ class MLMController extends Controller
 
     public function getDirectDownlineMembersById($id)
     {
-        $member = Member::findOrFail($id);
+        $user = User::findOrFail($id);
+        $member = $user->member;
 
-        $profileMember = Member::where('id', $id)->first();
-        $profileUser = $profileMember->user;
+
+        $profileUser = User::where('id', $id)
+            ->with('member')
+            ->first();
+        $profileMember = $profileUser->member;
         $sponsorUser = $profileMember && $profileMember->sponsor
             ? $profileMember->sponsor->user
             : null;
