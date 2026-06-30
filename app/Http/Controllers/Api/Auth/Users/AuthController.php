@@ -77,14 +77,14 @@ class AuthController extends Controller
             // Step 1: Create the user
             $userData = $validator->validated();
             $sponser_id = $userData['sponsor_id'];
-            $userData['sponsor_id'] = User::where('id_code', $sponser_id)->whereHas('member')->pluck('id')->first();
-            if (empty($userData['sponsor_id'])) {
+            $sponsorUser = User::where('id_code', $sponser_id)->whereHas('member')->first();
+            if (!$sponsorUser) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Registration failed , incorrect sponsor id',
                 ], 404);
             }
-            $userData;
+            $sponsorMemberId = $sponsorUser->member->id;
             $userData['password'] = bcrypt($userData['password']); // Hash password
 
             if ($request->hasFile('image')) {
@@ -103,14 +103,14 @@ class AuthController extends Controller
             // Step 2: Add the user to the members table
             $member = Member::create([
                 'user_id'       => $user->id,
-                'sponsor_id'    =>  $userData['sponsor_id'],
+                'sponsor_id'    => $sponsorMemberId,
                 'rank_id'       => null, // Set default rank or handle as needed
             ]);
 
             // Step 3: Add the new member to the UserTank
             UserTank::create([
                 'member_id' => $member->id,
-                'sponsor_id' =>  $userData['sponsor_id'],
+                'sponsor_id' => $sponsorMemberId,
             ]);
 
             // Step 4: Create an empty wallet for the member
