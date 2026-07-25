@@ -44,8 +44,8 @@ class PayoutCommissionsJob implements ShouldQueue
         static::dispatch(
             // windowStart: now()->subDays(31)->startOfDay(),
             // windowEnd: now()->subDays(10)->endOfDay(),
-            windowStart: Carbon::create(2026, 6, 26)->startOfDay(),
-            windowEnd: Carbon::create(2026, 7, 3)->endOfDay(),
+            windowStart: Carbon::create(2026, 7, 4)->startOfDay(),
+            windowEnd: Carbon::create(2026, 7, 10)->endOfDay(),
         );
     }
 
