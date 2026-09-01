@@ -27,8 +27,11 @@ use App\Http\Controllers\Api\Payment\PaymentController;
 use App\Http\Controllers\Api\Courses\CourseController;
 use App\Http\Controllers\Api\Courses\UserProfileController;
 
+
 route::prefix('v1')->group(function () {
 
+    require __DIR__ . '/landing-page.php';
+    
     route::post('login', [AuthController::class, 'login']);
     route::post('register', [AuthController::class, 'register']);
     route::get('sponsor-data/{id_code}', [AuthController::class, 'sponsorData']);
@@ -171,7 +174,6 @@ route::prefix('v1')->group(function () {
         // billing and subscription management
         Route::get('/billing/subscription', [SubscriptionController::class, 'mySubscriptions']);
         Route::get('/payment-history', [SubscriptionController::class, 'paymentHistory']);
-
     });
 
 
@@ -250,7 +252,6 @@ route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/payment-history', [PaymentController::class, 'getPaymentHistory']);
     });
-
 });
 // routes/api.php
 Route::post('/webhooks/bunny', function (Request $request) {
@@ -265,6 +266,3 @@ Route::post('/webhooks/bunny', function (Request $request) {
 
     return response()->noContent();
 });
-
-
-
