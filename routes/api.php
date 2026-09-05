@@ -26,12 +26,16 @@ use App\Http\Controllers\Api\Payment\PaymentController;
 // Course Controller
 use App\Http\Controllers\Api\Courses\CourseController;
 use App\Http\Controllers\Api\Courses\UserProfileController;
+//Admin Controllers
+use App\Http\Controllers\Api\Admin\PackageController as AdminPackageController;
+use App\Http\Controllers\Api\Admin\SubscribersController as AdminSubscribersController;
+use App\Http\Controllers\Api\Admin\UsersController as AdminUsersController;
+use App\Http\Controllers\Api\Admin\TicketsController as AdminTicketsController;
+use App\Http\Controllers\Api\Admin\RanksController as AdminRanksController;
 
 
 route::prefix('v1')->group(function () {
 
-    require __DIR__ . '/landing-page.php';
-    
     route::post('login', [AuthController::class, 'login']);
     route::post('register', [AuthController::class, 'register']);
     route::get('sponsor-data/{id_code}', [AuthController::class, 'sponsorData']);
@@ -201,6 +205,28 @@ route::prefix('v1')->group(function () {
 
             route::get('/members/{memberId}/generate-downline-report', [AdminUserController::class, 'generateDownlineReport']);
             // route::get('/members/{memberId}/all-downline-report' , [AdminUserController::class , 'allDownlineReport']);
+
+            ## Abdulla Sami 2026-12-Aug - Main website Admin Dashboard
+
+            // Landing page management
+            require __DIR__ . '/landing-page.php';
+            // packages management
+            Route::apiResource('packages', AdminPackageController::class);
+            Route::patch('packages/{package}/toggle-publish', [AdminPackageController::class, 'togglePublish']);
+            // Subscription management
+            Route::apiResource('subscriptions', AdminSubscribersController::class)->except(['store'])->only(['index', 'show', 'update', 'destroy']);
+            Route::post('subscriptions', [AdminSubscribersController::class, 'store']);
+            Route::get('members/{member}/subscription', [AdminSubscribersController::class, 'forMember']);
+            // Users management
+            Route::apiResource('users', AdminUsersController::class);
+            Route::get('users/{user}/profile', [AdminUsersController::class, 'profile']);
+            // Tickets management
+            Route::apiResource('tickets', AdminTicketsController::class);
+            Route::patch('tickets/{ticket}/status', [AdminTicketsController::class, 'updateStatus']);
+            Route::get('users/{user}/tickets', [AdminTicketsController::class, 'forUser']);
+            // Ranks management
+            Route::apiResource('ranks', AdminRanksController::class);
+            Route::get('ranks/{rank}/members', [AdminRanksController::class, 'members']);
         });
     });
 
